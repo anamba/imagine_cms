@@ -1,0 +1,3 @@
+module ImagineCms
+  # Your code goes here...
+end
