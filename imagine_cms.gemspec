@@ -6,11 +6,11 @@ Gem::Specification.new do |s|
   s.name        = "imagine_cms"
   s.version     = ImagineCms::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.authors     = ["Aaron Namba"]
+  s.email       = ["aaron@biggerbird.com"]
+  s.homepage    = "http://www.biggerbird.com"
+  s.summary     = %q{Imagine Content Management System for Rails}
+  s.description = %q{Imagine Content Management System for Rails}
 
   s.rubyforge_project = "imagine_cms"
 
