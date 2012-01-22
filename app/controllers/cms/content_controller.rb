@@ -1,13 +1,13 @@
 module Cms # :nodoc:
   class ContentController < ::ApplicationController # :nodoc:
     caches_action :rss_feed
-    helper :cms_application
+    helper CmsApplicationHelper
     
     before_filter :convert_content_path
     
     # Routes:
     # match 'plcalendar(/:action(/:id))' => 'cms/content#page_list_calendar'
-    # root :to => 'cms/content#show', :content_path => []
+    # root :to => 'cms/content#show'
     # match '*content_path' => 'cms/content#show'
     
     def show

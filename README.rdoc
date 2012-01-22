@@ -25,11 +25,12 @@ Here's what's coming up:
 
 * Imagine 3.0: 90% restored functionality, can function on existing sites with no database changes
 * Imagine 3.1: 100% restored functionality, may require a few simple migrations
-* Imagine 4.0: Refactoring & rewriting of the worst parts (substitutions); move away from ERB templating, to something like Liquid; switch to a cross-browser editor
+* Imagine 4.0: Refactoring & rewriting of the worst parts (substitutions); move away from ERB templating, to something like Liquid; switch to a cross-browser editor; switch to jquery
 
-(Imagine 1.x and 2.x have already been used internally, so we might as well start at 3.0.)
+(Imagine 1.x and 2.x version numbers have already been used internally, might as well start at 3.0.)
 
 Dependencies:
+* Rails 3.2
 * acts_as_tree
 * acts_as_versioned
 * mini_magick

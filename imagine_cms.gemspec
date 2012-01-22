@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Aaron Namba"]
   s.email       = ["aaron@biggerbird.com"]
-  s.homepage    = "http://www.biggerbird.com"
+  s.homepage    = "https://github.com/anamba/imagine_cms"
   s.summary     = %q{Imagine Content Management System for Rails}
   s.description = %q{Imagine Content Management System for Rails}
 
@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   
   s.add_dependency "rails",               "~> 3.2.0"
-  s.add_dependency "activerecord",       "~> 3.2.0"
   
   s.add_dependency "acts_as_tree",        "~> 0.1.1"
   s.add_dependency "acts_as_versioned",   "~> 0.6.0"
