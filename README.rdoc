@@ -1,3 +1,5 @@
+=About Imagine CMS
+
 Imagine CMS is a content management system originally developed for internal use at Bigger Bird
 Creative (biggerbird.com). However, it was so strongly bound to Rails that it became difficult to
 port to newer Rails versions. Thus, sites using Imagine have been stuck on Rails 1.2 since time
@@ -9,11 +11,15 @@ at the same time, backwards compatibility with existing sites is extremely impor
 reason for doing this is to allow us to upgrade existing sites to a modern, supported version of
 Rails.
 
-So... don't use this. At least, not until the second phase of this project (Imagine 4.x). Why? Well,
-the 3.x versions, while usable, will be hobbled by their need to remain compatible with Bigger
-Bird's existing sites. The ERB templating language is dangerous (allows shell escapes) and the
-editor is Firefox-only. Once we are into the 4.x era, when we can move ahead without worrying about
-backward compatibility, it will be a good time to get on board.
+So... don't use this. I'm not even including a license right now. (But it will probably be AGPLv3.)
+
+Wait until the second phase of this project (Imagine 4.x). Why? Well, the 3.x versions, while
+usable, will be hobbled by their need to remain compatible with Bigger Bird's existing sites. The
+ERB templating language is dangerous (allows shell escapes) and the editor is Firefox-only. Once we
+are into the 4.x era, when we can move ahead without worrying about backward compatibility, it will
+be a good time to get on board.
+
+=Roadmap
 
 Here's what's coming up:
 
@@ -22,3 +28,8 @@ Here's what's coming up:
 * Imagine 4.0: Refactoring & rewriting of the worst parts (substitutions); move away from ERB templating, to something like Liquid; switch to a cross-browser editor
 
 (Imagine 1.x and 2.x have already been used internally, so we might as well start at 3.0.)
+
+Dependencies:
+* acts_as_tree
+* acts_as_versioned
+* mini_magick

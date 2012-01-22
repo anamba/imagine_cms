@@ -18,4 +18,11 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
+  
+  s.add_dependency "rails",               "~> 3.2.0"
+  s.add_dependency "activerecord",       "~> 3.2.0"
+  
+  s.add_dependency "acts_as_tree",        "~> 0.1.1"
+  s.add_dependency "acts_as_versioned",   "~> 0.6.0"
+  s.add_dependency "mini_magick" #,         "~> 3.4"
 end

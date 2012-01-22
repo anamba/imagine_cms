@@ -73,6 +73,8 @@
 
 <div id="documentation" class="description">
   
+<h1 id="label-About+Imagine+CMS">About Imagine CMS</h1>
+
 <p>Imagine CMS is a content management system originally developed for
 internal use at Bigger Bird Creative (biggerbird.com). However, it was so
 strongly bound to Rails that it became difficult to port to newer Rails
@@ -86,13 +88,17 @@ backwards compatibility with existing sites is extremely important, as the
 whole reason for doing this is to allow us to upgrade existing sites to a
 modern, supported version of Rails.</p>
 
-<p>So… don’t use this. At least, not until the second phase of this
-project (Imagine 4.x). Why? Well, the 3.x versions, while usable, will be
-hobbled by their need to remain compatible with Bigger Bird’s existing
-sites. The ERB templating language is dangerous (allows shell escapes) and
-the editor is Firefox-only. Once we are into the 4.x era, when we can move
-ahead without worrying about backward compatibility, it will be a good time
-to get on board.</p>
+<p>So… don’t use this. I’m not even including a license right now. (But
+it will probably be AGPLv3.)</p>
+
+<p>Wait until the second phase of this project (Imagine 4.x). Why? Well, the
+3.x versions, while usable, will be hobbled by their need to remain
+compatible with Bigger Bird’s existing sites. The ERB templating language
+is dangerous (allows shell escapes) and the editor is Firefox-only. Once we
+are into the 4.x era, when we can move ahead without worrying about
+backward compatibility, it will be a good time to get on board.</p>
+
+<h1 id="label-Roadmap">Roadmap</h1>
 
 <p>Here’s what’s coming up:</p>
 <ul><li>
@@ -109,6 +115,15 @@ switch to a cross-browser editor</p>
 
 <p>(Imagine 1.x and 2.x have already been used internally, so we might as well
 start at 3.0.)</p>
+
+<p>Dependencies:</p>
+<ul><li>
+<p>acts_as_tree</p>
+</li><li>
+<p>acts_as_versioned</p>
+</li><li>
+<p>mini_magick</p>
+</li></ul>
 
 </div>
 
