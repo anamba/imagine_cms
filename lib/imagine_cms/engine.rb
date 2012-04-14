@@ -3,17 +3,16 @@ module ImagineCms
   class Engine < Rails::Engine
     engine_name "imagine_cms"
     
-    # initialize "imagine_cms.load_app_instance_data" do |app|
-    #   ImagineCms.setup do |config|
-        config.app_root = app.root
-    #   end
-    # end
+    config.app_root = root
+    middleware.use ::ActionDispatch::Static, "#{root}/public"
     
-    # initialize "imagine_cms.load_static_assets" do |app|
-      # app.middleware.use ::ActionDispatch::Static, "#{root}/public"
-      middleware.use ::ActionDispatch::Static, "#{root}/public"
-    # end
-    
+    ActiveSupport.on_load(:action_controller) do
+      require 'extensions/action_controller'
+      extend ActionControllerExtensions::ClassMethods
+      include ActionControllerExtensions::InstanceMethods
+      # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
+      # after_filter :compress_output    
+    end
   end
   
 end

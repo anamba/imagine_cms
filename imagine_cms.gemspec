@@ -19,9 +19,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
   
-  s.add_dependency "rails",               "~> 3.2.0"
-  
-  s.add_dependency "acts_as_tree",        "~> 0.1.1"
-  s.add_dependency "acts_as_versioned",   "~> 0.6.0"
-  s.add_dependency "mini_magick" #,         "~> 3.4"
+  s.add_dependency "rails",               "~> 3.2.2"
+  s.add_dependency "mini_magick",         "~> 3.4"
+  s.add_dependency "net-dns",             "~> 0.6.1"
 end

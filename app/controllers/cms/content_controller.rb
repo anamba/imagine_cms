@@ -35,7 +35,7 @@ module Cms # :nodoc:
         if e.message =~ /string contains null byte/
           # do nothing
         else
-          throw e
+          raise e
         end
       end
       
@@ -73,7 +73,7 @@ module Cms # :nodoc:
     helper_method :template_exists?
     
     def url_for_current
-      url_for
+      request.fullpath
     end
     helper_method :url_for_current
     
