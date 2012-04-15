@@ -23,14 +23,17 @@ be a good time to get on board.
 
 Here's what's coming up:
 
-* Imagine 3.0: 90% restored functionality, can function on existing sites with no database changes
-* Imagine 3.1: 100% restored functionality, may require a few simple migrations
-* Imagine 4.0: Refactoring & rewriting of the worst parts (substitutions); move away from ERB templating, to something like Liquid; switch to a cross-browser editor; switch to jquery
+Current status: Original functionality 25% restored
 
-(Imagine 1.x and 2.x version numbers have already been used internally, might as well start at 3.0.)
+* Imagine 3.0 (Rails 3.2): 90% restored functionality, can function on existing sites with no database changes
+* Imagine 3.1 (Rails 3.2): 100% restored functionality, may require a few simple migrations
+* Imagine 4.0 (Rails 4.0): Refactoring & rewriting of the worst parts (substitutions); move away from ERB templating, to something like Liquid; switch to a cross-browser editor; switch to jQuery
+
+(Imagine 1.x and 2.x version numbers have already been used internally, so might as well start at 3.0.)
 
 Dependencies:
 * Rails 3.2
 * acts_as_tree
 * acts_as_versioned
 * mini_magick
+* net-dns
