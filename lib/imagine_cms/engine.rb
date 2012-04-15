@@ -26,6 +26,11 @@ module ImagineCms
       require 'extensions/action_controller'
       extend ActionControllerExtensions::ClassMethods
       include ActionControllerExtensions::InstanceMethods
+      
+      helper CmsApplicationHelper
+      helper_method :template_exists?
+      helper_method :url_for_current
+      
       # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
       # after_filter :compress_output    
     end

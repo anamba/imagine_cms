@@ -1,7 +1,6 @@
 module Cms # :nodoc:
   class ContentController < ::ApplicationController # :nodoc:
     caches_action :rss_feed
-    helper CmsApplicationHelper
     
     before_filter :convert_content_path
     
@@ -56,32 +55,6 @@ module Cms # :nodoc:
     
     def show_from_db
       false
-    end
-    
-    ### COMPAT: convert_content_path
-    def convert_content_path
-      logger.debug "DEPRECATION WARNING: convert_content_path called"
-      params[:content_path] = params[:content_path].to_s.split('/')
-    end
-    
-    ### COMPAT - template_exists?
-    def template_exists?(template, extension = nil)
-      # ignore extension
-      logger.debug("DEPRECATION WARNING: template_exists? called")
-      lookup_context.find_all(template).any?
-    end
-    helper_method :template_exists?
-    
-    def url_for_current
-      request.fullpath
-    end
-    helper_method :url_for_current
-    
-    ### COMPAT - log_error
-    def log_error(e)
-      # noop
-      logger.debug("DEPRECATION WARNING: log_error called")
-      logger.error(e)
     end
     
   end
