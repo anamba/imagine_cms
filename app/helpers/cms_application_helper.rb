@@ -76,13 +76,13 @@ module CmsApplicationHelper
   #
   # NOTE: @error and @notice are deprecated, use flash.now[:error] and flash.now[:notice] instead.
   def flash_message(message = 'Please review the following messages:')
-    output = ''
+    output = ''.html_safe
     if (flash[:error] || @error || '') != ''
-      output << "<p>#{message}</p>"
-      output << "<p class=\"error\">#{flash[:error] || @error}</p>"
+      output << content_tag('p') { message }
+      output << content_tag('p', :class => 'error') { flash[:error] || @error }
     end
     if (flash[:notice] || @notice || '') != ''
-      output << "<p class=\"notice\">#{flash[:notice] || @notice}</p>"
+      output << content_tag('p', :class => 'notice') { flash[:notice] || @notice }
     end
     output
   end
@@ -426,7 +426,7 @@ EOF
   def copyright_year(year)
     year_str, this_year = year.to_s, Time.now.year.to_s
     year_str << "&ndash;#{this_year}" if ((year_str.to_i.to_s == year_str) and (year_str.to_i != this_year.to_i))
-    year_str
+    year_str.html_safe
   end
   
 end
