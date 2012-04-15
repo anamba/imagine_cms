@@ -14,7 +14,7 @@ module ActionControllerExtensions
       
       if perform_mx_lookup
         begin
-          require 'net/dns/dns'
+          # require 'net/dns'
           res = Net::DNS::Resolver.new
           valid = valid && res.mx(host).size > 0
         rescue Exception => e

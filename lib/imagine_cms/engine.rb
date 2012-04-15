@@ -6,6 +6,16 @@ module ImagineCms
     config.app_root = root
     middleware.use ::ActionDispatch::Static, "#{root}/public"
     
+    #
+    # load unusual gems
+    #
+    require 'net/dns'
+    
+    #
+    # load extensions
+    #
+    require 'extensions/array'
+    
     ActiveSupport.on_load(:action_controller) do
       require 'extensions/action_controller'
       extend ActionControllerExtensions::ClassMethods
