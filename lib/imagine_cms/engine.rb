@@ -12,6 +12,12 @@ module ImagineCms
     require 'net/dns'
     
     #
+    # load provided classes
+    #
+    require 'hash_object'
+    require 'hash_wrapper'
+    
+    #
     # load extensions
     #
     require 'extensions/array'
