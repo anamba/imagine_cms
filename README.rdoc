@@ -21,9 +21,9 @@ be a good time to get on board.
 
 =Roadmap
 
-Here's what's coming up:
-
 Current status: Original functionality 25% restored
+
+Here's what's coming up:
 
 * Imagine 3.0 (Rails 3.2): 90% restored functionality, can function on existing sites with no database changes
 * Imagine 3.1 (Rails 3.2): 100% restored functionality, may require a few simple migrations

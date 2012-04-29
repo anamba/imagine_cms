@@ -75,14 +75,13 @@ module CmsApplicationHelper
   # Display any available flash messages (:error, :notice), 
   #
   # NOTE: @error and @notice are deprecated, use flash.now[:error] and flash.now[:notice] instead.
-  def flash_message(message = 'Please review the following messages:')
+  def flash_message
     output = ''.html_safe
     if (flash[:error] || @error || '') != ''
-      output << content_tag('p') { message }
-      output << content_tag('p', :class => 'error') { flash[:error] || @error }
+      output << content_tag('div', :class => 'alert alert-error') { flash[:error] || @error }
     end
     if (flash[:notice] || @notice || '') != ''
-      output << content_tag('p', :class => 'notice') { flash[:notice] || @notice }
+      output << content_tag('div', :class => 'alert alert-info') { flash[:notice] || @notice }
     end
     output
   end
