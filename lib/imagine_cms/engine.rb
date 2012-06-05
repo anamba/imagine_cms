@@ -28,8 +28,16 @@ module ImagineCms
       include ActionControllerExtensions::InstanceMethods
       
       helper CmsApplicationHelper
+      helper_method :user_has_permission?
+      helper_method :user_has_permissions?
       helper_method :template_exists?
       helper_method :url_for_current
+      helper_method :gm_to_local
+      helper_method :local_to_gm
+      helper_method :ts_to_str
+      helper_method :ts_to_time_str
+      helper_method :time_to_str
+      helper_method :date_to_str
       
       # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
       # after_filter :compress_output    

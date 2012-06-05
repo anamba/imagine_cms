@@ -1,0 +1,26 @@
+<h2>Manage Users</h2><br/>
+
+<%= link_to raw('Create a new user &raquo;'), :action => 'create' %>
+
+<%= flash_message %>
+
+<table cellspacing="3" cellpadding="1" border="0" width="95%">
+  <tr>
+    <td bgcolor="#dedede" width="26%"><b>USERNAME</b></td>
+    <td bgcolor="#dedede" width="22%"><b>FIRST NAME</b></td>
+    <td bgcolor="#dedede" width="22%"><b>LAST NAME</b></td>
+    <td bgcolor="#dedede" width="10%"><b>Active?</b></td>
+    <td bgcolor="#dedede" width="10%">&nbsp;</td>
+    <td bgcolor="#dedede" width="10%">&nbsp;</td>
+  </tr>
+  <% for u in @users %>
+  <tr>
+    <td><%= link_to u.username, :action => 'edit', :id => u %></td>
+    <td><%= u.first_name %></td>
+    <td><%= u.last_name %></td>
+    <td><%= u.active ? 'Y' : 'N' %>
+    <td><%= button_to((u.active ? 'Disable' : 'Enable'), { :action => (u.active ? 'disable' : 'enable'), :id => u}, { :class => 'form_button' }) if u.username != session[:user_username] %></td>
+    <td><%= button_to('Delete', { :action => 'destroy', :id => u }, { :confirm => 'Are you sure you want to delete ' + u.username + '?', :class => 'form_button' }) if u.username != session[:user_username] %></td>
+  </tr>
+  <% end %>
+</table><br/>

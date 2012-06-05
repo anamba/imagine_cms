@@ -1,0 +1,60 @@
+<%-
+  @nav_sections = []
+  @subnav_sections = []
+  
+  if is_logged_in_user?
+    @nav_sections << [ 'Users', { :controller => '/manage/users' } ] if user_has_permission?(:manage_users)
+  end
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title><%= controller.controller_path.split('/').concat([ params[:action] ]).map { |s| s.titlecase }.join(' > ') %></title>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= stylesheet_link_tag    "manage", :media => "all" %>
+    <%#= stylesheet_link_tag 'print', :media => 'print' %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tag %>
+  </head>
+  
+  <body<%= @onload.blank? ? '' : " onload=\"#{@onload}\"" %>>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" class="noprint">
+      <tr height="35" bgcolor="#4D4D4D">
+        <td style="padding: 7px 15px 0 15px; border-bottom: solid #ffffff 1px; color: white">
+        <%- if is_logged_in_user? -%>
+          <!-- Header Navigation -->
+          <div style="float: left; padding-top: 2px;">
+            <a href="/manage"><img src="/assets/manage/start.gif" width="44" height="14" alt="Start" /></a>
+          </div>
+          <div style="float: left; padding-left: 20px;">
+            <%= raw @nav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.join(' | ') %>
+          </div>
+          <div style="float: right">
+            <%= link_to 'Change password', { :controller => '/manage/users', :action => 'edit', :id => session[:user_id] }, :style => 'color: white'%> |
+            <%= link_to 'Log out', { :controller => '/manage/user', :action => 'logout' }, :style => 'color: white' %>
+          </div>
+        <%- end -%>
+        </td>
+      </tr>
+      <%- unless @subnav_sections.blank? -%>
+      <tr height="30" bgcolor="#777777">
+        <td style="padding: 7px 15px 0 15px; border-bottom: solid #ffffff 1px; color: white">
+          <!-- Header Navigation -->
+          <div style="float: left; padding-left: 20px;">
+            <%= @subnav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.join(' | ') %>
+          </div>
+          <div style="float: right">
+          </div>
+        </td>
+      </tr>
+      <%- end -%>
+    </table>
+    
+    <div id="management-content" style="padding: 15px 10px 1px 15px">
+      <!-- Main Content -->
+      <%= yield %>
+    </div>
+  </body>
+</html>

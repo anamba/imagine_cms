@@ -1,0 +1,70 @@
+<%= flash_message %>
+
+<%= form_tag do %>
+<table>
+  <tr>
+    <td>First name:</td>
+    <td><%= text_field :user, :first_name %></td>
+  </tr>
+  <tr>
+    <td>Last name:</td>
+    <td><%= text_field :user, :last_name %></td>
+  </tr>
+  <tr>
+    <td>Email address:</td>
+    <td><%= text_field :user, :email_address %></td>
+  </tr>
+  
+  <tr>
+    <td>Username:</td>
+    <td><%= text_field :user, :username %></td>
+  </tr>
+  <tr>
+    <td>New Password:</td>
+    <td><%= password_field :user, :password %></td>
+  </tr>
+  <tr>
+    <td>Confirm:</td>
+    <td><%= password_field :user, :password_confirmation %></td>
+  </tr>
+  
+  <tr>
+    <td>Administrator:</td>
+    <td><%= check_box :user, :is_superuser %></td>
+  </tr>
+  
+  <tr>
+    <td colspan="2">-- OR -- </td>
+  </tr>
+  
+  <tr>
+    <td>Manage Restaurants:</td>
+    <td><%= check_box :user, :can_manage_restaurants %></td>
+  </tr>
+  <tr>
+    <td>Manage Recipes:</td>
+    <td><%= check_box :user, :can_manage_recipes %></td>
+  </tr>
+  <tr>
+    <td>Manage Blog Posts:</td>
+    <td><%= check_box :user, :can_manage_blog %></td>
+  </tr>
+  <tr>
+    <td>Manage Requests:</td>
+    <td><%= check_box :user, :can_manage_reqs %></td>
+  </tr>
+  <tr>
+    <td>Manage Members:</td>
+    <td><%= check_box :user, :can_manage_members %></td>
+  </tr>
+  <tr>
+    <td>Manage Users:</td>
+    <td><%= check_box :user, :can_manage_users %></td>
+  </tr>
+  
+  <tr>
+    <td></td>
+    <td><%= submit_tag 'Update' %> or <%= link_to 'Cancel', :action => 'index' %></td>
+  </tr>
+</table>
+<% end %>

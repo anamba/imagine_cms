@@ -1,0 +1,20 @@
+<%= flash_message %>
+
+<%= form_tag({}, { :name => 'login_form' }) do %>
+<table>
+  <tr>
+    <td align="right">Username:</td>
+    <td><%= text_field :login, :username, { :class => 'form' } %></td>
+  </tr>
+  <tr>
+    <td align="right">Password:</td>
+    <td><%= password_field :login, :password, { :class => 'form' } %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><%= submit_tag 'Login', :class => 'form_button' %></td>
+  </tr>
+</table>
+<% end %>
+
+<%= javascript_tag "try { document.forms['login_form'].elements['login_username'].focus(); } catch (e) {}" %>

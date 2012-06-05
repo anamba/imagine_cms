@@ -1,0 +1,37 @@
+<h2>Create New User</h2><br/>
+
+<%= flash_message %>
+
+<%= form_tag do %>
+<table>
+  <tr>
+    <td>First name:</td>
+    <td><%= text_field :user, :first_name %></td>
+  </tr>
+  <tr>
+    <td>Last name:</td>
+    <td><%= text_field :user, :last_name %></td>
+  </tr>
+  <tr>
+    <td>Email address:</td>
+    <td><%= text_field :user, :email_address %></td>
+  </tr>
+  
+  <tr>
+    <td>Username:</td>
+    <td><%= text_field :user, :username %></td>
+  </tr>
+  <tr>
+    <td>Password:</td>
+    <td><%= password_field :user, :password %></td>
+  </tr>
+  <tr>
+    <td>Confirm:</td>
+    <td><%= password_field :user, :password_confirmation %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><%= submit_tag 'Create', :class => 'form_button' %></td>
+  </tr>
+</table>
+<% end -%>

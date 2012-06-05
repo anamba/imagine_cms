@@ -88,21 +88,52 @@ module CmsApplicationHelper
   
   # Similar to button_to, but takes a url for a button image as its first argument.
   def image_button_to(source, options = {}, html_options = {})
-    html_options.stringify_keys!
-    html_options[:type] = 'image'
-    html_options[:src] = image_path(source)
+    # html_options.stringify_keys!
+    # html_options[:type] = 'image'
+    # html_options[:src] = image_path(source)
+    # 
+    # convert_boolean_attributes!(html_options, %w( disabled ))
+    # 
+    # if confirm = html_options.delete("confirm")
+    #   html_options["onclick"] = "return #{confirm_javascript_function(confirm)};"
+    # end
+    # 
+    # url = options.is_a?(String) ? options : url_for(options)
+    # name ||= url
+    # 
+    # "<form method=\"post\" action=\"#{h url}\" class=\"image-button-to\"><div>" +
+    #   tag("input", html_options) + "</div></form>"
+    html_options = html_options.stringify_keys
     
     convert_boolean_attributes!(html_options, %w( disabled ))
-    
-    if confirm = html_options.delete("confirm")
-      html_options["onclick"] = "return #{confirm_javascript_function(confirm)};"
+
+    method_tag = ''
+    if (method = html_options.delete('method')) && %w{put delete}.include?(method.to_s)
+      method_tag = tag('input', :type => 'hidden', :name => '_method', :value => method.to_s)
     end
-    
-    url = options.is_a?(String) ? options : url_for(options)
+
+    form_method = method.to_s == 'get' ? 'get' : 'post'
+    form_options = html_options.delete('form') || {}
+    form_options[:class] ||= html_options.delete('form_class') || 'button_to'
+
+    remote = html_options.delete('remote')
+
+    request_token_tag = ''
+    if form_method == 'post' && protect_against_forgery?
+      request_token_tag = tag(:input, :type => "hidden", :name => request_forgery_protection_token.to_s, :value => form_authenticity_token)
+    end
+
+    url = options.is_a?(String) ? options : self.url_for(options)
     name ||= url
-    
-    "<form method=\"post\" action=\"#{h url}\" class=\"image-button-to\"><div>" +
-      tag("input", html_options) + "</div></form>"
+
+    html_options = convert_options_to_data_attributes(options, html_options)
+
+    html_options.merge!("type" => "image", "value" => name, "src" => image_path(source))
+
+    form_options.merge!(:method => form_method, :action => url, :class => "image-button-to")
+    form_options.merge!("data-remote" => "true") if remote
+
+    "#{tag(:form, form_options, true)}<div>#{method_tag}#{tag("input", html_options)}#{request_token_tag}</div></form>".html_safe
   end
   
   # Similar to submit_to_remote, but takes a url for a button image as its
