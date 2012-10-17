@@ -77,7 +77,10 @@ module ActionControllerExtensions
     # Determines whether the input string is a valid email address per RFC specification
     def valid_email_address?(addr, perform_mx_lookup = false)
       valid = true
-      valid = valid && addr.to_s =~ /\A([\w\d]+(?:[\w\d\!\#\$\%\&\*\+\-\/\=\?\^\`\{\|\}\~\.]*[\w\d]+)*)@((?:[\w\d]+\.)+[\w]{2,})\z/
+      
+      # simplified regex for speed... the original can basically lock up the system on longish addresses
+      # valid = valid && addr.to_s =~ /\A([\w\d]+(?:[\w\d\!\#\$\%\&\*\+\-\/\=\?\^\`\{\|\}\~\.]*[\w\d]+)*)@((?:[\w\d]+(?:[-]*[\w\d]+)*\.)+[\w]{2,})\z/
+      valid = valid && addr.to_s =~ /\A([\w\d\!\#\$\%\&\*\+\-\/\=\?\^\`\{\|\}\~\.]+)@((?:[\w\d]+(?:[-]*[\w\d]+)*\.)+[\w]{2,})\z/
       user, host = $1, $2
       
       # blacklist
