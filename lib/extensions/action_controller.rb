@@ -109,7 +109,8 @@ module ActionControllerExtensions
     def template_exists?(template, extension = nil)
       # ignore extension
       logger.debug("DEPRECATION WARNING: template_exists? called")
-      lookup_context.find_all(template).any?
+      partial = File.join(File.dirname(template), '_' + File.basename(template))
+      lookup_context.find_all(template).any? || lookup_context.find_all(partial).any?
     end
     
     ### COMPAT - template_exists?
