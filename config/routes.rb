@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   
   # primary CMS content routes
   root :to => 'cms/content#show'
-  match '*content_path' => 'cms/content#show'
+  match 'rss/:page_id/:page_list_name'          => 'cms/content#rss_feed'
+  match '*content_path'                         => 'cms/content#show'
   
 end

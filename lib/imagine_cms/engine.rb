@@ -7,9 +7,17 @@ module ImagineCms
     middleware.use ::ActionDispatch::Static, "#{root}/public"
     
     #
-    # load unusual gems
+    # activate gems as needed
     #
     require 'net/dns'
+    require 'acts_as_tree'
+    require 'prototype-rails'
+    require 'rails_rinku'
+    
+    #
+    # rails plugins
+    # 
+    require 'acts_as_versioned/lib/acts_as_versioned'
     
     #
     # load provided classes
@@ -32,12 +40,18 @@ module ImagineCms
       helper_method :user_has_permissions?
       helper_method :template_exists?
       helper_method :url_for_current
+      helper_method :is_editing_page?
       helper_method :gm_to_local
       helper_method :local_to_gm
       helper_method :ts_to_str
       helper_method :ts_to_time_str
       helper_method :time_to_str
       helper_method :date_to_str
+      
+      helper_method :insert_object
+      helper_method :substitute_placeholders
+      helper_method :template_option
+      helper_method :breadcrumbs
       
       # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
       # after_filter :compress_output    
