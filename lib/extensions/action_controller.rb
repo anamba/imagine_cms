@@ -101,28 +101,28 @@ module ActionControllerExtensions
     
     ### COMPAT: convert_content_path
     def convert_content_path
-      logger.debug "DEPRECATION WARNING: convert_content_path called"
+      logger.debug "DEPRECATION WARNING (Imagine CMS) WARNING: convert_content_path called"
       params[:content_path] = params[:content_path].to_s.split('/') rescue []
     end
     
     ### COMPAT - template_exists?
     def template_exists?(template, extension = nil)
       # ignore extension
-      logger.debug("DEPRECATION WARNING: template_exists? called")
+      logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: template_exists? called")
       partial = File.join(File.dirname(template), '_' + File.basename(template))
       lookup_context.find_all(template).any? || lookup_context.find_all(partial).any?
     end
     
     ### COMPAT - template_exists?
     def url_for_current
-      logger.debug("DEPRECATION WARNING: url_for_current called")
+      logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
       request.fullpath
     end
     
     ### COMPAT - log_error
     def log_error(e)
       # noop
-      logger.debug("DEPRECATION WARNING: log_error called")
+      logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: log_error called")
       logger.error(e)
     end
     
