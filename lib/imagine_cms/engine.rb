@@ -6,8 +6,8 @@ module ImagineCms
     config.app_root = root
     middleware.use ::ActionDispatch::Static, "#{root}/public"
     
-    initializer :assets do |config|
-      Rails.application.config.assets.precompile += %w( codepress/** dojo/** management.css )
+    initializer "imagine_cms.assets.precompile" do |config|
+      Rails.application.config.assets.precompile += %w( codepress/** dojo/** management.css reset.css )
     end
     
     #
