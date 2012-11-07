@@ -1,16 +1,3 @@
-<style type="text/css">
-  .CodeMirror-line-numbers {
-    padding: 6px 6px 0;
-    line-height: 15px;
-    font-size: 7pt;
-    color: #777;
-  }
-  
-  .CodeMirror-line-numbers div {
-    text-align: right;
-  }
-</style>
-
 <%= flash_message %>
 
 <h2>Edit Snippet</h2>
@@ -26,14 +13,13 @@
     <td valign="top"><div style="margin-top: 2px">Content:</div></td>
     <td>
       <%= text_area :snip, :content, :class => 'codepress html autocomplete-off', :style => 'width: 100%; height: 600px;' %>
-      <%= javascript_tag "if (typeof(CodeMirror) == 'function') { var editor = CodeMirror.fromTextArea('snip_content', { parserfile: ['parsexml.js', 'parsejavascript.js', 'tokenizejavascript.js', 'parsecss.js', 'parsehtmlmixed.js'], stylesheet: '/javascripts/codemirror/css/xmlcolors.css', path: '/javascripts/codemirror/', lineNumbers: true, textWrapping: false, indentUnit: 2, tabMode: 'spaces', electricChars: false }); }" %>
     </td>
   </tr>
   <tr>
     <td></td>
     <td>
       <%= submit_tag 'Save Snippet', :class => 'form_button' %>
-      <button onclick="$('preview_frame').scrollIntoView(); snip_content.toggleEditor(); snip_content.toggleEditor(); $('preview_content').value = $('snip_content').value; $('preview_form').submit(); return false;" class="form_button">Preview</button>
+      <button onclick="$('preview_frame').scrollIntoView(); snip_content.toggleEditor(); $('preview_content').value = $('snip_content_cp').value; $('preview_form').submit(); snip_content.toggleEditor(); return false;" class="form_button">Preview</button>
       <%= link_to 'Cancel', :action => 'snippets' %>
     </td>
   </tr>

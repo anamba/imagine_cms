@@ -123,7 +123,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         render_to_string :inline => @snip.content
       rescue Exception => e
         message = e.message
-        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>"
+        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
         logger.debug e
         return
       end
