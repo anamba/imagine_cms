@@ -1,6 +1,8 @@
 class CmsSnippet < ActiveRecord::Base
   acts_as_versioned
   
+  attr_accessible :name, :content
+  
   def content=(value)
     if value && value.is_a?(String)
       # filter suspicious content... go overboard for now, fine-tune later perhaps

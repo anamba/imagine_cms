@@ -1,21 +1,8 @@
-<style type="text/css">
-  .CodeMirror-line-numbers {
-    padding: 6px 6px 0;
-    line-height: 15px;
-    font-size: 7pt;
-    color: #777;
-  }
-  
-  .CodeMirror-line-numbers div {
-    text-align: right;
-  }
-</style>
-
 <%= flash_message %>
 
 <h2>Edit Template</h2>
 
-<%= form_tag({}, { :onsubmit => (@javascripts.include?("codepress/codepress") ? "temp_content.toggleEditor();" : '') }) do %>
+<%= form_tag({}, { :onsubmit => "temp_content.toggleEditor();" }) do %>
 <table width="100%" height="100%">
   <col width="100" />
   <tr>
@@ -26,14 +13,13 @@
     <td valign="top"><div style="margin-top: 2px">Content:</div></td>
     <td>
       <%= text_area :temp, :content, :class => 'codepress html autocomplete-off', :style => 'width: 100%; height: 600px;' %>
-      <%= javascript_tag "if (typeof(CodeMirror) == 'function') { var editor = CodeMirror.fromTextArea('temp_content', { parserfile: ['parsexml.js', 'parsejavascript.js', 'tokenizejavascript.js', 'parsecss.js', 'parsehtmlmixed.js'], stylesheet: '/javascripts/codemirror/css/xmlcolors.css', path: '/javascripts/codemirror/', lineNumbers: true, textWrapping: false, indentUnit: 2, tabMode: 'spaces', electricChars: false }); }" %>
     </td>
   </tr>
   <tr>
     <td></td>
     <td>
       <%= submit_tag 'Save Template', :class => 'form_button' %>
-      <button onclick="$('preview_frame').scrollIntoView(); <%= (@javascripts.include?("codepress/codepress") ? "temp_content.toggleEditor(); temp_content.toggleEditor();" : '') %> $('preview_content').value = $('temp_content').value; $('preview_form').submit(); return false;" class="form_button">Preview</button>
+      <button onclick="$('preview_frame').scrollIntoView(); temp_content.toggleEditor(); $('preview_content').value = $('temp_content_cp').value; $('preview_form').submit(); temp_content.toggleEditor(); return false;" class="form_button">Preview</button>
       <%= link_to 'Cancel', :action => 'templates' %>
     </td>
   </tr>
@@ -56,6 +42,7 @@
 <% end -%>
 
 
-<form id="preview_form" action="<%= url_for :controller => '/cms/content', :action => 'preview_template' %>" target="preview_frame">
-  <textarea id="preview_content" name="temp[content]" style="display: none;"></textarea>
-</form>
+<%= form_tag({ :controller => '/cms/content', :action => 'preview_template' }, :id => 'preview_form', :target => 'preview_frame') do %>
+  <%= text_area_tag 'temp[content]', '', :id => 'preview_content', :style => 'display: none;' %>
+  <%= hidden_field_tag 'mode', 'preview' %>
+<% end %>

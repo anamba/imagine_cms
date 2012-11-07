@@ -15,7 +15,7 @@
 
 <h2>Edit Snippet</h2>
 
-<%= form_tag({}, { :onsubmit => (@javascripts.include?("codepress/codepress") ? "snip_content.toggleEditor();" : '') }) do %>
+<%= form_tag({}, { :onsubmit => "snip_content.toggleEditor();" }) do %>
 <table width="100%" height="100%">
   <col width="100" />
   <tr>
@@ -33,7 +33,7 @@
     <td></td>
     <td>
       <%= submit_tag 'Save Snippet', :class => 'form_button' %>
-      <button onclick="$('preview_frame').scrollIntoView(); <%= (@javascripts.include?("codepress/codepress") ? "snip_content.toggleEditor(); snip_content.toggleEditor();" : '') %> $('preview_content').value = $('snip_content').value; $('preview_form').submit(); return false;" class="form_button">Preview</button>
+      <button onclick="$('preview_frame').scrollIntoView(); snip_content.toggleEditor(); snip_content.toggleEditor(); $('preview_content').value = $('snip_content').value; $('preview_form').submit(); return false;" class="form_button">Preview</button>
       <%= link_to 'Cancel', :action => 'snippets' %>
     </td>
   </tr>

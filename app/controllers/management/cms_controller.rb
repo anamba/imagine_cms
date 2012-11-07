@@ -80,10 +80,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def edit_template
     @temp = CmsTemplate.find_by_id(params[:id]) || CmsTemplate.new
     
-    case request.method
-    when :get
-    when :post
-      @temp.attributes = @temp.attributes.update(params[:temp])
+    if request.post?
+      @temp.assign_attributes(params[:temp])
       
       begin
         @pg = CmsPage.new
@@ -91,7 +89,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         render_to_string :inline => @temp.content
       rescue Exception => e
         message = e.message
-        flash.now[:error] = "<pre>#{html_escape(message)}</pre>"
+        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
         logger.debug e
         return
       end
@@ -116,10 +114,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def edit_snippet
     @snip = CmsSnippet.find_by_id(params[:id]) || CmsSnippet.new
     
-    case request.method
-    when :get
-    when :post
-      @snip.attributes = @snip.attributes.update(params[:snip])
+    if request.post?
+      @snip.assign_attributes(params[:snip])
       
       begin
         @pg = CmsPage.new
@@ -127,7 +123,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         render_to_string :inline => @snip.content
       rescue Exception => e
         message = e.message
-        flash.now[:error] = "<pre>#{html_escape(message)}</pre>"
+        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>"
         logger.debug e
         return
       end
@@ -167,7 +163,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         render_to_string :inline => params[:file_content]
       rescue Exception => e
         message = e.message
-        flash.now[:error] = "<pre>#{html_escape(message)}</pre>"
+        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>"
         logger.debug e
         return
       end
@@ -187,7 +183,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         redirect_to :action => 'edit_master', :id => params[:id]
       rescue Exception => e
         message = e.message
-        flash.now[:error] = "<pre>#{html_escape(message)}</pre>"
+        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>"
         log_error(e)
       end
     end
@@ -198,9 +194,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @page_levels << ''
     @path = ''
     @page = nil
-    
-    @javascripts ||= []
-    @javascripts << 'builder' << 'cropper'
   end
   
   def list_pages

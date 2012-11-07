@@ -192,6 +192,158 @@ module Cms # :nodoc:
     end
     
     
+    def disable_caching
+      @allow_caching = false
+    end
+    helper_method :disable_caching
+    
+    def search
+      @terms = []
+      @pages = []
+      
+      if params[:q]
+        @terms = params[:q].split(/\s+/).reject { |t| t.length < 3 }
+      end
+      
+      CmsPage.index_all
+      unless @terms.empty?
+        term_variants = []
+        @terms.each do |term|
+          term_variants << [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
+        end
+        
+        conds = [ 'published_version >= 0' ]
+        vars  = []
+        term_variants.each do |term_variant|
+          conds << "(title regexp ?)"
+          vars  << "[[:<:]](#{term_variant})[[:>:]]"
+        end
+        @pages.concat CmsPage.find(:all, :conditions => [ conds.join(' and ') ].concat(vars))
+        
+        conds = [ 'published_version >= 0' ]
+        vars  = []
+        term_variants.each do |term_variant|
+          conds << "(title regexp ? or search_index regexp ?)"
+          vars  << "[[:<:]](#{term_variant})[[:>:]]" << "[[:<:]](#{term_variant})[[:>:]]"
+        end
+        @pages.concat CmsPage.find(:all, :conditions => [ conds.join(' and ') ].concat(vars))
+        
+        # fulltext doesn't work with innodb... may need to make a separate myisam
+        # table just for search. (this would be better because it would sort by relevance)
+        # @pages.concat CmsPage.find(:all, :conditions => [ 'match (title, search_index) against (?)', params[:q] ])
+      end
+      @pages = @pages.uniq.reject { |pg| pg.search_index.empty? }
+      
+      @pg = CmsPage.new
+      @pg.template = CmsTemplate.find_by_name('Search') || CmsTemplate.new
+      @page_title = 'Search Results'
+      
+      load_page_objects or return
+      @page_objects['obj-text-search_results'] = render_to_string(:partial => 'search')
+      
+      render :inline => render_cms_page_to_string(@pg)
+    end
+    
+    def rss_feed
+      min_time = Time.rfc2822(request.env["HTTP_IF_MODIFIED_SINCE"]) rescue nil
+      if min_time && (Time.now - min_time) < 5.minutes
+        render :text => '', :status => '304 Not Modified' and return
+      end
+      
+      @pg = CmsPage.find_by_id(params[:page_id])
+      render :nothing => true and return unless @pg && params[:page_list_name]
+      key = "obj-page_list-#{params[:page_list_name].gsub(/[^\w]/, '_')}"
+      
+      load_page_objects or return true
+      
+      options ||= {}
+      today = Time.mktime(Time.now.year, Time.now.month, Time.now.day)
+      case @page_objects["#{key}-date-range"]
+        when 'all'
+        when 'past'
+          options[:end_date] = today
+        when 'future'
+          options[:start_date] = today
+        when 'custom'
+          options[:start_date] = @page_objects["#{key}-date-range-custom-start"]
+          options[:end_date] = @page_objects["#{key}-date-range-custom-end"]
+      end
+      
+      str = render_cms_page_to_string(@pg)
+      
+      @pages = page_list_items(@pg, key, options).first(20)
+      @page_contents = {}
+      
+      unless @pages.empty?
+        @most_recent_pub_date = @pages.first
+        @pages.each { |pg| most_recent_pub_date = pg if pg.published_date > @most_recent_pub_date.published_date }
+        
+        if min_time && @most_recent_pub_date.published_date && @most_recent_pub_date.published_date <= min_time
+          # use cached version
+          render :text => '', :status => '304 Not Modified' and return
+        end
+        
+        @pages.each_with_index do |page, index|
+          @page_contents[page.id] = render_to_string :inline => substitute_placeholders(@page_objects["#{key}-template"] || options[:template] || '', page, :index => index+1, :count => @pages.size)
+        end
+      end
+      
+      # send feed
+      response.headers["Content-Type"] = "application/rss+xml"
+      response.headers["Last-Modified"] = @pages.first.published_date.httpdate rescue Time.now
+      
+      render :layout => false
+    end
+    
+    def preview_template
+      @pg = CmsPage.find(1)
+      @pg.template = CmsTemplate.new
+      @pg.template.assign_attributes(params[:temp] || params[:snip] || {})
+      @page_objects = HashObject.new
+      render :inline => substitute_placeholders(@pg.template.content, @pg), :layout => 'application'
+    end
+    
+    def page_list_calendar
+      @pg = CmsPage.find(params[:id])
+      load_page_objects or return true
+      
+      @month = (params[:month] || Time.now.month).to_i
+      @year = (params[:year] || Time.now.year).to_i
+      @key = params[:key]
+      first_of_month = Time.mktime(@year, @month, 1)
+      last_of_month = first_of_month.end_of_month
+      
+      @css_prefix = params[:css_prefix] || 'calendar_'
+      
+      events = page_list_items(@pg, @key, :start_date => first_of_month, :end_date => last_of_month)
+      
+      @event_days = {}
+      events.each do |e|
+        if e.article_date
+          event_start = e.article_date.mday
+          if e.article_end_date
+            event_end = e.article_end_date > last_of_month ? last_of_month.mday : e.article_end_date.mday
+          else
+            event_end = event_start
+          end
+          
+          for index in event_start..event_end
+            @event_days[index] ||= ''
+            @event_days[index] << erb_render(substitute_placeholders(@page_objects["#{@key}-template"], e))
+          end
+          
+        end
+      end
+      @event_days.each do |index, val|
+        @event_days[index] = (@page_objects["#{@key}-header"] || '') + val + (@page_objects["#{@key}-footer"] || '')
+      end
+      
+      render :update do |page|
+        page.replace_html "page_list_calendar_#{@key}_month_year", :partial => 'page_list_calendar_month_year'
+        page.replace_html "page_list_calendar_#{@key}_days", :partial => 'page_list_calendar_days'
+      end
+    end
+    
     
     protected
     
