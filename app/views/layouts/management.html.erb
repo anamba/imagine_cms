@@ -12,6 +12,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title><%= controller.controller_path.split('/').concat([ params[:action] ]).map { |s| s.titlecase }.join(' > ') %></title>
+    <%#= javascript_tag 'var djConfig = { isDebug: true };' %>
+    <% if is_logged_in_user? -%>
+      <%= javascript_include_tag 'dojo/dojo' %>
+    <% end -%>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= stylesheet_link_tag    "manage", :media => "all" %>
     <%#= stylesheet_link_tag 'print', :media => 'print' %>
