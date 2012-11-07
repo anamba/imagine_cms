@@ -14,7 +14,7 @@
 </div>
 <%= sortable_element('image_sorter', :url => { :action => 'set_gallery_order' }, :tag => 'table', :constraint => '') %>
 
-<%- form_remote_tag(:update => 'insert_image_dialog_content', :url => { :action => 'complete_gallery', :id => @pg }) do -%>
+<%= form_remote_tag(:update => 'insert_image_dialog_content', :url => { :action => 'complete_gallery', :id => @pg }) do -%>
   Resize to be at most <%= text_field_tag :max_width, GalleryMaxWidth, :style => 'width: 40px' %> pixels wide and <%= text_field_tag :max_height, GalleryMaxHeight, :style => 'width: 40px' %> pixels high<br/>
   <%= text_field_tag 'dirname', params[:dirname], :style => 'display: none' %>
   

@@ -10,9 +10,9 @@
   certain your image is already web-ready. Otherwise, click "Next" to crop and
   resize your image before using it.</p>
   
-  <%- form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg },
-                                    { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
-  <table>
+  <%= form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg },
+                                    { :finish => "if (arguments[0] == 'success') { $('filename').value = arguments[0]; $('mainform').submit(); }" }) do -%>
+<table>
     <tr>
       <td width="70">Image file:</td>
       <td><%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %></td>
@@ -41,7 +41,7 @@
   
   <p>Upload a zip file of images to create a photo gallery.</p>
   
-  <%- form_tag_with_upload_progress({ :action => 'receive_gallery', :id => @pg },
+  <%= form_tag_with_upload_progress({ :action => 'receive_gallery', :id => @pg },
                                     { :finish => "if (arguments[0]) { $('dirname').value = arguments[0]; $('mainform_gallery').onsubmit(); }" }) do -%>
   <table>
     <tr>
@@ -62,13 +62,13 @@
   <%- end -%>
 </fieldset>
 
-<%- form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform' },
+<%= form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform' },
                     :url => { :action => 'crop_image', :id => @pg }) do -%>
   <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
   <%= text_field_tag 'filename', '', :style => 'display: none' %>
 <%- end -%>
 
-<%- form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform_gallery' },
+<%= form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform_gallery' },
                     :url => { :action => 'gallery_setup', :id => @pg }) do -%>
   <%= text_field_tag :dirname, '', :style => 'display: none' %>
 <%- end -%>

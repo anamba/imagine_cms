@@ -23,8 +23,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   before_filter :convert_invalid_chars_in_params
   
-  # upload_status_for :receive_image
-  # upload_status_for :add_to_gallery
+  upload_status_for :receive_image
+  upload_status_for :add_to_gallery
   
   cache_sweeper :cms_content_sweeper
   
@@ -703,7 +703,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     begin
       data = params[:file][:data]
       original_filename = data.original_filename
-      target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       localfile = File.join(target_dir, original_filename)
       
       begin

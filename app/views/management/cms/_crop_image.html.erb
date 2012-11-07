@@ -148,7 +148,7 @@ Pressing "Save Image" will crop the image and insert it into the page.
 <br/>
 
 <center>
-  <%- form_remote_tag :update => 'insert_image_dialog_content',
+  <%= form_remote_tag :update => 'insert_image_dialog_content',
                       :url => { :action => "save_crop", :id => @pg, :filename => @image_file } do -%>
     <table cellpadding="10">
       <tr>

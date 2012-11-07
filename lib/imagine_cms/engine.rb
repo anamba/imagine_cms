@@ -13,16 +13,23 @@ module ImagineCms
     #
     # activate gems as needed
     #
+    require 'prototype-rails'
+    # require 'redactor-rails'
+    require 'mini_magick'
+    require 'rails_rinku'
     require 'net/dns'
     require 'acts_as_tree'
-    require 'prototype-rails'
-    require 'rails_rinku'
     
     #
     # rails plugins
     # 
     require 'acts_as_versioned/lib/acts_as_versioned'
     require 'prototype_legacy_helper/lib/prototype_legacy_helper'
+    
+    require 'upload_progress/lib/multipart_progress'
+    require 'upload_progress/lib/progress'
+    require 'upload_progress/lib/upload_progress'
+    require 'upload_progress/lib/upload_progress_helper'
     
     #
     # load provided classes
@@ -39,6 +46,9 @@ module ImagineCms
       require 'extensions/action_controller'
       extend ActionControllerExtensions::ClassMethods
       include ActionControllerExtensions::InstanceMethods
+      
+      include UploadProgress
+      helper UploadProgress::UploadProgressHelper
       
       # include + helper: allow use both in controllers and views
       

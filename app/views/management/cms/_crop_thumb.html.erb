@@ -148,7 +148,7 @@ Pressing "Save Thumbnail" will crop the thumbnail and set it as the new thumbnai
 <br/>
 
 <center>
-  <%- form_remote_tag :update => 'select_thumbnail_dialog_content',
+  <%= form_remote_tag :update => 'select_thumbnail_dialog_content',
                       :url => { :action => "save_crop_thumb", :id => @pg, :filename => @image_file } do -%>
     <table cellpadding="10">
       <tr>

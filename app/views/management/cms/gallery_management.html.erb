@@ -8,7 +8,7 @@
 <div id="gallery_container">
   <div id="controls" style="margin-bottom: 10px;">
     <div id="select_gallery" style="float: left;">
-      <%- form_remote_tag :url => { :action => 'select_gallery', :id => @pg },
+      <%= form_remote_tag :url => { :action => 'select_gallery', :id => @pg },
                           :update => 'select_gallery' do -%>
         Current Gallery:
         <select name="gallery_id" onchange="new Ajax.Updater('gallery_container', '/manage/cms/select_gallery/<%= @pg.id %>', {asynchronous:true, evalScripts:true, parameters:Form.serialize(this.form)}); return false;">

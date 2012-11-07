@@ -5,7 +5,7 @@
 
 <p>Select the file you'd like to make available for site visitors to download.</p>
 
-<%- form_tag_with_upload_progress({ :action => 'receive_file', :id => @pg },
+<%= form_tag_with_upload_progress({ :action => 'receive_file', :id => @pg },
                                   { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
 <table>
   <tr>
@@ -25,7 +25,7 @@
 </table>
 <%- end -%>
 
-<%- form_remote_tag(:update => 'insert_file_dialog_content', :html => { :id => 'mainform' },
+<%= form_remote_tag(:update => 'insert_file_dialog_content', :html => { :id => 'mainform' },
                     :url => { :action => 'create_file_link', :id => @pg }) do -%>
   <%= text_field_tag 'filename', '', :style => 'display: none' %>
 <%- end -%>

@@ -20,7 +20,7 @@
     when 'print_stylesheet' then 'Print Stylesheet'
 end %></h2>
 
-<%- form_tag({}, { :onsubmit => "file_content.toggleEditor();" }) do -%>
+<%= form_tag({}, { :onsubmit => "file_content.toggleEditor();" }) do -%>
 <table width="100%" height="100%">
   <tr>
     <td>

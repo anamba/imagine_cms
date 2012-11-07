@@ -7,7 +7,7 @@
 
 <%= sortable_element('images', :url => { :action => 'sort_images', :id => @pg, :gallery_id => params[:gallery_id] }, :tag => 'div', :constraint => '') %>
 
-<%- form_remote_tag(:update => 'gallery_container',
+<%= form_remote_tag(:update => 'gallery_container',
                     :url => { :action => 'sort_images_save', :id => @pg, :gallery_id => params[:gallery_id] }) do -%>
   <%= submit_tag "Save order" %> or <%= link_to_remote "cancel",
                                                        :url => { :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] },

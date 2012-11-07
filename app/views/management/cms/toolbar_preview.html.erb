@@ -45,7 +45,7 @@
           <span style="font-family: Arial">Preview:</span>
         </td>
         <td style="vertical-align: middle;">
-          <%- form_tag('/' + @pg.path, { :method => 'get' }) do -%>
+          <%= form_tag('/' + @pg.path, { :method => 'get' }) do -%>
           <div style="border: 2px solid #EBEBEB">
            <select name="version" style="font-size: 8pt; width: 210px" onchange="location.href = this.value;">
             <!-- FIXME: using "p" here inserts a paragraph in most cases! -->

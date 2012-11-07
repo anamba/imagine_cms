@@ -148,7 +148,7 @@ Pressing "Save Feature Image" will crop the image and set it as the new feature 
 <br/>
 
 <center>
-  <%- form_remote_tag :update => 'select_thumbnail_dialog_content',
+  <%= form_remote_tag :update => 'select_thumbnail_dialog_content',
                       :url => { :action => "save_crop_feature_image", :id => @pg, :filename => @image_file } do -%>
     <table cellpadding="10">
       <tr>

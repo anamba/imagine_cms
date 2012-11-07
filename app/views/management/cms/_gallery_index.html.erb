@@ -4,7 +4,7 @@
   </div>
 </div>
 
-<%- form_remote_tag(:update => 'gallery_container', :html => { :id => 'mainform_gallery' },
+<%= form_remote_tag(:update => 'gallery_container', :html => { :id => 'mainform_gallery' },
                     :url => { :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] }) do -%>
   <%= text_field_tag :dirname, '', :style => 'display: none' %>
 <%- end -%>

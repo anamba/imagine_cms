@@ -5,7 +5,7 @@
 certain your image is already web-ready. Otherwise, click "Next" to crop and
 resize your image before using it.</p>
 
-<%- form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg, :overwrite => 1 },
+<%= form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg, :overwrite => 1 },
                                   { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
 <table>
   <tr>
@@ -28,7 +28,7 @@ resize your image before using it.</p>
 </table>
 <%- end -%>
 
-<%- form_remote_tag(:update => 'select_thumbnail_dialog_content', :html => { :id => 'mainform' },
+<%= form_remote_tag(:update => 'select_thumbnail_dialog_content', :html => { :id => 'mainform' },
                     :url => { :action => 'crop_feature_image', :id => @pg }) do -%>
   <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
   <%= text_field_tag 'filename', '', :style => 'display: none' %>
