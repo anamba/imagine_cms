@@ -59,7 +59,7 @@ module Cms # :nodoc:
     def show_from_db
       logger.debug 'Rendering content from database'
       
-      # begin
+      begin
         @content_levels = params[:content_path]
         db_path = params[:content_path]
         edit_mode = false
@@ -182,10 +182,10 @@ module Cms # :nodoc:
             return true
           end
         end
-      # rescue Exception => e
-      #   logger.debug "Error rendering from db: #{e.inspect.gsub(/</, '&lt;')} #{e.backtrace}"
-      #   log_error(e)
-      # end
+      rescue Exception => e
+        logger.debug "Error rendering from db: #{e.inspect.gsub(/</, '&lt;')} #{e.backtrace}"
+        log_error(e)
+      end
       
       # if we haven't rendered something from the db by now, return false
       false
