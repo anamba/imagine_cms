@@ -51,7 +51,7 @@ class Management::UserController < Management::ApplicationController
   
   def redirect_to_default(user)
     redirect_to UserRedirectAfterLogin and return if defined?(UserRedirectAfterLogin)
-    redirect_to :controller => '/manage/default', :action => 'index'
+    redirect_to :controller => '/management/default', :action => 'index'
   end
   
   
