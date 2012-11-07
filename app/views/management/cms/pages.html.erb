@@ -21,24 +21,14 @@ EOF
 <%= flash_message %>
 
 <div id="columnBrowserToolbar" style="background-color: #d0d0d0; padding: 4px; margin-bottom: 5px;  ">
-  <a id="new_link" href="#">
-    <img src="/assets/management/btn_top_new.gif" style="margin-right: 2px;" />
-  </a>
-  <a id="edit_content_link" href="#" target="_blank">
-    <img src="/assets/management/btn_top_edit.gif" style="margin-right: 2px;" />
-  </a>
+  <a id="new_link" href="#"><img src="/assets/management/btn_top_new.gif" style="margin-right: 2px;" /></a>
+  <a id="edit_content_link" href="#" target="_blank"><img src="/assets/management/btn_top_edit.gif" style="margin-right: 2px;" /></a>
   <form id="edit_content_form" action="#" onsubmit="this.action = $('edit_content_link').href;" target="_blank" style="display: none">
     <button>dummy</button>
   </form>
-  <a id="edit_link" href="#">
-    <img src="/assets/management/btn_top_properties.gif" style="margin-right: 2px;" />
-  </a>
-  <a id="view_link" href="#" target="_blank">
-    <img src="/assets/management/btn_top_preview.gif" style="margin-right: 2px;" />
-  </a>
-  <a id="delete_link" href="#" onclick="if (confirm('Are you sure you want to delete the selected page?')) { $('delete_form').submit(); } return false;">
-    <img src="/assets/management/btn_top_delete.gif" style="margin: 0" />
-  </a>
+  <a id="edit_link" href="#"><img src="/assets/management/btn_top_properties.gif" style="margin-right: 2px;" /></a>
+  <a id="view_link" href="#" target="_blank"><img src="/assets/management/btn_top_preview.gif" style="margin-right: 2px;" /></a>
+  <a id="delete_link" href="#" onclick="if (confirm('Are you sure you want to delete the selected page?')) { $('delete_form').submit(); } return false;"><img src="/assets/management/btn_top_delete.gif" style="margin: 0" /></a>
   <%= form_tag('', :id => "delete_form", :style => "display: none") do %>
     <button>dummy</button>
   <% end %>
