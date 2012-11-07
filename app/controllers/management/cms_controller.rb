@@ -652,7 +652,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @page_objects["#{key}-sort-second-field"] ||= options[:secondary_sort_key]
       @page_objects["#{key}-sort-second-direction"] ||= options[:secondary_sort_direction]
       
-      render_to_string :partial => 'page_list', :locals => { :name => name, :key => key }
+      render_to_string(:partial => 'page_list', :locals => { :name => name, :key => key }).html_safe
     when :snippet
       @snippet = CmsSnippet.find_by_name(name)
       if @snippet
