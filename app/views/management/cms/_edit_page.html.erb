@@ -12,6 +12,7 @@
                    :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';",
                    :html => { :onsubmit => 'teardownTextFieldHints();' } do -%>
 <table>
+  <col width="120"><col width="*"><col width="5">
 <%- if (@pg.id || 2) > 1 -%>
   <tr>
     <td>Name/URL:</td>
