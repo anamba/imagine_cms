@@ -154,7 +154,7 @@ module CmsApplicationHelper
     url = ''
     text = ''
     email.length.times do |i|
-      url << (i % 2 == 0 ? sprintf("%%%x", email[i]) : email[i])
+      url << (i % 2 == 0 ? sprintf("%%%x", email[i].to_i) : email[i])
       text << (i % 4 == 0 ? '<span>' << email[i] << '</span>' : email[i])
     end
     
