@@ -14,6 +14,29 @@ class CmsPage < ActiveRecord::Base
   validates_format_of :name, :with => /\A[-\w\d%]+\Z/
   validates_uniqueness_of :path, :message => 'conflicts with an existing page'
   
+  before_validation :compute_and_store_path, :set_versions
+  
+  def compute_and_store_path
+    if self.parent
+      if self.parent.path != ''
+        self.path = "#{self.parent.path}/#{self.name}"
+      else
+        self.path = self.name
+      end
+    else
+      self.path = ''
+    end
+  end
+  
+  def set_versions
+    if self.template
+      self.cms_template_version ||= self.template.version
+    end
+    
+    self.published_version ||= -1
+    self.published_date ||= self.created_on || Time.now
+  end
+  
   def sub_pages(options = {})
     # not using options just yet, but you can override if you like
     conditions = [ 'published_version >= 0' ]
@@ -52,26 +75,6 @@ class CmsPage < ActiveRecord::Base
       value.gsub!(/<(%.*?`.*?\s*%)>/, '&lt;\1&gt;')
     end
     super(value)
-  end
-  
-  def before_validation
-    # compute and store path
-    if self.parent
-      if self.parent.path != ''
-        self.path = "#{self.parent.path}/#{self.name}"
-      else
-        self.path = self.name
-      end
-    else
-      self.path = ''
-    end
-    
-    if self.template
-      self.cms_template_version ||= self.template.version
-    end
-    
-    self.published_version ||= -1
-    self.published_date ||= self.created_on || Time.now
   end
   
   def update_index
