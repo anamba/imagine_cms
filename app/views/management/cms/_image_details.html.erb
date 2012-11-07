@@ -1,0 +1,26 @@
+<table>
+  <tr valign="top">
+    <td><%= image_tag "content/#{params[:path]}/#{params[:gallery_id]}/#{params[:image]}" %></td>
+    <td style="padding-left: 10px;">
+      <div id="caption_container" style="margin-bottom: 20px;">
+        <strong>Caption</strong><br/>
+        <%- form_remote_tag :url => { :action => 'update_caption', :id => params[:id], :path => params[:path], :gallery_id => params[:gallery_id], :image => params[:image] },
+                            :update => 'gallery_container' do -%>
+          <%= text_area_tag "caption", @caption %><br/>
+          <%= submit_tag "Save" %> or <%= link_to_remote "cancel",
+                                                         :url => { :action => 'gallery_management', :id => params[:id], :gallery_id => params[:gallery_id] },
+                                                         :update => 'gallery_container' %>
+        <%- end -%>
+      </div>
+      
+      <div id="delete_container">
+        <strong>Delete Photo</strong><br/>
+        <%- form_remote_tag :url => { :action => 'delete_photo', :id => params[:id], :path => params[:path], :gallery_id => params[:gallery_id], :image => params[:image] },
+                            :update => 'gallery_container',
+                            :confirm => "This action cannot be undone. Continue?" do -%>
+          <%= submit_tag "Delete" %>
+        <%- end -%>
+      </div>
+    </td>
+  </tr>
+</table>

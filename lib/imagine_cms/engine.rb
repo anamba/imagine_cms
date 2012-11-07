@@ -6,6 +6,10 @@ module ImagineCms
     config.app_root = root
     middleware.use ::ActionDispatch::Static, "#{root}/public"
     
+    initializer :assets do |config|
+      Rails.application.config.assets.precompile += %w( codepress/** dojo/** manage.css )
+    end
+    
     #
     # activate gems as needed
     #
@@ -18,6 +22,7 @@ module ImagineCms
     # rails plugins
     # 
     require 'acts_as_versioned/lib/acts_as_versioned'
+    require 'prototype_legacy_helper/lib/prototype_legacy_helper'
     
     #
     # load provided classes
@@ -35,26 +40,18 @@ module ImagineCms
       extend ActionControllerExtensions::ClassMethods
       include ActionControllerExtensions::InstanceMethods
       
+      # include + helper: allow use both in controllers and views
+      
+      include PrototypeHelper  # from prototype_legacy_helper
+      helper PrototypeHelper
+      
+      include CmsApplicationHelper
       helper CmsApplicationHelper
-      helper_method :user_has_permission?
-      helper_method :user_has_permissions?
-      helper_method :template_exists?
-      helper_method :url_for_current
-      helper_method :is_editing_page?
-      helper_method :gm_to_local
-      helper_method :local_to_gm
-      helper_method :ts_to_str
-      helper_method :ts_to_time_str
-      helper_method :time_to_str
-      helper_method :date_to_str
       
       helper_method :insert_object
-      helper_method :substitute_placeholders
-      helper_method :template_option
-      helper_method :breadcrumbs
       
       # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
-      # after_filter :compress_output    
+      before_filter :expire_session_data
     end
   end
   

@@ -1,0 +1,5 @@
+<script type="text/javascript">
+    var editor = dojo.widget.Editor2Manager.getCurrentInstance();
+    editor.execCommand('inserthtml', '<' + '%= insert_object(\'<%= params[:dirname] %>\', :photo_gallery) %' + '>');
+    cancelInsertImage();
+</script>

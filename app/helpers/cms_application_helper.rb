@@ -1,12 +1,655 @@
 module CmsApplicationHelper
   
+  # Saves the current request to the session so that it can be replayed later
+  # (for example, after authentication). Only params of type String, Hash and
+  # Array will be saved. save_request is called in a before_filter in
+  # application.rb.
+  #
+  # Two levels of saved params are required so that params can be unsaved in
+  # the event of a 404 or other event that would make the current param set an
+  # unlikely or undesirable candidate for replaying.
+  def save_user_request
+    return if params[:action] == 'login'
+    
+    session[:old_saved_user_uri] = session[:saved_user_uri];
+    session[:old_saved_user_params] = session[:saved_user_params] || {};
+    saved_params = params.reject { |k, v| !(v.kind_of?(String) || v.kind_of?(Hash) || v.kind_of?(Array)) }
+    saved_params.each { |key, val| saved_params[key] = val.reject { |k, v| !(v.kind_of?(String) || v.kind_of?(Hash) || v.kind_of?(Array)) } if val.kind_of?(Hash) }
+    session[:saved_user_uri] = request.url
+    session[:saved_user_params] = saved_params
+  end
+  
+  # Returns a User object corresponding to the currently logged in user, or returns false
+  # and redirects to the login page if not logged in.
+  def authenticate_user
+    # if user is not logged in, record the current request and redirect
+    if !session[:user_authenticated]
+      if User.find(:all).size == 0
+        flash[:notice] = 'No users exist in the system. Please create one now.'
+        redirect_to :controller => '/management/user', :action => 'create_first'
+      else
+        flash[:notice] = 'This is an admin-only function. To continue, please log in.'
+        save_user_request
+        redirect_to :controller => '/management/user', :action => 'login'
+      end
+      
+      return false
+    end
+    
+    @user = User.find(session[:user_id]) rescue nil
+    session[:user_is_superuser] = @user.is_superuser rescue nil
+    
+    @user
+  end
+  
+  # Takes a symbol/string or array of symbols/strings and returns true if user has all
+  # of the named permissions.
+  #
+  # Result is stored in the session to speed up future checks.
+  def user_has_permissions?(*permission_set)
+    return false if !(@user ||= authenticate_user)
+    
+    if !permission_set.is_a? Array
+      permission_set = [ permission_set ]
+    end
+    
+    if session[:user_is_superuser]
+      for perm in permission_set
+        perm = perm.to_s
+        session[('user_can_' + perm).to_sym] ||= true
+      end
+      return true
+    end
+    
+    for perm in permission_set
+      perm = perm.to_s
+      session[('user_can_' + perm).to_sym] = @user.send('can_' + perm)
+      # logger.debug "user_can_#{perm} = #{@user.send('can_' + perm)}"
+      return session[('user_can_' + perm).to_sym]
+    end
+  end
+  alias :user_has_permission? :user_has_permissions?
+  
+  # Returns true if a Member is logged in.
+  def is_logged_in?
+    session[:authenticated]
+  end
+  
+  # Returns true if a User is logged in.
+  def is_logged_in_user?
+    session[:user_authenticated]
+  end
+  
+  # Returns true if the user is editing the current page.
+  # (This just means that we are rendering :controller => 'management/cms', :action => 'edit_page_content'.)
+  def is_editing_page?
+    params[:controller] == 'management/cms' && params[:action] == 'edit_page_content'
+  end
+  
+  # Determines whether the input string is a valid email address per RFC specification
+  def valid_email_address?(addr, perform_mx_lookup = false)
+    valid = true
+    
+    # simplified regex for speed... the original can basically lock up the system on longish addresses
+    # valid = valid && addr.to_s =~ /\A([\w\d]+(?:[\w\d\!\#\$\%\&\*\+\-\/\=\?\^\`\{\|\}\~\.]*[\w\d]+)*)@((?:[\w\d]+(?:[-]*[\w\d]+)*\.)+[\w]{2,})\z/
+    valid = valid && addr.to_s =~ /\A([\w\d\!\#\$\%\&\*\+\-\/\=\?\^\`\{\|\}\~\.]+)@((?:[\w\d]+(?:[-]*[\w\d]+)*\.)+[\w]{2,})\z/
+    user, host = $1, $2
+    
+    if perform_mx_lookup
+      begin
+        # require 'net/dns'
+        res = Net::DNS::Resolver.new
+        valid = valid && res.mx(host).size > 0
+      rescue Exception => e
+        logger.error(e)
+      end
+    end
+    
+    valid
+  end
+  
+  ### COMPAT: convert_content_path
+  def convert_content_path
+    logger.debug "DEPRECATION WARNING (Imagine CMS) WARNING: convert_content_path called"
+    params[:content_path] = params[:content_path].to_s.split('/') rescue []
+  end
+  
+  ### COMPAT - template_exists?
+  def template_exists?(template, extension = nil)
+    # ignore extension
+    logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: template_exists? called")
+    partial = File.join(File.dirname(template), '_' + File.basename(template))
+    lookup_context.find_all(template).any? || lookup_context.find_all(partial).any?
+  end
+  
+  ### COMPAT - template_exists?
+  def url_for_current
+    logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
+    request.fullpath
+  end
+  
+  # Returns the first non-empty string in its arg list. Clearly, depends on nil_empty plugin.
+  def first_non_empty(*args)
+    while !args.empty?
+      ret = args.shift
+      return ret unless ret.to_s.empty?
+    end
+    return ''
+  end
+  
+  ### COMPAT - log_error
+  def log_error(e)
+    # noop
+    logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: log_error called")
+    logger.error(e)
+  end
+  
+  def convert_invalid_chars_in_params
+    dig_deep(params) { |s| convert_invalid_chars!(s) }
+  end
+  
+  def dig_deep(hash, &block)
+    if hash.instance_of? String
+      yield(hash)
+    elsif hash.kind_of? Hash
+      hash.each_key { |h| dig_deep(hash[h]) { |s| block.call(s) } }
+    else
+      nil
+    end
+  end
+  
+  def convert_invalid_chars!(s)
+    # leave commented out until we're sure these are still needed
+    
+    # s.gsub!(/\xe2\x80\x98/, '&lsquo;')  # ‘
+    # s.gsub!(/\xe2\x80\x99/, '&rsquo;')  # ’
+    # s.gsub!(/\xe2\x80\x9c/, '&ldquo;')  # “
+    # s.gsub!(/\xe2\x80\x9d/, '&rdquo;')  # ”
+    # s.gsub!(/\xe2\x80\x93/, '&ndash;')  # –
+    # s.gsub!(/\xe2\x80\x94/, '&mdash;')  # —
+    # s.gsub!(/\xe2\x80\xa2/, '&bull;')   # •
+    # s.gsub!(/\xe2\x80\xa6/, '&hellip;') # …
+    # s.gsub!(/\xe2\x80\xa8/, '&nbsp;')   # (space)
+    # s.gsub!(/\xe2\x84\xa2/, '&trade;')  # ™
+    # 
+    # s.gsub!(/\xc2\xae/, '&reg;')    # ®
+    # s.gsub!(/\xc2\xab/, '&laquo;')  # «
+    # s.gsub!(/\xc2\xbb/, '&raquo;')  # »
+    # s.gsub!(/\xc2\xbd/, '&frac12;') # ½
+    # s.gsub!(/\xc2\xbc/, '&frac14;') # ¼
+    # 
+    # s.gsub!(/\xc4\x80/, '&#x100;')  # Ā
+    # s.gsub!(/\xc4\x81/, '&#x101;')  # ā
+    # s.gsub!(/\xc4\x92/, '&#x112;')  # Ē
+    # s.gsub!(/\xc4\x93/, '&#x113;')  # ē
+    # s.gsub!(/\xc4\xaa/, '&#x12A;')  # Ī
+    # s.gsub!(/\xc4\xab/, '&#x12B;')  # ī
+    # s.gsub!(/\xc5\x8c/, '&#x14C;')  # Ō
+    # s.gsub!(/\xc5\x8d/, '&#x14D;')  # ō
+    # s.gsub!(/\xc5\xaa/, '&#x16A;')  # Ū
+    # s.gsub!(/\xc5\xab/, '&#x16B;')  # ū
+    # 
+    # s.gsub!(/\xc3\x84/, '&Auml;') # Ä
+    # s.gsub!(/\xc3\x8b/, '&Euml;') # Ë
+    # s.gsub!(/\xc3\x8f/, '&Iuml;') # Ï
+    # s.gsub!(/\xc3\x96/, '&Ouml;') # Ö
+    # s.gsub!(/\xc3\x9c/, '&Uuml;') # Ü
+    # s.gsub!(/\xc3\xa4/, '&auml;') # ä
+    # s.gsub!(/\xc3\xab/, '&euml;') # ë
+    # s.gsub!(/\xc3\xaf/, '&iuml;') # ï
+    # s.gsub!(/\xc3\xb6/, '&ouml;') # ö
+    # s.gsub!(/\xc3\xbc/, '&uuml;') # ü
+    # 
+    # s.gsub!(/\xc3\x81/, '&Aacute;') # Á
+    # s.gsub!(/\xc3\x89/, '&Eacute;') # É
+    # s.gsub!(/\xc3\x8d/, '&Iacute;') # Í
+    # s.gsub!(/\xc3\x93/, '&Oacute;') # Ó
+    # s.gsub!(/\xc3\x9a/, '&Uacute;') # Ú
+    # s.gsub!(/\xc3\xa1/, '&aacute;') # á
+    # s.gsub!(/\xc3\xa9/, '&eacute;') # é
+    # s.gsub!(/\xc3\xad/, '&iacute;') # í
+    # s.gsub!(/\xc3\xb3/, '&oacute;') # ó
+    # s.gsub!(/\xc3\xba/, '&uacute;') # ú
+    # 
+    # s.gsub!(/\xc5\x98/, '&#x158;') # Ř
+    # s.gsub!(/\xc5\x99/, '&#x159;') # ř
+    # 
+    # s.gsub!(/\x85/, '&hellip;') # …
+    # s.gsub!(/\x8b/, '&lt;')     # <
+    # s.gsub!(/\x9b/, '&gt;')     # >
+    # s.gsub!(/\x91/, '&lsquo;')  # ‘
+    # s.gsub!(/\x92/, '&rsquo;')  # ’
+    # s.gsub!(/\x93/, '&ldquo;')  # “
+    # s.gsub!(/\x94/, '&rdquo;')  # ”
+    # s.gsub!(/\x97/, '&mdash;')  # —
+    # s.gsub!(/\x99/, '&trade;')  # ™
+    # s.gsub!(/\x95/, '*')
+    # s.gsub!(/\x96/, '-')
+    # s.gsub!(/\x98/, '~')
+    # s.gsub!(/\x88/, '^')
+    # s.gsub!(/\x82/, ',')
+    # s.gsub!(/\x84/, ',,')
+    # s.gsub!(/\x89/, 'o/oo')
+    # s.gsub!(/\x8c/, 'OE')
+    # s.gsub!(/\x9c/, 'oe')
+  end
+  
+  # Convert from GMT/UTC to local time (based on time zone setting in session[:time_zone])
+  def gm_to_local(time)
+    ActiveSupport::TimeZone.new(session[:time_zone] || 'UTC').utc_to_local(time)
+  end
+  
+  # Convert from local time to GMT/UTC (based on time zone setting in session[:time_zone])
+  def local_to_gm(time)
+    ActiveSupport::TimeZone.new(session[:time_zone] || 'UTC').local_to_utc(time)
+  end
+  
+  # Convert a time object into a formatted date/time string
+  def ts_to_str(ts)
+    return '' if ts == nil
+    gm_to_local(ts).strftime('%a %b %d, %Y') + ' at ' +
+      gm_to_local(ts).strftime('%I:%M%p').downcase + ' ' + (session[:time_zone_abbr] || '')
+  end
+  
+  # Convert a time object into a formatted time string (no date)
+  def ts_to_time_str(ts)
+    return '' if ts == nil
+    gm_to_local(ts).strftime('%I:%M:%S%p').downcase
+  end
+  
+  # Convert times to a standard format (e.g. 1:35pm)
+  def time_to_str(t, convert = true)
+    return '' if t == nil
+    if convert
+      gm_to_local(t).strftime("%I").to_i.to_s + gm_to_local(t).strftime(":%M%p").downcase
+    else
+      t.strftime("%I").to_i.to_s + t.strftime(":%M%p").downcase
+    end
+  end
+  
+  # Convert times to a standard format (e.g. 1:35pm)
+  def date_to_str(t, convert = true)
+    return '' if t == nil
+    if convert
+      gm_to_local(t).strftime("%m").to_i.to_s + '/' + gm_to_local(t).strftime("%d").to_i.to_s + gm_to_local(t).strftime("/%Y")
+    else
+      t.strftime("%m").to_i.to_s + '/' + t.strftime("%d").to_i.to_s + t.strftime("/%Y")
+    end
+  end
+  
+  
+  
+  def load_page_objects(obj_type = nil, name = nil)
+    if params[:version].to_i > 0 && params[:version].to_i != @pg.published_version
+      if is_logged_in_user?
+        if user_has_permission?(:manage_cms)
+          @pg.revert_to(params[:version].to_i)
+        end
+      else
+        authenticate_user
+        return false
+      end
+    elsif @pg.version != @pg.published_version
+      @pg.revert_to(@pg.published_version)
+    end
+    
+    @page_objects = HashObject.new
+    conditions = [ 'cms_page_version = ?' ]
+    cond_vars = [ @pg.version ]
+    
+    if obj_type
+      conditions << 'obj_type = ?'
+      cond_vars << obj_type
+    end
+    if name
+      conditions << 'name = ?'
+      cond_vars << name
+    end
+    
+    @pg.objects.find(:all, :conditions => [ conditions.join(' and ') ].concat(cond_vars)).each do |obj|
+      @page_objects["obj-#{obj.obj_type.to_s}-#{obj.name}"] = obj.content
+    end
+  end
+  
+  def page_list_items(pg, key, options = {})
+    pages = []
+    instance_tags_include = []
+    instance_tags_exclude = []
+    instance_tags_require = []
+    
+    conditions = [ 'cms_pages.published_version >= 0', 'cms_pages.published_date is not null', 'cms_pages.published_date < NOW()' ]
+    cond_vars = []
+    
+    if options[:start_date]
+      options[:start_date] = Time.parse(options[:start_date]) if options[:start_date].is_a? String
+      conditions << 'cms_pages.article_date >= ?'
+      cond_vars << options[:start_date]
+    end
+    if options[:end_date]
+      options[:end_date] = Time.parse(options[:end_date]) if options[:end_date].is_a? String
+      conditions << 'cms_pages.article_date < ?'
+      cond_vars << (options[:end_date] + 1.day)
+    end
+    
+    @page_objects["#{key}-sources-tag-count"] = @page_objects["#{key}-sources-tag-count"].to_i
+    
+    for i in 0...@page_objects["#{key}-sources-tag-count"]
+      case @page_objects["#{key}-sources-tag#{i}-behavior"]
+      when 'include'
+        instance_tags_include << @page_objects["#{key}-sources-tag#{i}"]
+      when 'exclude'
+        instance_tags_exclude << @page_objects["#{key}-sources-tag#{i}"]
+      when 'require'
+        instance_tags_require << @page_objects["#{key}-sources-tag#{i}"]
+      end
+    end
+    include_tags = instance_tags_include.map { |t| t.strip }.reject { |t| t.empty? }
+    exclude_tags = instance_tags_exclude.map { |t| t.strip }.reject { |t| t.empty? }
+    require_tags = instance_tags_require.map { |t| t.strip }.reject { |t| t.empty? }
+    
+    if include_tags.empty?
+      include_tags = (options[:include_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.empty? }
+      include_tags.each do |t|
+        i = @page_objects["#{key}-sources-tag-count"]
+        @page_objects["#{key}-sources-tag#{i}"] = t
+        @page_objects["#{key}-sources-tag#{i}-behavior"] = 'include'
+        @page_objects["#{key}-sources-tag-count"] += 1
+      end
+    end
+    if exclude_tags.empty?
+      exclude_tags = (options[:exclude_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.empty? }
+      exclude_tags.each do |t|
+        i = @page_objects["#{key}-sources-tag-count"]
+        @page_objects["#{key}-sources-tag#{i}"] = t
+        @page_objects["#{key}-sources-tag#{i}-behavior"] = 'exclude'
+        @page_objects["#{key}-sources-tag-count"] += 1
+      end
+    end
+    if require_tags.empty?
+      require_tags = (options[:require_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.empty? }
+      require_tags.each do |t|
+        i = @page_objects["#{key}-sources-tag-count"]
+        @page_objects["#{key}-sources-tag#{i}"] = t
+        @page_objects["#{key}-sources-tag#{i}-behavior"] = 'require'
+        @page_objects["#{key}-sources-tag-count"] += 1
+      end
+    end
+    
+    # pull all folder content
+    folders = []
+    for i in 0...@page_objects["#{key}-sources-folder-count"].to_i
+      folders << HashObject.new(:src => @page_objects["#{key}-sources-folder#{i}"].strip,
+                                :expand_folders => @page_objects["#{key}-sources-folder#{i}-expand-folders"])
+    end
+    folders = folders.reject { |f| f.src.empty? }
+    
+    if folders.empty?
+      folders = (options[:folders] || '').split(',').map do |f|
+        bits = f.strip.split(':')
+        
+        obj = HashObject.new
+        obj.src = bits[0]
+        obj.expand_folders = 'true'
+        
+        while bit = bits.shift
+          case bit
+          when 'expand-folders'
+            ;
+          when 'no-expand-folders'
+            obj.expand_folders = 'false'
+          end
+        end
+        
+        obj
+      end
+      folders = folders.reject { |f| f.src.empty? }
+      
+      @page_objects["#{key}-sources-folder-count"] = folders.size
+      folders.each_with_index do |f, i|
+        @page_objects["#{key}-sources-folder#{i}"] = f.src
+        @page_objects["#{key}-sources-folder#{i}-expand-folders"] = f.expand_folders
+      end
+    end
+    
+    # exclude expired items if specified
+    if @page_objects["#{key}-include-expired"]
+      if @page_objects["#{key}-include-expired"] == 'false'
+        conditions << '(cms_pages.expires = ? OR (cms_pages.expires = ? AND cms_pages.expiration_date >= ?))'
+        cond_vars << false
+        cond_vars << true
+        cond_vars << Time.now
+      end
+    end
+    
+    folders.each do |f|
+      begin
+        if f.expand_folders && f.expand_folders == 'false'
+          f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
+          parent_page = CmsPage.find_by_path(f.src)
+          pages.concat parent_page.children.find(:all, :include => [ :tags ], :conditions => [ conditions.join(' and ') ].concat(cond_vars))
+        else
+          if f.src == '/'
+            pages.concat CmsPage.find(:all, :include => [ :tags ], :conditions => [ conditions.join(' and ') ].concat(cond_vars))
+          else
+            f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
+            fconditions = conditions.dup
+            fconditions << 'path like ?'
+            fcond_vars = cond_vars.dup
+            fcond_vars << f.src+'/%'
+            pages.concat CmsPage.find(:all, :include => [ :tags ], :conditions => [ fconditions.join(' and ') ].concat(fcond_vars))
+          end
+        end
+      rescue Exception => e
+        logger.debug e
+      end
+    end
+    
+    # pull all include tag content
+    include_tags.each do |tag|
+      pages.concat CmsPageTag.find_all_by_name(tag, :include => [ :page ], :conditions => [ conditions.join(' and ') ].concat(cond_vars)).map { |cpt| cpt.page }
+    end
+    
+    # dump anything that has an excluded tag
+    exclude_tags.each do |tag|
+      pages.reject! { |page| page.tags.reject { |t| t.name != tag } != [] }
+    end
+    
+    # dump anything that does not have a required tag
+    require_tags.each do |tag|
+      pages.reject! { |page| page.tags.reject { |t| t.name != tag } == [] }
+    end
+    
+    if pg && (options[:exclude_current] === true || @page_objects["#{key}-exclude-current"] == 'true')
+      pages.reject! { |page| page == pg }
+    end
+    
+    # set some reasonable defaults in case the sort keys are nil
+    pages.each { |pg| pg.article_date ||= Time.now; pg.position ||= 0; pg.title ||= '' }
+    pri_sort_key = first_non_empty(@page_objects["#{key}-sort-first-field"], options[:primary_sort_key], 'article_date')
+    pri_sort_dir = first_non_empty(@page_objects["#{key}-sort-first-direction"], options[:primary_sort_direction], 'asc')
+    sec_sort_key = first_non_empty(@page_objects["#{key}-sort-second-field"], options[:secondary_sort_key], 'position')
+    sec_sort_dir = first_non_empty(@page_objects["#{key}-sort-second-direction"], options[:secondary_sort_direction], 'asc')
+    @page_objects["#{key}-sort-first-field"] ||= pri_sort_key
+    @page_objects["#{key}-sort-first-direction"] ||= pri_sort_dir
+    @page_objects["#{key}-sort-second-field"] ||= sec_sort_key
+    @page_objects["#{key}-sort-second-direction"] ||= sec_sort_dir
+    
+    keys_with_dir = [ [ pri_sort_key, pri_sort_dir ], [ sec_sort_key, sec_sort_dir ] ]
+    pages.sort! do |a,b|
+      index = 0
+      result = 0
+      while result == 0 && index < keys_with_dir.size
+        key = keys_with_dir[index][0]
+        aval = a.send(key)
+        bval = b.send(key)
+        
+        if !aval
+          result = 1
+        elsif !bval
+          result = -1
+        else
+          result = aval <=> bval
+        end
+        
+        result *= -1 if keys_with_dir[index][1] && keys_with_dir[index][1].downcase == 'desc'
+        index += 1
+      end
+      
+      result
+    end
+    
+    offset = first_non_empty(@page_objects["#{key}-item-offset"], options[:item_offset], 0).to_i
+    pages = pages[offset, pages.size] || []
+    
+    # randomize if requested
+    randomize = first_non_empty(@page_objects["#{key}-use-randomization"], options[:use_randomization], 'false').to_s == 'true'
+    random_pool_size = first_non_empty(@page_objects["#{key}-random-pool-size"], options[:random_pool_size], '').to_i
+    if randomize
+      if random_pool_size > 0
+        pages = pages.first(random_pool_size)
+      end
+      
+      n = pages.length
+      for i in 0...n
+        r = rand(n-1).floor
+        pages[r], pages[i] = pages[i], pages[r]
+      end
+    end
+    
+    pages
+  end
+  
+  def substitute_placeholders(html, page, extra_attributes = {})
+    return html unless page
+    
+    temp = html.dup
+    
+    # mangle anything inside of an insert_object so that it won't be caught (yet)
+    temp.gsub!(/(insert_object\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
+      one, two, three = $1, $2, $3
+      one + two.gsub(/<#/, '<!#') + three
+    end
+    
+    # first, extras passed in args
+    extra_attributes.each do |k,v|
+      temp.gsub!(/<#\s*#{k.to_s}\s*#>/, v.to_s)
+    end
+    
+    # next, page object attributes and template options (from page properties)
+    page.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
+      temp.gsub!(/<#\s*#{obj.name}\s*#>/, (obj.content || '').to_s)
+    end
+    page.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
+      temp.gsub!(/<#\s*option_#{obj.name.gsub(/[^\w\d]/, '_')}\s*#>/, obj.content || '')
+    end
+    
+    # path is kind of a special case, we like to see it with a leading /
+    temp.gsub!(/<#\s*path\s*#>/, '/' + (page.path || ''))
+    
+    # substitute tags in a helpful way
+    temp.gsub!(/<#\s*tags\s*#>/, page.tags.map { |t| t.name }.join(', '))
+    temp.gsub!(/<#\s*tags_as_css_classes\s*#>/, page.tags_as_css_classes)
+    
+    # use full date/time format for created_on and updated_on
+    temp.gsub!(/<#\s*created_on\s*#>/, "#{page.created_on.getlocal.strftime('%a')} #{date_to_str(page.created_on)} #{time_to_str(page.created_on)}") if page.created_on
+    temp.gsub!(/<#\s*updated_on\s*#>/, "#{page.updated_on.getlocal.strftime('%a')} #{date_to_str(page.updated_on)} #{time_to_str(page.updated_on)}") if page.updated_on
+    
+    # handle any custom substitutions
+    temp = substitute_placeholders_custom(temp, page)
+    
+    # finally, toss in the rest of the generic class attributes
+    (page.attributes.map { |c| c.first } +
+    [ 'article_date_month', 'article_date_mon', 'article_date_day', 'article_date_year', 'article_date_yr' ]).each do |attr|
+      begin
+        val = page.send(attr.downcase.underscore)
+        case val.class.to_s
+        when 'String'
+          val
+        when 'Time'
+          val = val.strftime("(%a) ") + val.strftime("%B ") + val.day.to_s + val.strftime(", %Y")
+        when 'NilClass'
+          val = ''
+        else
+          # logger.error "#{attr} (#{val.class}): #{val}"
+        end
+      rescue
+        # val = '<!-- attribute not found -->'
+        val = ''
+      end
+      temp.gsub!(/<#\s*#{attr}\s*#>/, val.to_s)
+    end
+    # temp.gsub!(/<#\s*(.*?)\s*#>/, "<!-- attribute not found -->")
+    temp.gsub!(/<#\s*(.*?)\s*#>/, '')
+    
+    # unmangle mangled stuff
+    temp.gsub!(/(insert_object\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
+      one, two, three = $1, $2, $3
+      one + two.gsub(/<!#/, '<#') + three
+    end
+    
+    temp.html_safe
+  end
+  
+  # override this method to do your own custom subtitutions
+  def substitute_placeholders_custom(temp, page)
+    # an example:
+    # begin
+    #   temp.gsub!(/<#\s*upcoming_event_date\s*#>/, page.article_date.strftime("<span class=\"month\">%b</span><span class=\"day\">%d</span>"))
+    # rescue
+    # end
+    
+    # remember to return your modified copy of temp
+    temp
+  end
+  
+  
+  def template_option(name, type = :string)
+    return nil unless @pg
+    
+    @template_options ||= {}
+    @template_options[name] = type
+    
+    key = name.gsub(/[^\w\d]/, '_')
+    obj = @pg.objects.find_by_name("#{type}-#{key}", :conditions => [ "obj_type = 'option'" ])
+    return nil unless obj
+    
+    case type
+    when :checkbox
+      obj.content == "1"
+    else
+      obj.content
+    end
+  end
+  
+  
+  def breadcrumbs(options = {})
+    # only works on CCS pages
+    if @pg
+      separator = options.delete(:separator) || ' &raquo; '
+      link_class = options.delete(:link_class)
+      
+      pg = @pg
+      ret = pg.title
+      
+      while pg = pg.parent
+        if pg.published_version >= 0
+          ret = "<a href=\"/#{pg.path}\" class=\"#{link_class}\">#{pg.title}</a>" + separator + ret
+        end
+      end
+      
+      return ret
+    else
+      return ''
+    end
+  end
+  
   # Get an array of all times, useful in select's (5 minute interval by default)
   def all_times_array(interval = 5)
     a = []
     (0..23).each do |h|
       (0..59).each do |m|
         next unless m % interval == 0
-        t = Time.mktime(2000, 1, 1, h, m)
+        t = Time.utc(2000, 1, 1, h, m)
         a << t.strftime("%I").to_i.to_s + t.strftime(":%M%p").downcase
       end
     end
@@ -41,11 +684,11 @@ module CmsApplicationHelper
     if errors.size > 0
       ret << " title=\"#{h errors.join('; ')}\""
     end
-    ret << '><img src="/images/interface/form_error.gif" width="17" height="17" border="0" />'
+    ret << '><img src="/assets/interface/form_error.gif" width="17" height="17" border="0" />'
     ret << '</div>'
     
     ret << "<div id=\"#{object_name}_#{method_name}_loading\" class=\"form-loading\" style=\"display: none;\">"
-    ret << "<img src=\"/images/interface/form_loading.gif\" width=\"16\" height=\"16\" border=\"0\" style=\"margin: 0 1px 1px 0;\" />"
+    ret << "<img src=\"/assets/interface/form_loading.gif\" width=\"16\" height=\"16\" border=\"0\" style=\"margin: 0 1px 1px 0;\" />"
     ret << "</div>"
     
     if errors.size > 0 && options[:display_messages]
@@ -78,10 +721,10 @@ module CmsApplicationHelper
   def flash_message
     output = ''.html_safe
     if (flash[:error] || @error || '') != ''
-      output << content_tag('div', :class => 'alert alert-error') { flash[:error] || @error }
+      output << content_tag('div', :class => 'alert alert-error error') { flash[:error] || @error }
     end
     if (flash[:notice] || @notice || '') != ''
-      output << content_tag('div', :class => 'alert alert-info') { flash[:notice] || @notice }
+      output << content_tag('div', :class => 'alert alert-info notice') { flash[:notice] || @notice }
     end
     output
   end
@@ -151,14 +794,17 @@ module CmsApplicationHelper
   
   # Creates a mailto: link that is encoded to prevent most harvesting attempts.
   def encoded_mail_to(email, link_text = nil)
+    email = h(email)
     url = ''
     text = ''
-    email.length.times do |i|
-      url << (i % 2 == 0 ? sprintf("%%%x", email[i].to_i) : email[i])
-      text << (i % 4 == 0 ? '<span>' << email[i] << '</span>' : email[i])
+    
+    # this only works with ascii, but email addresses are supposed to be ascii
+    email.bytes.to_a.each_with_index do |b, i|
+      url << (i % 2 == 0 ? sprintf("%%%x", b) : b)
+      text << (i % 4 == 0 ? '<span>' << b << '</span>' : b)
     end
     
-    "<a href=\"mailto:#{url}\">#{link_text || text}</a>"
+    "<a href=\"mailto:#{url}\">#{link_text || text}</a>".html_safe
   end
   
   # Display a date picker with an ajax calendar.
@@ -221,18 +867,18 @@ module CmsApplicationHelper
     
     ret = <<EOF
   <span><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><span id="date_picker_#{object}_#{method_prefix}_value">#{default_value.strftime('%a %m/%d/%y')}</span></a></span>
-  <span id="date_picker_#{object}_#{method_prefix}icon"><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><img src="/images/interface/icon_time.gif" style="float: none" alt="date picker" /></a></span>
+  <span id="date_picker_#{object}_#{method_prefix}icon"><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><img src="/assets/interface/icon_time.gif" style="float: none" alt="date picker" /></a></span>
   <div id="date_picker_#{object}_#{method_prefix}main" style="display: none; background-color: white; border: 1px solid gray; padding: 3px; z-index: 101;" class="date-picker-main">
     <table width="190">
       <tr>
-        <td><a href="#" onclick="dpPrevMonth('#{object}', '#{method_prefix}', #{min_year}); #{h(draw_calendar)}; return false;"><img src="/images/interface/arrow_previous.gif" border="0" alt="Previous" style="float: left; padding: 2px 0 0 6px; margin: 0;" /></a></td>
+        <td><a href="#" onclick="dpPrevMonth('#{object}', '#{method_prefix}', #{min_year}); #{h(draw_calendar)}; return false;"><img src="/assets/interface/arrow_previous.gif" border="0" alt="Previous" style="float: left; padding: 2px 0 0 6px; margin: 0;" /></a></td>
         <td colspan="5" align="center">
           <nobr>
           #{ select_tag object + '_' + method_prefix + '_month_sel', options_for_select(months_hash, default_value.month.to_s), :class => 'form', :style => 'border: 1px solid gray; font-size: 11px; padding: 0; margin: 0;', :onchange => h(draw_calendar) }
           #{ select_tag object + '_' + method_prefix + '_year_sel', options_for_select((min_year..max_year).to_a, default_value.year), :class => 'form', :style => 'border: 1px solid gray; font-size: 11px; padding: 0; margin: 0;', :onchange => h(draw_calendar) }
           </nobr>
         </td>
-        <td><a href="#" onclick="dpNextMonth('#{object}', '#{method_prefix}', '#{max_year}'); #{h(draw_calendar)}; return false;"><img src="/images/interface/arrow_next.gif" border="0" alt="Next" style="float: right; padding: 2px 6px 0 0; margin: 0;" /></a></td>
+        <td><a href="#" onclick="dpNextMonth('#{object}', '#{method_prefix}', '#{max_year}'); #{h(draw_calendar)}; return false;"><img src="/assets/interface/arrow_next.gif" border="0" alt="Next" style="float: right; padding: 2px 6px 0 0; margin: 0;" /></a></td>
       </tr>
     </table>
     <div id="date_picker_#{object}_#{method_prefix}_days" class="date-picker-days"></div>
@@ -245,6 +891,7 @@ module CmsApplicationHelper
   </div>
 EOF
     ret += javascript_tag(draw_calendar)
+    ret.html_safe
   end
   
   # Display a clickable ajax event calendar.
@@ -290,7 +937,7 @@ EOF
     @css_prefix = css_prefix
     @popout_direction = popout_direction
     
-    first_of_month = Time.mktime(@year, @month, 1)
+    first_of_month = Time.utc(@year, @month, 1)
     last_of_month = first_of_month.end_of_month
     events = @calendar.events.find(:all, :conditions => [ 'start_date >= ? and start_date <= ?', first_of_month, last_of_month ])
       
@@ -305,7 +952,7 @@ EOF
       <td class="#{css_prefix}container">
         <table class="#{css_prefix}head" cellspacing="0" cellpadding="0" border="0">
           <tr class="#{css_prefix}head">
-            <td class="#{css_prefix}head #{css_prefix}head_prev_month"><a href="#" onclick="dpPrevMonth('event', 'calendar', #{min_year}); #{draw_calendar}; return false;"><img src="/images/interface/arrow_previous.gif" border="0" alt="Previous" style="float: left; padding-left: 2px;" /></a></td>
+            <td class="#{css_prefix}head #{css_prefix}head_prev_month"><a href="#" onclick="dpPrevMonth('event', 'calendar', #{min_year}); #{draw_calendar}; return false;"><img src="/assets/interface/arrow_previous.gif" border="0" alt="Previous" style="float: left; padding-left: 2px;" /></a></td>
             <td class="#{css_prefix}head #{css_prefix}head_month_select">
               <div#{options[:show_selects] ? '' : ' style="display: none"'}>
                 #{ select 'event_calendar', 'month_sel', months_hash, { :selected => Time.now.month.to_s }, :class => 'form', :style => 'font-size: 11px;', :onchange => draw_calendar }
@@ -315,7 +962,7 @@ EOF
                 #{render '/util/_calendar_month_year'}
               </div>
             </td>
-            <td class="#{css_prefix}head #{css_prefix}head_next_month"><a href="#" onclick="dpNextMonth('event', 'calendar', '#{max_year}'); #{draw_calendar}; return false;"><img src="/images/interface/arrow_next.gif" border="0" alt="Next" style="float: right; padding-right: 2px;" /></a></td>
+            <td class="#{css_prefix}head #{css_prefix}head_next_month"><a href="#" onclick="dpNextMonth('event', 'calendar', '#{max_year}'); #{draw_calendar}; return false;"><img src="/assets/interface/arrow_next.gif" border="0" alt="Next" style="float: right; padding-right: 2px;" /></a></td>
           </tr>
         </table>
       </td>

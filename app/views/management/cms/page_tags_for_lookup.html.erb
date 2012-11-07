@@ -1,0 +1,5 @@
+var taglist = new Array(<%= @tags.size %>)
+
+<% @tags.each_with_index do |tag, i| -%>
+taglist[<%= i %>]="<%=h tag %>"
+<% end -%>

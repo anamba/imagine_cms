@@ -1,0 +1,61 @@
+<style type="text/css">
+  .CodeMirror-line-numbers {
+    padding: 6px 6px 0;
+    line-height: 15px;
+    font-size: 7pt;
+    color: #777;
+  }
+  
+  .CodeMirror-line-numbers div {
+    text-align: right;
+  }
+</style>
+
+<%= flash_message %>
+
+<h2>Edit Snippet</h2>
+
+<%= form_tag({}, { :onsubmit => (@javascripts.include?("codepress/codepress") ? "snip_content.toggleEditor();" : '') }) do %>
+<table width="100%" height="100%">
+  <col width="100" />
+  <tr>
+    <td>Name:</td>
+    <td><%= text_field :snip, :name %></td>
+  </tr>
+  <tr>
+    <td valign="top"><div style="margin-top: 2px">Content:</div></td>
+    <td>
+      <%= text_area :snip, :content, :class => 'codepress html autocomplete-off', :style => 'width: 100%; height: 600px;' %>
+      <%= javascript_tag "if (typeof(CodeMirror) == 'function') { var editor = CodeMirror.fromTextArea('snip_content', { parserfile: ['parsexml.js', 'parsejavascript.js', 'tokenizejavascript.js', 'parsecss.js', 'parsehtmlmixed.js'], stylesheet: '/javascripts/codemirror/css/xmlcolors.css', path: '/javascripts/codemirror/', lineNumbers: true, textWrapping: false, indentUnit: 2, tabMode: 'spaces', electricChars: false }); }" %>
+    </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>
+      <%= submit_tag 'Save Snippet', :class => 'form_button' %>
+      <button onclick="$('preview_frame').scrollIntoView(); <%= (@javascripts.include?("codepress/codepress") ? "snip_content.toggleEditor(); snip_content.toggleEditor();" : '') %> $('preview_content').value = $('snip_content').value; $('preview_form').submit(); return false;" class="form_button">Preview</button>
+      <%= link_to 'Cancel', :action => 'snippets' %>
+    </td>
+  </tr>
+</table>
+<br/>
+
+<%= render :partial => 'template_reference' %>
+<br/>
+
+<table width="100%">
+  <col width="100" />
+  <tr>
+    <td valign="top"><div style="margin-top: 2px">Preview:</div></td>
+    <td>
+      <iframe id="preview_frame" name="preview_frame" style="width: 100%; height: 600px; border: 1px solid gray;"></iframe>
+      <%= submit_tag 'Save Snippet', :class => 'form_button' %>
+    </td>
+  </tr>
+</table>
+<% end %>
+
+
+<form id="preview_form" action="<%= url_for :controller => '/cms/content', :action => 'preview_template' %>" target="preview_frame">
+  <textarea id="preview_content" name="temp[content]" style="display: none;"></textarea>
+</form>

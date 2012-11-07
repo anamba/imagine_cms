@@ -1,0 +1,14 @@
+<h2>CMS &raquo; Templates</h2>
+
+<%= flash_message %>
+
+<button onclick="location.href = '<%= url_for :action => 'edit_template' %>'" class="form_button">Create Template</button>
+<br/>
+<br/>
+
+<table>
+  <tr>
+    <td>Name</td>
+  </tr>
+  <%= render :partial => 'temp', :collection => @temps %>
+</table>

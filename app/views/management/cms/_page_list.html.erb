@@ -1,0 +1,171 @@
+<div id="page_list_container_<%= key %>" style="border: 1px solid gray; padding: 8px; background-color: #dddddd; width: 170px; text-align: center;">
+  Page List: <%= name %><br/>
+  <button class="form_button" onclick="showDojoDialog('page_list_<%= key %>'); return false;">Configure</button>
+</div>
+
+<div dojoType="ModalFloatingPane" id="page_list_<%= key %>" title="Page List: <%= name %>"
+     hasShadow="true" resizable="true" followScroll="false" displayCloseAction="true" appendToBody="false"
+     style="width: 600px; height: 580px; display: none">
+  <div class="ccs-page-list-form">
+    <fieldset>
+      <legend>Sources</legend>
+      
+      Select folders and/or tags to indicate which content to pull into this list.
+      
+      <div id="page_list_<%= key %>-source-list" style="margin: 10px;">
+        <%- for i in 0...@page_objects["#{key}-sources-folder-count"].to_i -%>
+          <%= render :partial => 'page_list_source_folder', :locals => { :i => i, :key => key } %>
+        <%- end -%>
+        <%- for i in 0...@page_objects["#{key}-sources-tag-count"].to_i -%>
+          <%= render :partial => 'page_list_source_tag', :locals => { :i => i, :key => key } %>
+        <%- end -%>
+        <%= text_field(:page_objects, "#{key}-sources-tag-count", :style => 'display: none') %>
+        <%= text_field(:page_objects, "#{key}-sources-folder-count", :style => 'display: none') %>
+      </div>
+      
+      <table>
+        <tr>
+          <td><%= button_to_function('Add Folder', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms/page_list_add_folder?key=#{key}&i=' + $('page_objects_#{key}-sources-folder-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-folder-count').value++;", :class => 'form_button') %></td>
+          <td><%= button_to_function('Add Tag', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms/page_list_add_tag?key=#{key}&i=' + $('page_objects_#{key}-sources-tag-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-tag-count').value++;", :class => 'form_button') %></td>
+          <td>
+            <%= check_box(:page_objects, "#{key}-include-expired", { :class => 'form', :style => '' }, 'true', 'false') %>
+            <label for="page_objects_<%= key %>-include-expired">Include expired items</label>
+          </td>
+          <td>
+            <%= check_box(:page_objects, "#{key}-exclude-current", { :class => 'form', :style => '' }, 'true', 'false') %>
+            <label for="page_objects_<%= key %>-exclude-current">Exclude current page</label>
+          </td>
+        </tr>
+      </table>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Display</legend>
+      
+      <table>
+        <col width="60" />
+        <tr>
+          <td>Format:</td>
+          <td colspan="2">
+            <%- @page_objects["#{key}-style-display-as"] ||= 'list' -%>
+            <%= radio_button :page_objects, "#{key}-style-display-as", 'list', :onclick => "$$('.page_list_#{key}_list_option').each(function (e) { Element.show(e) }); $$('.page_list_#{key}_calendar_option').each(function (e) { Element.hide(e) });" %><label for="page_objects_<%= key %>-style-display-as_list">List</label>&nbsp;
+            <%= radio_button :page_objects, "#{key}-style-display-as", 'calendar', :onclick => "$$('.page_list_#{key}_calendar_option').each(function (e) { Element.show(e) }); $$('.page_list_#{key}_list_option').each(function (e) { Element.hide(e) });" %><label for="page_objects_<%= key %>-style-display-as_calendar">Calendar</label>
+          </td>
+        </tr>
+        <tr class="page_list_<%= key %>_list_option">
+          <td>Number:</td>
+          <td>
+            Display <%= text_field(:page_objects, "#{key}-max-item-count", :class => 'form', :style => 'margin: 0; width: 20px') %> items,
+            but skip the first <%= text_field(:page_objects, "#{key}-item-offset", :class => 'form', :style => 'margin: 0; width: 20px;') %>
+            <br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <%= check_box :page_objects, "#{key}-use-pagination" %>
+            <label for="page_objects_<%= key %>-use-pagination">Show multiple list segments</label>
+            <br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <%= check_box :page_objects, "#{key}-use-randomization" %>
+            <label for="page_objects_<%= key %>-use-randomization">Select randomly from the top</label>
+              <%= text_field(:page_objects, "#{key}-random-pool-size", :class => 'form', :style => 'margin: 0; width: 20px') %> items
+          </td>
+        </tr>
+        <tr class="page_list_<%= key %>_list_option">
+          <td>Sort:</td>
+          <td>
+            First by
+            <%= select(:page_objects, "#{key}-sort-first-field",
+                       [ [ 'Date', 'article_date' ], [ 'Position', 'position' ],
+                         [ 'Title', 'title' ] ], {},
+                       :class => 'form', :style => 'margin: 0; border: 1px solid gray;') %>
+            <%= select(:page_objects, "#{key}-sort-first-direction",
+                       [ 'asc', 'desc' ], {},
+                       :class => 'form', :style => 'margin: 0; border: 1px solid gray;') %>
+            then by
+            <%= select(:page_objects, "#{key}-sort-second-field",
+                       [ [ 'Date', 'article_date' ], [ 'Position', 'position' ],
+                         [ 'Title', 'title' ] ], {},
+                       :class => 'form', :style => 'margin: 0; border: 1px solid gray;') %>
+            <%= select(:page_objects, "#{key}-sort-second-direction",
+                       [ 'asc', 'desc' ], {},
+                       :class => 'form', :style => 'margin: 0; border: 1px solid gray;') %>
+          </td>
+        <tr class="page_list_<%= key %>_list_option">
+          <td>Date:</td>
+          <td>
+            <%-
+              @page_objects["#{key}-date-range"] ||= 'all'
+            -%>
+            <%= radio_button :page_objects, "#{key}-date-range", 'all' %><label for="page_objects_<%= key %>-date-range_all">All Dates</label>&nbsp;&nbsp;
+            <%= radio_button :page_objects, "#{key}-date-range", 'past' %><label for="page_objects_<%= key %>-date-range_past">Past</label>&nbsp;&nbsp;
+            <%= radio_button :page_objects, "#{key}-date-range", 'future' %><label for="page_objects_<%= key %>-date-range_future">Future</label>&nbsp;&nbsp;
+            <%= radio_button :page_objects, "#{key}-date-range", 'custom' %><label for="page_objects_<%= key %>-date-range_custom">Range:</label>
+            <%= date_picker :page_objects, "#{key}-date-range-custom-start", :default_value => (@page_objects["#{key}-date-range-custom-start"] || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %> &ndash;
+            <%= date_picker :page_objects, "#{key}-date-range-custom-end", :default_value => (@page_objects["#{key}-date-range-custom-end"] || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %>
+          </td>
+        </tr>
+      </table>
+    </fieldset>
+    <script type="text/javascript">
+        if ($('page_objects_<%= key %>-style-display-as_list').checked) {
+            $$('.page_list_<%= key %>_list_option').each(function(e) { Element.show(e) } );
+            $$('.page_list_<%= key %>_calendar_option').each(function(e) { Element.hide(e) } );
+        } else {
+            $$('.page_list_<%= key %>_calendar_option').each(function(e) { Element.show(e) } );
+            $$('.page_list_<%= key %>_list_option').each(function(e) { Element.hide(e) } );
+        }
+    </script>
+    
+    <fieldset>
+      <legend>Item Template</legend>
+      
+      <div style="float: left; width: 330px;">
+        This HTML code will be generated for each page in the source list. Customize it with attributes (e.g. Title).
+      </div>
+      
+      <div style="float: right">
+        <%- system_attrs = @pg.attributes.map { |c| c.first }.
+                                          reject { |c| [ 'cms_template_id',
+                                                         'cms_template_version',
+                                                         'position' ].include?(c) }.sort -%>
+        <select class="form" style="width: 150px;" onchange="insertAtCaret($('page_objects_<%= key %>-template'), '<# ' + this.value + ' #>'); this.value = '';">
+          <option value="">-- Insert Attribute --</option>
+          <%- system_attrs.each do |attr| -%>
+            <option value="<%=h attr %>"><%=h attr.titleize %></option>
+          <%- end -%>
+        </select>
+      </div>
+      
+      <br clear="all" />
+      
+      <%= text_area(:page_objects, "#{key}-template", :style => 'border: 1px solid gray; width: 100%;', :rows => '6') %>
+    </fieldset>
+    
+    <div id="page_list_<%= key %>-advanced">
+      <fieldset>
+        <legend>Enclosing HTML</legend>
+        
+        <table width="100%">
+          <tr>
+            <td valign="top">Start:</td>
+            <td><%= text_area(:page_objects, "#{key}-header", :style => 'border: 1px solid gray; width: 100%;', :rows => '4') %></td>
+          </tr>
+          <tr>
+            <td valign="top">End:</td>
+            <td><%= text_area(:page_objects, "#{key}-footer", :style => 'border: 1px solid gray; width: 100%;', :rows => '4') %></td>
+          </tr>
+        </table>
+      </fieldset>
+      
+      <fieldset>
+        <legend>"Empty" Message</legend>
+        
+        <p>This message is displayed when no pages match the search criteria.</p>
+        
+        <%= text_area(:page_objects, "#{key}-empty_message", :style => 'border: 1px solid gray; width: 100%;', :rows => '4') %>
+      </fieldset>
+    </div>
+    
+    <br/>
+    
+    <center><button class="form_button" onclick="hideDojoDialog('page_list_<%= key %>'); return false;">Close</button></center>
+  </div>
+</div>

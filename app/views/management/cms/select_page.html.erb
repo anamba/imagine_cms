@@ -1,0 +1,57 @@
+<%
+  cbNumColumns = 0;
+  cbColWidth = 170;
+  cbColHeight = 200;
+  cbBorderWidth = 1;
+  cbColWidthFull = 172;
+-%>
+<%= javascript_tag <<-EOF
+  dojo.require("dojo.widget.*");
+  dojo.require("dojo.widget.Dialog");
+  
+  cbColWidth = '#{cbColWidth}px';
+  cbColHeight = '#{cbColHeight}px';
+  cbBorderWidth = '#{cbBorderWidth}px';
+  cbColWidthFull = '#{cbColWidthFull}';
+EOF
+%>
+
+<div id="columnBrowserContainer" style="width: 100%; height: <%= cbColHeight + 20 %>px; overflow: auto;">
+  <div id="columnBrowser" style="width: <%= cbColWidthFull * (@page_levels.size) %>px;">
+    <% @page_levels.each_with_index do |name, i| %>
+      <%
+        if !name.empty?
+          @path << '/' if !@path.empty?
+          @path << name
+        end
+        @parent = @page
+        @page = CmsPage.find_by_path @path
+        @page_level = i
+        @pages = @parent.children if @parent
+        
+        break_flag = false
+        
+        if !@page
+          if @parent && @parent.children.first
+            @page = @parent.children.first
+          elsif @parent
+            @page = @parent
+          else
+            @page = CmsPage.find(:first)
+          end
+          break_flag = true
+        end
+      -%>
+      <div id="columnBrowserLevel<%= i %>" style="width: <%= cbColWidth %>px; height: <%= cbColHeight %>px; overflow: auto; float: left; border: <%= cbBorderWidth %>px solid gray;">
+        <% if i == 0 -%>
+          <%= render :partial => 'list_page_select', :locals => { :list_page_select => CmsPage.find(1) } %>
+        <% else -%>
+          <%= render :partial => 'list_pages_select' %>
+        <% end -%>
+        <%= javascript_tag "$('cb_item_#{@parent.id}').className = 'cb_item cb_item_selected';" if @parent %>
+      </div>
+      <%- break if break_flag -%>
+    <% end -%>
+  </div>
+</div>
+<%= javascript_tag "cbNumColumns = #{@page_levels.size - 1}; try { $('columnBrowserLevel' + cbNumColumns).scrollIntoView(); } catch (e) {}; $('page_browser_selection').value = '/#{@page.path}';" %>

@@ -1,0 +1,42 @@
+<table width="100%">
+  <col width="100" />
+  <tr>
+    <td></td>
+    <td>
+      <fieldset>
+        <legend>Reference</legend>
+        
+        <table width="100%">
+          <tr>
+            <td valign="top">
+<pre>
+&lt;%= insert_object('Content', :text) %&gt;
+&lt;%= insert_object('Top Nav', :snippet) %&gt;
+&lt;%= insert_object('My Page List', :page_list,
+                  :header => 'html', :footer => 'html',
+                  :template => 'html', :folders => 'f1,f2',
+                  :include_tags => 't1,t2',
+                  :exclude_tags => 't3,t4',
+                  :require_tags => 't5,t6',
+                  :primary_sort_key => 'article_date',
+                  :primary_sort_direction => 'asc',
+                  :item_count => 5, :item_offset => 1) %&gt;
+</pre>
+            </td>
+            <td valign="top">
+<pre>
+&lt;%= template_option('Caption', :string) %&gt;
+
+&lt;% if template_option('Use sidebar?', :checkbox) %&gt;
+    ...
+&lt;% else %&gt;
+    ...
+&lt;% end %&gt;
+</pre>
+            </td>
+          </tr>
+        </table>
+      </fieldset>
+    </td>
+  </tr>
+</table>

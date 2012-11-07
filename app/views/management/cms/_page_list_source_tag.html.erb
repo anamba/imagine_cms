@@ -1,0 +1,18 @@
+<% i ||= 0 %>
+<div style="border: 1px solid #f0f0f0;">
+  <table width="100%">
+    <col width="70" /><col width="*" /><col width="80" />
+    <tr>
+      <td>Tag <%= i.to_i + 1 %>:</td>
+      <td>
+        <%= text_field(:page_objects, "#{key}-sources-tag#{i}", :class => 'form', :style => 'margin: 0; border: 1px solid gray; width: 100%;') %>
+        
+        <div id="page_objects_<%= key %>-sources-tag<%= i %>_auto_complete" class="auto_complete" style="display: none;"></div>
+        <%= javascript_tag "new Autocompleter.Local('page_objects_#{key}-sources-tag#{i}', 'page_objects_#{key}-sources-tag#{i}_auto_complete', taglist, { frequency: 0.1, minChars: 1 })" %>
+      </td>
+      <td>
+        <%= select(:page_objects, "#{key}-sources-tag#{i}-behavior", [ 'include', 'exclude', 'require' ], {}, :class => 'form', :style => 'margin: 0; border: 1px solid gray; width: 100%;') %>
+      </td>
+    </tr>
+  </table>
+</div>

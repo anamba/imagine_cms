@@ -1,0 +1,14 @@
+<h2>CMS &raquo; Snippets</h2>
+
+<%= flash_message %>
+
+<button onclick="location.href = '<%= url_for :action => 'edit_snippet' %>'" class="form_button">Create Snippet</button>
+<br/>
+<br/>
+
+<table>
+  <tr>
+    <td>Name</td>
+  </tr>
+  <%= render :partial => 'snippet', :collection => @snippets %>
+</table>

@@ -1,0 +1,117 @@
+<div id="delete_gallery_container">
+  <%- unless @galleries.size > 0 -%>
+  <div id="save_errors" class="error"></div>
+  <h3 style="margin-bottom: 10px;">Insert Image</h3>
+  <%- end -%>
+
+  <div id="select_gallery_container">
+  
+  <%- if session[:broken_galleries] and session[:broken_galleries].size > 0 -%>
+    <div id="borken_galleries" style="margin-bottom: 10px; padding: 10px; background-color: #ffa7b9; border: 2px solid #f03;">
+      <p><b>The following galleries have problems and require fixing:</b></p>
+      <ul style="padding: 0; margin: 0 0 0 15px; list-style-type: disc;">
+        <%- session[:broken_galleries].sort.each do |g| -%>
+        <li><%= g.titleize %> (<%= link_to_remote "delete",
+                                                  :url => { :action => 'delete_gallery', :id => params[:id], :gallery_id => g },
+                                                  :update => 'delete_gallery_container',
+                                                  :confirm => "This action cannot be undone. Continue?" %>)</li>
+        <%- end -%>
+      </ul>
+    </div>
+  <%- end -%>
+  
+  <%-
+    if @galleries.size > 0
+  -%>
+    <div id="select_gallery">
+      <h2>Select gallery</h2>
+    <%-
+      @galleries.each do |gallery|
+        unless session[:broken_galleries].include?(File.basename(gallery))
+          all_images = Dir.glob(File.join(gallery, '*.{jpg,jpeg,png,gif}'))
+          images = []
+          all_images.each { |img| images << img unless File.basename(img).include?('thumb') }
+    -%>
+      <div id="<%= File.basename(gallery) %>" style="float: left; width: 130px; margin: 0 20px 20px 0; text-align: center;">
+        <%= link_to_remote image_tag(File.join('content', @pg.path, File.basename(gallery), 'management', 'preview.jpg')),
+                           :url => { :action => 'select_gallery', :id => @pg, :gallery_id => File.basename(gallery) },
+                           :update => 'select_gallery_container' %><br/>
+        <strong><%= File.basename(gallery).titleize %></strong><br/>
+        <span style="font-size: 10px; color: #555"><%= images.size %> photos</span>
+      </div>
+      <%- end -%>
+    <%- end -%>
+      <br style="clear: both" />
+    </div>
+  <%- end -%>
+
+    <fieldset>
+      <legend>Single Image</legend>
+
+      <p>Select an image, then click "Finish" to upload and insert it if you are
+      certain your image is already web-ready. Otherwise, click "Next" to crop and
+      resize your image before using it.</p>
+
+      <%- form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg },
+                                        { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+      <table>
+        <tr>
+          <td width="70">Image file:</td>
+          <td><%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span style="color: #888888">Valid image types: jpeg, png, gif</span></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+            <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; $('next_clicked_upload').value = '1'; $('next_clicked').value = '1'; this.disabled = true; this.value = 'Uploading...';" %>
+            <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+            <%= link_to_function "Cancel", "cancelInsertImage()" %>
+            <%= text_field_tag 'next_clicked_upload', '0', :style => 'display: none' %>
+          </td>
+        </tr>
+      </table>
+      <%- end -%>
+    </fieldset><br/>
+  
+    <fieldset>
+      <legend>New Photo Gallery</legend>
+
+      <p>Upload a zip file of images to create a photo gallery.</p>
+
+      <%- form_tag_with_upload_progress({ :action => 'receive_gallery', :id => @pg },
+                                        { :finish => "if (arguments[0]) { $('dirname').value = arguments[0]; $('mainform_gallery').onsubmit(); }" }) do -%>
+      <table>
+        <tr>
+          <td width="70">Zip file:</td>
+          <td>
+            <%= file_field 'gallery_file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+            <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('gallery_file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+            <%= link_to_function "Cancel", "cancelInsertImage()" %>
+          </td>
+        </tr>
+      </table>
+      <%- end -%>
+    </fieldset><br/>
+
+    <%- form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform' },
+                        :url => { :action => 'crop_image', :id => @pg }) do -%>
+      <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
+      <%= text_field_tag 'filename', '', :style => 'display: none' %>
+    <%- end -%>
+
+    <%- form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform_gallery' },
+                        :url => { :action => 'gallery_setup', :id => @pg }) do -%>
+      <%= text_field_tag :dirname, '', :style => 'display: none' %>
+    <%- end -%>
+  </div>
+</div>

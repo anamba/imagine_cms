@@ -1,0 +1,22 @@
+<h3 style="margin-bottom: 10px;">Gallery Setup</h3>
+
+<p>Drag the images until they are in the desired order.</p>
+
+<div id="image_sorter" style="border: 1px solid gray">
+  <%- @thumbs.each_with_index do |thumb, index| -%>
+  <table id="thumb_<%= File.basename(thumb, File.extname(thumb)).to_i %>" border="0" cellpadding="0" cellspacing="2" style="width: 90px; height: 90px; float: left;">
+    <tr height="80">
+      <td align="center"><%= image_tag '/' + thumb %></td>
+    </tr>
+  </table>
+  <%- end -%>
+  <br clear="all" />
+</div>
+<%= sortable_element('image_sorter', :url => { :action => 'set_gallery_order' }, :tag => 'table', :constraint => '') %>
+
+<%- form_remote_tag(:update => 'insert_image_dialog_content', :url => { :action => 'complete_gallery', :id => @pg }) do -%>
+  Resize to be at most <%= text_field_tag :max_width, GalleryMaxWidth, :style => 'width: 40px' %> pixels wide and <%= text_field_tag :max_height, GalleryMaxHeight, :style => 'width: 40px' %> pixels high<br/>
+  <%= text_field_tag 'dirname', params[:dirname], :style => 'display: none' %>
+  
+  <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "this.disabled = true; this.value = 'Please wait...';" %>
+<%- end -%>

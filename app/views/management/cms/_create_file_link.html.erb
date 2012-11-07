@@ -1,0 +1,21 @@
+<%-
+	ext = File.extname(@filename)
+	ext = (ext.blank? ? 'generic' : ext.gsub(/\./, ''))
+-%>
+<%= javascript_tag <<-EOF
+var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
+linkNode = dojo.withGlobal(curInst.window, "getAncestorElement", dojo.html.selection, ['a']);
+
+curInst.restoreSelection();
+
+if (!linkNode) {
+    var html = dojo.withGlobal(curInst.window, 'getSelectedHtml', dojo.html.selection);
+} else {
+    var html = linkNode.innerHTML;
+    dojo.withGlobal(curInst.window, 'selectElement', dojo.html.selection, [linkNode]);
+}
+
+curInst.execCommand('inserthtml', '<a href=\"/#{@filename}\" class=\"file-#{ext}\" target=\"_blank\">'+html+'</a>');
+cancelInsertFile();
+EOF
+%>

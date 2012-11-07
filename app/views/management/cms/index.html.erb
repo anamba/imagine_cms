@@ -1,0 +1,20 @@
+<h2>CMS</h2>
+
+<ul>
+  <li><strong><%= link_to 'Pages', :action => 'pages' %></strong></li>
+  <li><%= link_to 'Templates', :action => 'templates' %></li>
+  <li><%= link_to 'Snippets', :action => 'snippets' %></li>
+</ul>
+
+<b>Admin</b>
+<br/>
+<div style="width: 400px">
+  Warning: For expert users only. The master files are not versioned and all changes take effect immediately. There is no undo.
+</div>
+<ul style="margin-top: 4px">
+  <li><%= link_to 'Edit Master Template', :action => 'edit_master', :id => 'template' %></li>
+  <li><%= link_to 'Edit Master Web Stylesheet', :action => 'edit_master', :id => 'web_stylesheet' %></li>
+  <li><%= link_to 'Edit Master Print Stylesheet', :action => 'edit_master', :id => 'print_stylesheet' %></li>
+  <li><%= link_to 'Edit Master IE Stylesheet', :action => 'edit_master', :id => 'ie_stylesheet' %></li>
+  <li><%= link_to 'Edit Master IE6 Stylesheet', :action => 'edit_master', :id => 'ie6_stylesheet' %></li>
+</ul>

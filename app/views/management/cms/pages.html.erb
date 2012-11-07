@@ -1,0 +1,99 @@
+<%
+  cbNumColumns = 0;
+  cbColWidth = 170;
+  cbColHeight = 300;
+  cbBorderWidth = 1;
+  cbColWidthFull = 172;
+-%>
+<%= javascript_tag <<-EOF
+  dojo.require("dojo.widget.*");
+  dojo.require("dojo.widget.Dialog");
+  
+  cbColWidth = '#{cbColWidth}px';
+  cbColHeight = '#{cbColHeight}px';
+  cbBorderWidth = '#{cbBorderWidth}px';
+  cbColWidthFull = '#{cbColWidthFull}';
+EOF
+%>
+
+<h2>CMS &raquo; Pages</h2>
+
+<%= flash_message %>
+
+<div id="columnBrowserToolbar" style="background-color: #d0d0d0; padding: 4px; margin-bottom: 5px;  ">
+  <a id="new_link" href="#">
+    <img src="/assets/management/btn_top_new.gif" style="margin-right: 2px;" />
+  </a>
+  <a id="edit_content_link" href="#" target="_blank">
+    <img src="/assets/management/btn_top_edit.gif" style="margin-right: 2px;" />
+  </a>
+  <form id="edit_content_form" action="#" onsubmit="this.action = $('edit_content_link').href;" target="_blank" style="display: none">
+    <button>dummy</button>
+  </form>
+  <a id="edit_link" href="#">
+    <img src="/assets/management/btn_top_properties.gif" style="margin-right: 2px;" />
+  </a>
+  <a id="view_link" href="#" target="_blank">
+    <img src="/assets/management/btn_top_preview.gif" style="margin-right: 2px;" />
+  </a>
+  <a id="delete_link" href="#" onclick="if (confirm('Are you sure you want to delete the selected page?')) { $('delete_form').submit(); } return false;">
+    <img src="/assets/management/btn_top_delete.gif" style="margin: 0" />
+  </a>
+  <%= form_tag('', :id => "delete_form", :style => "display: none") do %>
+    <button>dummy</button>
+  <% end %>
+  <div class="clearer"></div>
+</div>
+
+<div id="columnBrowserContainer" style="width: 100%; height: <%= cbColHeight + 20 %>px; overflow: auto;">
+  <div id="columnBrowser" style="width: <%= cbColWidthFull * (@page_levels.size) %>px;">
+    <%- @page_levels.each_with_index do |name, i| -%>
+      <%-
+        if !name.empty?
+          @path << '/' if !@path.empty?
+          @path << name
+        end
+        @parent = @page
+        @page = CmsPage.find_by_path @path
+        @page_level = i
+        @pages = @parent.children if @parent
+        
+        break_flag = false
+        
+        if !@page
+          if @parent && @parent.children.first
+            @page = @parent.children.first
+          elsif @parent
+            @page = @parent
+          else
+            @page = CmsPage.find(:first)
+          end
+          break_flag = true
+        end
+      -%>
+      <div id="columnBrowserLevel<%= i %>" style="width: <%= cbColWidth %>px; height: <%= cbColHeight %>px; overflow: auto; float: left; border-width: <%= cbBorderWidth %>px <%= cbBorderWidth %>px <%= cbBorderWidth %>px <%= i == 0 ? "#{cbBorderWidth}px" : '0' %>; border-style: solid; border-color: gray;">
+        <%- if i == 0 -%>
+          <%= render :partial => 'list_page', :locals => { :list_page => CmsPage.find(1) } %>
+        <%- else -%>
+          <%= render :partial => 'list_pages' %>
+        <%- end -%>
+        <%= javascript_tag "$('cb_item_#{@parent.id}').className = 'cb_item cb_item_selected';" if @parent %>
+      </div>
+      <%- break if break_flag -%>
+    <%- end -%>
+  </div>
+</div>
+
+<%- list_page = @page -%>
+
+<script type="text/javascript">
+    cbNumColumns = <%= @page_levels.size - 1 %>;
+    $('columnBrowserLevel' + cbNumColumns).scrollIntoView();
+    $('view_link').href = '/<%= list_page.path %>';
+    $('new_link').onclick = function () { editProperties('<%=raw url_for(:action => 'edit_page', :mode => 'ajax_new', :parent_id => list_page, :authenticity_token => form_authenticity_token.to_s) %>', 'Create New Page under /<%= list_page.path %>'); return false; };
+    $('edit_link').onclick = function () { editProperties('<%=raw url_for :action => 'edit_page', :id => list_page, :mode => 'ajax_edit', :authenticity_token => form_authenticity_token.to_s %>', 'Page Properties: <%= list_page.name %>'); return false; };
+    $('edit_content_link').href = '<%=raw url_for :action => 'edit_page_content', :id => list_page, :authenticity_token => form_authenticity_token.to_s %>';
+    $('delete_form').action = '<%=raw url_for :action => 'delete_page', :id => list_page.id %>';
+</script>
+
+<%= render :partial => 'dialogs' %>

@@ -15,14 +15,14 @@ class Management::UserController < Management::ApplicationController
           redirect_to :action => 'login' and return false
         end
         session[:user_authenticated] = true
-      
+        
         session[:user_id] = test.id
         session[:user_username] = test.username
         session[:user_first_name] = test.first_name
         session[:user_last_name] = test.last_name
-      
+        
         complete_login(test)
-      
+        
         if params[:redirect_on_success]
           redirect_to params[:redirect_on_success] and return
         else

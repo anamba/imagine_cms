@@ -1,0 +1,31 @@
+<%= javascript_tag "try { $('insert_image_dialog_content').innerHTML = ''; } catch (e) {}" %>
+
+<div id="save_errors" class="error"></div>
+<h3>Create Download Link</h3>
+
+<p>Select the file you'd like to make available for site visitors to download.</p>
+
+<%- form_tag_with_upload_progress({ :action => 'receive_file', :id => @pg },
+                                  { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+<table>
+  <tr>
+    <td>File:</td>
+    <td>
+      <%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %>
+    </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>
+      <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+      <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+      <%= link_to_function "Cancel", "cancelInsertFile()" %>
+    </td>
+  </tr>
+</table>
+<%- end -%>
+
+<%- form_remote_tag(:update => 'insert_file_dialog_content', :html => { :id => 'mainform' },
+                    :url => { :action => 'create_file_link', :id => @pg }) do -%>
+  <%= text_field_tag 'filename', '', :style => 'display: none' %>
+<%- end -%>

@@ -1,0 +1,10 @@
+<div id="images_container">
+  <div id="images">
+    <%= render :partial => 'image', :collection => @images, :locals => { :id => @pg, :path => @pg.path, :gallery_id => params[:gallery_id] } %>
+  </div>
+</div>
+
+<%- form_remote_tag(:update => 'gallery_container', :html => { :id => 'mainform_gallery' },
+                    :url => { :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] }) do -%>
+  <%= text_field_tag :dirname, '', :style => 'display: none' %>
+<%- end -%>

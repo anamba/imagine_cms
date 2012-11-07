@@ -1,0 +1,6 @@
+num = (rand*1000).to_i
+page.replace_html message_div, :partial => 'util/message', :locals => { :id => num, :message => message }
+page.visual_effect 'appear', 'message_' + num.to_s, { :duration => '0.3' }
+page.delay(1.5) do
+  page.visual_effect 'fade', 'message_' + num.to_s, { :duration => '0.3' }
+end

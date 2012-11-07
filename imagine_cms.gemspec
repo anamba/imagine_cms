@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   
   s.add_dependency "rails",               "~> 3.2.8"
   s.add_dependency "prototype-rails"
-  s.add_dependency "redactor-rails"
+  # s.add_dependency "redactor-rails"
   s.add_dependency "mini_magick",         "~> 3.4"
   s.add_dependency "rinku",               "~> 1.7.2"
   s.add_dependency "net-dns",             "~> 0.7.1"

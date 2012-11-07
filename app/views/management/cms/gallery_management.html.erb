@@ -1,0 +1,108 @@
+<style type="text/css" media="screen">
+  div#controls a {
+    color: #4c4c4c;
+    font-weight: bold;
+    text-decoration: none;
+  }
+</style>
+<div id="gallery_container">
+  <div id="controls" style="margin-bottom: 10px;">
+    <div id="select_gallery" style="float: left;">
+      <%- form_remote_tag :url => { :action => 'select_gallery', :id => @pg },
+                          :update => 'select_gallery' do -%>
+        Current Gallery:
+        <select name="gallery_id" onchange="new Ajax.Updater('gallery_container', '/manage/cms/select_gallery/<%= @pg.id %>', {asynchronous:true, evalScripts:true, parameters:Form.serialize(this.form)}); return false;">
+        <%-
+          @galleries.each do |gallery|
+            unless session[:broken_galleries].include?(File.basename(gallery))
+        -%>
+          <option value="<%= File.basename(gallery) %>"<%= " selected=\"selected\"" if File.basename(gallery) == params[:gallery_id] %>><%= File.basename(gallery).titleize %></option>
+        <%-
+            end
+          end
+        -%>
+          <option value="new">New&hellip;</option>
+        </select>
+      <%- end -%>
+    </div>
+    
+    <%= link_to_remote image_tag("management/gallery_index.gif") + " Index",
+                       { :url => { :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] },
+                         :update => 'gallery_container' }, :style => 'float: right; margin-right: 6px;' %>
+    <%= link_to_remote image_tag("management/gallery_sort.gif") + " Sort images",
+                       { :url => { :action => 'sort_images', :id => @pg, :gallery_id => params[:gallery_id] },
+                         :update => 'gallery_window' }, :style => 'float: right; margin-right: 6px;' %>
+    <%= link_to_remote image_tag("management/gallery_delete.gif") + " Delete Gallery",
+                       { :url => { :action => 'delete_gallery', :id => @pg, :gallery_id => params[:gallery_id] },
+                         :update => 'delete_gallery_container',
+                         :confirm => "This gallery, including photos and captions, will be deleted and cannot be undone. Continue?" },
+                         :style => 'float: right; margin-right: 6px;' %>
+    <br clear="all" />
+  </div>
+  
+  <fieldset style="margin-bottom: 10px;">
+    <legend>Gallery Settings</legend>
+
+    <%= form_remote_tag(:url => { :action => 'save_gallery_settings', :id => @pg, :gallery_id => params[:gallery_id] },
+                       :loading => "$('btn_save_settings').disabled = true; $('btn_save_settings').value = 'Saving...'",
+                       :failure => "$('btn_save_settings').disabled = false; $('btn_save_settings').value = 'Save Failed'",
+                       :success => "$('btn_save_settings').value = 'Saved'") do %>
+    <table>
+      <tr>
+        <td width="100">Slideshow Speed:</td>
+        <td>
+          <%= text_field :gallery, :slide_duration, :class => 'form', :style => 'margin-bottom: 0; width: 20px', :onkeypress => "$('btn_save_settings').disabled = false;" %> seconds per slide (set to zero to disable)
+        </td>
+      </tr>
+      <tr>
+        <td width="100">Slideshow Autoplay?</td>
+        <td>
+          <%= radio_button :gallery, :autoplay, true, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_autoplay_true">Yes</label><br/>
+          <%= radio_button :gallery, :autoplay, false, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_autoplay_false">No</label>
+        </td>
+      </tr>
+      <tr>
+        <td>Show Thumbnails?</td>
+        <td>
+          <%= radio_button :gallery, :show_thumbs, true, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_show_thumbs_true">Yes</label><br/>
+          <%= radio_button :gallery, :show_thumbs, false, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_show_thumbs_false">No</label>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <%= submit_tag 'Save', :id => 'btn_save_settings', :class => 'form_button', :style => 'width: 70px;' %>
+          <%= javascript_tag "$('btn_save_settings').disabled = true;" %>
+        </td>
+      </tr>
+    </table>
+    <% end %>
+  </fieldset>
+  
+  <fieldset style="margin-bottom: 10px;">
+    <legend>Add Images</legend>
+    
+    <%= form_tag_with_upload_progress({ :action => 'add_to_gallery', :id => @pg, :gallery_id => params[:gallery_id] },
+                                     { :finish => "if (arguments[0]) { $('dirname').value = arguments[0]; $('mainform_gallery').onsubmit(); }" }) do %>
+    <table>
+      <tr>
+        <td width="100">Zip or Image File:</td>
+        <td>
+          <%= file_field 'gallery_file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+          <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('gallery_file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+        </td>
+      </tr>
+    </table>
+    <% end %>
+  </fieldset>
+  
+  <div id="gallery_window">
+    <%= render :partial => 'gallery_index' %>
+  </div>
+</div>

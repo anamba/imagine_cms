@@ -1,0 +1,4 @@
+<%= form_tag({}, :id => 'page_content_form') do %>
+  <%= submit_tag 'Save', :id => 'btn_save', :style => 'display: none' %>
+  <%= render :inline => @template_content %>
+<% end %>

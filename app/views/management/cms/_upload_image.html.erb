@@ -1,0 +1,74 @@
+<%= javascript_tag "try { $('insert_file_dialog_content').innerHTML = ''; } catch (e) {}" %>
+
+<div id="save_errors" class="error"></div>
+<h3 style="margin-bottom: 10px;">Insert Image</h3>
+
+<fieldset>
+  <legend>Single Image</legend>
+  
+  <p>Select an image, then click "Finish" to upload and insert it if you are
+  certain your image is already web-ready. Otherwise, click "Next" to crop and
+  resize your image before using it.</p>
+  
+  <%- form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg },
+                                    { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+  <table>
+    <tr>
+      <td width="70">Image file:</td>
+      <td><%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><span style="color: #888888">Valid image types: jpeg, png, gif</span></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+        <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; $('next_clicked_upload').value = '1'; $('next_clicked').value = '1'; this.disabled = true; this.value = 'Uploading...';" %>
+        <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+        <%= link_to_function "Cancel", "cancelInsertImage()" %>
+        <%= text_field_tag 'next_clicked_upload', '0', :style => 'display: none' %>
+      </td>
+    </tr>
+  </table>
+  <%- end -%>
+</fieldset>
+<br/>
+
+<fieldset>
+  <legend>Photo Gallery</legend>
+  
+  <p>Upload a zip file of images to create a photo gallery.</p>
+  
+  <%- form_tag_with_upload_progress({ :action => 'receive_gallery', :id => @pg },
+                                    { :finish => "if (arguments[0]) { $('dirname').value = arguments[0]; $('mainform_gallery').onsubmit(); }" }) do -%>
+  <table>
+    <tr>
+      <td width="70">Zip file:</td>
+      <td>
+        <%= file_field 'gallery_file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+        <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('gallery_file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+        <%= link_to_function "Cancel", "cancelInsertImage()" %>
+      </td>
+    </tr>
+  </table>
+  <%- end -%>
+</fieldset>
+
+<%- form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform' },
+                    :url => { :action => 'crop_image', :id => @pg }) do -%>
+  <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
+  <%= text_field_tag 'filename', '', :style => 'display: none' %>
+<%- end -%>
+
+<%- form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform_gallery' },
+                    :url => { :action => 'gallery_setup', :id => @pg }) do -%>
+  <%= text_field_tag :dirname, '', :style => 'display: none' %>
+<%- end -%>

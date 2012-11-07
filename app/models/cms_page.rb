@@ -1,6 +1,8 @@
 class CmsPage < ActiveRecord::Base
   include ActsAsTree
   
+  attr_accessible :cms_template_id, :cms_template_version, :parent_id, :name, :title, :path, :article_date, :article_end_date, :summary, :thumbnail_path, :position, :comment_count, :version, :published_version, :published_date, :expiration_date, :expires, :search_index, :updated_by, :updated_by_username
+  
   acts_as_versioned
   acts_as_tree :order => 'path'
   

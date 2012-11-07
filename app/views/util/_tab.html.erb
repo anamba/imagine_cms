@@ -1,0 +1,4 @@
+  <td id="<%= tab.downcase.gsub(/\s/, '_') %>_tab_left" width="4" height="24"></td>
+  <td id="<%= tab.downcase.gsub(/\s/, '_') %>_tab_center" onclick="setTabVisibility('<%= tab.downcase.gsub(/\s/, '_') %>')" style="cursor: pointer; padding: 0 5px 0 5px;" height="24"><%= tab %></td>
+  <td id="<%= tab.downcase.gsub(/\s/, '_') %>_tab_right" onclick="setTabVisibility('<%= tab.downcase.gsub(/\s/, '_') %>')" width="4" height="24"></td>
+  <td>&nbsp;</td>

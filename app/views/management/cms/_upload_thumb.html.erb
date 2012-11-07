@@ -1,0 +1,35 @@
+<div id="save_errors" class="error"></div>
+<h3>Select Thumbnail</h3>
+
+<p>Select an image, then click "Finish" to upload and insert it if you are
+certain your image is already web-ready. Otherwise, click "Next" to crop and
+resize your image before using it.</p>
+
+<%- form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg, :overwrite => 1 },
+                                  { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+<table>
+  <tr>
+    <td>File:</td>
+    <td>
+      <%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+      <span style="color: #888888">Valid image types: jpeg, png, gif</span>
+    </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>
+      <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
+      <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; $('next_clicked_upload').value = '1'; $('next_clicked').value = '1'; this.disabled = true; this.value = 'Uploading...';" %>
+      <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+      <%= link_to_function "Cancel", "cancelSelectThumbnail()" %>
+      <%= text_field_tag 'next_clicked_upload', '0', :style => 'display: none' %>
+    </td>
+  </tr>
+</table>
+<%- end -%>
+
+<%- form_remote_tag(:update => 'select_thumbnail_dialog_content', :html => { :id => 'mainform' },
+                    :url => { :action => 'crop_thumb', :id => @pg }) do -%>
+  <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
+  <%= text_field_tag 'filename', '', :style => 'display: none' %>
+<%- end -%>

@@ -1,0 +1,6 @@
+<table width="350">
+  <tr>
+    <td width="100"><%=h name %>:</td>
+    <td><%= text_field :page_objects, "obj-attribute-#{name.gsub(/[^\w\d]/, '_')}", :class => 'form', :style => 'width: 240px' %></td>
+  </tr>
+</table>

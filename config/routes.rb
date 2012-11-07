@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   match 'manage/cms(/:action(/:id))'            => 'management/cms'
   match 'manage/users(/:action(/:id))'          => 'management/users'
   
+  match 'util/date_picker'                      => 'util#date_picker', :as => :date_picker
+  
   # primary CMS content routes
   root :to => 'cms/content#show'
   match 'rss/:page_id/:page_list_name'          => 'cms/content#rss_feed'

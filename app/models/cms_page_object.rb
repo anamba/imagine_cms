@@ -1,8 +1,13 @@
 class CmsPageObject < ActiveRecord::Base
+  attr_accessible :name, :obj_type
+  
   belongs_to :page, :class_name => 'CmsPage', :foreign_key => 'cms_page_id'
   
-  def before_create
-    self.cms_page_version = self.page.version unless self.cms_page_version.to_i > 0
+  before_create :set_page_version
+  
+  
+  def set_page_version
+    self.cms_page_version ||= page.version
   end
   
   def content=(value)

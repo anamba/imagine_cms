@@ -1,0 +1,109 @@
+<div class="ccs-toolbar EditorToolbarDomNode EditorToolbarSmallBg" style="height: 25px;">
+  <table cellpadding="1" cellspacing="0" border="0">
+    <tbody>
+      <tr valign="top" align="left">
+      <% if @pg -%>
+        <td onclick="location.href = '<%= url_for :controller => '/management/cms', :action => 'edit_page_content', :id => @pg, :version => params[:version] %>';">
+          <!-- save -->
+          <span class="iconContainer">
+            <span title="Edit" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
+          </span>
+        </td>
+        <td onclick="location.href = '<%= url_for :controller => '/management/cms', :action => 'edit_page_content', :id => @pg, :version => params[:version] %>';" style="vertical-align: middle; cursor: pointer">
+          <span title="Edit" style="font-family: Arial">Edit</span>
+        </td>
+        
+        <td onclick="editProperties('<%= url_for :action => 'edit_page', :id => @pg, :mode => 'ajax_edit', :return_to => 'preview' %>');">
+          <!-- save -->
+          <span class="iconContainer" style="margin: 0 0 0 10px;">
+            <span title="Edit" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
+          </span>
+        </td>
+        <td onclick="editProperties('<%= url_for :action => 'edit_page', :id => @pg, :mode => 'ajax_edit', :return_to => 'preview' %>');" style="vertical-align: middle; cursor: pointer">
+          <span title="Edit" style="font-family: Arial">Properties</span>
+        </td>
+        
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="iconContainer">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Sep" style="width: 5px; min-width: 5px;"></span>
+          </span>
+        </td>
+        
+        <td onclick="location.href = '<%= url_for :controller => '/management/cms', :action => 'pages', :path => (@pg ? @pg.path : nil) %>';" style="vertical-align: middle; cursor: pointer">
+          <a href="<%= url_for :controller => '/management/cms', :action => 'pages', :path => (@pg ? @pg.path : nil) %>" style="text-decoration: none"><span title="Manage Pages" style="font-family: Arial; color: #3c3c3c;">Pages</span></a>
+        </td>
+        
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="iconContainer">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Sep" style="width: 5px; min-width: 5px;"></span>
+          </span>
+        </td>
+        
+        <td style="vertical-align: middle;">
+          <span style="font-family: Arial">Preview:</span>
+        </td>
+        <td style="vertical-align: middle;">
+          <%- form_tag('/' + @pg.path, { :method => 'get' }) do -%>
+          <div style="border: 2px solid #EBEBEB">
+           <select name="version" style="font-size: 8pt; width: 210px" onchange="location.href = this.value;">
+            <!-- FIXME: using "p" here inserts a paragraph in most cases! -->
+            <%- @pg.versions.reverse.each do |pg| -%>
+              <option value="<%= "#{@pg.path.empty? ? '' : '/' + @pg.path}/version/#{pg.version}" %>"<%= (params[:version] || @pg.published_version).to_i == pg.version ? ' selected="selected"' : '' %>>
+                <%= "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{ " by #{pg.updated_by_username}" unless pg.updated_by_username.empty? }" + (pg.version == @pg.published_version ? ' [PUBLISHED]' : '') %>
+              </option>
+            <%- end -%>
+          </select>
+          </div>
+          <%- end -%>
+        </td>
+        
+        <td style="vertical-align: middle;">
+          <span style="font-family: Arial; margin-left: 10px;">Publish:</span>
+        </td>
+        
+        <td style="vertical-align: middle;">
+          <%- if !UseCmsAccessLevels || user_has_permission?(:manage_cms_publishing) -%>
+            <%= form_remote_tag(:url => { :controller => '/management/cms', :action => 'set_page_version', :id => @pg },
+                               :loading => "$('set_page_version_loading').show();",
+                               :complete => "$('set_page_version_loading').hide();" + (@pg ? "$('pg_published_version_container').style.borderColor = ($('pg_published_version').value == '0' || $('pg_published_version').value == '#{@pg.versions.last.version}') ? '#EBEBEB' : 'red';" : '')) do -%>
+              <div id="pg_published_version_container" style="border-color: <%= @pg && (@pg.published_version == 0 || @pg.published_version == @pg.versions.last.version) ? '#EBEBEB' : 'red' %>; border-style: solid; border-width: 2px;">
+              <select name="pg[published_version]" id="pg_published_version" style="font-size: 8pt; width: 210px;" onchange="this.form.onsubmit();">
+                <%- [ [ '[ Offline ]', -1 ], [ '[ Latest Version ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.empty? }", pg.version ] }).each do |label, version| %>
+                <option value="<%= version %>"<%= (@pg && @pg.published_version == version.to_i) ? ' selected="selected"' : '' %>><%= label %></option>
+                <%- end -%>
+              </select>
+              </div>
+            <% end %>
+          <%- else -%>
+            <%- if params[:version] && params[:version].to_i != @pg.published_version && !(@pg.published_version == 0 && params[:version].to_i == @pg.versions.count) -%>
+              <%= form_remote_tag(:url => { :controller => '/management/cms', :action => 'request_review', :id => @pg, :version => (params[:version] || @pg.published_version) },
+                                 :loading => "$('set_page_version_loading').show();",
+                                 :complete => "$('set_page_version_loading').hide();") do -%>
+                <%= submit_tag "Submit Version #{(params[:version])} for Review" %>
+              <% end %>
+            <%- else -%>
+              [ version <%= @pg.version %> is the published version ]
+            <%- end -%>
+          <%- end -%>
+        </td>
+        <td width="20">
+          <div id="set_page_version_loading" style="display: none"><img src="/assets/interface/form_loading.gif" /></div>
+        </td>
+      <% end -%>
+        
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="iconContainer">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Sep" style="width: 5px; min-width: 5px;"></span>
+          </span>
+        </td>
+        
+        <td onclick="location.href = '<%= url_for :controller => '/management/user', :action => 'logout', :redirect => (@pg ? @pg.path : '') %>';" style="vertical-align: middle; cursor: pointer">
+          <a href="<%= url_for :controller => '/management/user', :action => 'logout', :redirect => (@pg ? "/#{@pg.path}" : '') %>" style="text-decoration: none"><span title="Log out" style="font-family: Arial; color: #3c3c3c;">Logout</span></a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

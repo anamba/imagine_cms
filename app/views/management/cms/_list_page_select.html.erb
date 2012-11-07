@@ -1,0 +1,8 @@
+<div id="<%= "cb_item_#{list_page_select.id}" %>" class="cb_item" style="width: 148px; overflow: hidden; margin: 2px; float: left; cursor: pointer" onclick="$('page_browser_selection').value = '/<%= list_page_select.path %>'; setTimeout('cbSelectItem(\'' + this.id + '\', <%= @page_level %>, \'<%=raw url_for :action => 'list_pages_select', :level => @page_level + 1, :parent_id => list_page_select.id, :authenticity_token => form_authenticity_token.to_s %>\');', 200);" ondblclick="">
+  <table cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td valign="top"><img src="/assets/management/icon_page.gif" style="margin: 2px 5px 0 0; "/></td>
+      <td<%= list_page_select.published_version >= 0 ? '' : ' style="color: gray"' %>><%= list_page_select.name %></td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,176 @@
+<script type="text/javascript">
+  attrlist = new Array(<%= @attrs.size %>)
+  
+  <% @attrs.each_with_index do |attr, i| -%>
+  attrlist[<%= i %>]="<%=h attr %>"
+  <% end -%>
+</script>
+
+<div id="save_errors" class="error"></div>
+
+<%= form_remote_tag :url => { :action => 'edit_page', :id => @pg },
+                   :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';",
+                   :html => { :onsubmit => 'teardownTextFieldHints();' } do -%>
+<table>
+<%- if (@pg.id || 2) > 1 -%>
+  <tr>
+    <td>Name/URL:</td>
+    <td>
+      <%= text_field :pg, :name, :class => 'form', :style => 'margin-bottom: 0; width: 150px', :onchange => (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = $('original_name').value; };") %><br/>
+      <%= text_field_tag :original_name, @pg.name, :style => 'display: none' %>
+      <%= text_field :pg, :parent_id, :style => 'display: none' %>
+    </td>
+  </tr>
+<%- end -%>
+  <tr>
+    <td>Title:</td>
+    <td><%= text_field :pg, :title, :class => 'form', :style => 'width: 100%;' %></td>
+  </tr>
+<%- if @pg.respond_to?(:html_head) -%>
+  <tr>
+    <td valign="top"><div style="margin-top: 4px;">HTML Head:<br/>(for advanced users)</div></td>
+    <td><%= text_area :pg, :html_head, :class => 'form', :style => 'width: 100%; height: 50px; overflow: auto;' %></td>
+  </tr>
+<%- end -%>
+  <tr>
+    <td valign="top"><div style="margin-top: 4px;">Template:</div></td>
+    <td>
+      <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;', :onchange => '' %>
+      
+      <div id="edit_page_template_options" style="background-color: white; width: 100%; height: 80px; overflow: auto; border: 1px solid #aaaaaa">
+        <%= render :partial => 'template_options' %>
+      </div>
+      <%= observe_field 'pg_cms_template_id', :update => 'edit_page_template_options', :with => 'template_id',
+                                              :url => { :action => 'show_template_options', :id => @pg },
+                                              :loading => "$('edit_page_template_options').innerHTML = 'Loading...';"
+                                               %>
+    </td>
+  </tr>
+  <tr>
+    <td>Article Date:</td>
+    <td>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td width="110">
+            <%= date_picker :pg, :article_date, :default_value => (@pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %>
+          </td>
+          <td width="120">
+            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"' %>>&ndash; <%= date_picker :pg, :article_end_date, :default_value => (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %></div>
+          </td>
+          <td align="right" width="180">
+            <input type="checkbox" name="use_article_date_range" value="1" onclick="$('div_article_end_date').toggle();"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? ' checked="checked"' : '' %> /><label for="use_article_date_range">Use date range</label>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>Tags:</td>
+    <td><%= text_field_tag :tags, @tags, :class => 'form', :style => 'width: 100%' %></td>
+  </tr>
+  <tr>
+    <td>Published Version:</td>
+    <td><%= select :pg, :published_version, [ [ '[ Offline ]', -1 ], [ '[ Latest Version ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.empty? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
+  </tr>
+  <tr>
+    <td>Publish Date:</td>
+    <td>
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="120"><%= date_picker :pg, :published_date, :default_value => (@pg.published_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 2.years.from_now %></td>
+          <td width="60">Position:</td>
+          <td><%= text_field :pg, :position, :class => 'form', :style => 'width: 20px' %></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>Expiration Date:</td>
+    <td>
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="100"><%= check_box :pg, :expires, {}, 'true', 'false' %><label>Expires on:</label></td>
+          <td width="120"><%= date_picker :pg, :expiration_date, :default_value => (@pg.expiration_date || @pg.published_date || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 2.years.from_now %></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><div style="margin-top: 4px;">Summary:</div></td>
+    <td><%= text_area :pg, :summary, :class => 'form', :style => 'width: 100%; height: 50px;' %></td>
+  </tr>
+  <tr>
+    <td>Thumbnail:</td>
+    <td>
+      <%- if @pg.new_record? -%>
+        A thumbnail cannot be added until you save this page.
+      <%- else -%>
+      <div id="thumbnail_preview">
+        <%- if @pg.thumbnail_path.empty? -%>
+          no thumbnail image selected
+        <%- else -%>
+          <%= image_tag(@pg.thumbnail_path) %>
+        <%- end -%>
+      </div>
+      <%= button_to_function "Select Thumbnail...",
+                             "selectThumbnail('#{url_for :action => 'upload_thumb', :id => @pg.id}');",
+                             :class => 'form_button' %>
+      <%- end -%>
+      <%= text_field :pg, :thumbnail_path, :class => 'form', :style => 'width: 350px; display: inline;' %>
+    </td>
+  </tr>
+  <%- if @pg.respond_to?(:feature_image_path) -%>
+  <tr>
+    <td>Feature Image:</td>
+    <td>
+      <%- if @pg.new_record? -%>
+        A feature image cannot be added until you save this page.
+      <%- else -%>
+      <div id="feature_image_preview">
+        <%- if @pg.feature_image_path.empty? -%>
+          no feature image selected
+        <%- else -%>
+          <%= image_tag(@pg.feature_image_path) %>
+        <%- end -%>
+      </div>
+      <%= button_to_function "Select Feature Image...",
+                             "selectThumbnail('#{url_for :action => 'upload_feature_image', :id => @pg.id}');",
+                             :class => 'form_button' %>
+      <%- end -%>
+      <%= text_field :pg, :feature_image_path, :class => 'form', :style => 'width: 350px; display: inline;' %>
+    </td>
+  </tr>
+  <%- end -%>
+  <tr>
+    <td valign="top"><div style="margin-top: 4px;">Custom Attributes:</div></td>
+    <td>
+      <table cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td>Add an attribute: &nbsp;</td>
+          <td>
+            <%= text_field_tag :custom_attribute_name, '', :class => 'form', :style => 'margin-bottom: 4px;' %>
+            <%= javascript_tag "addTextFieldHint('custom_attribute_name', '[ attribute name ]'); setupTextFieldHints(); "%>
+            <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
+            <%= javascript_tag "$('custom_attribute_name').onkeydown = disableEnterKey; new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });" %>
+            
+            <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '/manage/cms/page_attribute?name=' + $('custom_attribute_name').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", :class => 'form_button', :style => 'margin-bottom: 5px;' %>
+          </td>
+        </tr>
+      </table>
+      <div id="custom_attributes" style="background-color: white; height: 100px; overflow: auto; border: 1px solid #aaaaaa">
+        <%- @page_objects.each do |key,val| -%>
+          <%- key =~ /^obj-(\w+?)-(.+?)$/ -%>
+          <%= render :partial => 'page_attribute', :locals => { :name => $2 } if $1 == 'attribute' %>
+        <%- end -%>
+      </div>
+    </td>
+  <tr>
+    <td></td>
+    <td>
+      <%= submit_tag 'Save', :id => 'btn_save', :class => 'form_button', :style => 'width: 70px;' %>
+      <%= link_to_function 'Cancel', "cancelEditProperties();" %>
+      <%= hidden_field_tag 'return_to', params[:return_to] %>
+    </td>
+  </tr>
+</table>
+<% end -%>

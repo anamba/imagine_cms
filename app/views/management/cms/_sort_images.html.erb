@@ -1,0 +1,15 @@
+<p>Drag the images until they are in the desired order. Click <strong>save</strong> when finished.</p>
+
+<div id="images" style="margin-bottom: 10px; padding: 10px; border: 2px dashed #555;">
+  <%= render :partial => 'image_draggable', :collection => @images, :locals => { :path => @pg.path, :gallery_id => params[:gallery_id] } %>
+  <br style="clear: both;" />
+</div>
+
+<%= sortable_element('images', :url => { :action => 'sort_images', :id => @pg, :gallery_id => params[:gallery_id] }, :tag => 'div', :constraint => '') %>
+
+<%- form_remote_tag(:update => 'gallery_container',
+                    :url => { :action => 'sort_images_save', :id => @pg, :gallery_id => params[:gallery_id] }) do -%>
+  <%= submit_tag "Save order" %> or <%= link_to_remote "cancel",
+                                                       :url => { :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] },
+                                                       :update => 'gallery_container' %>
+<%- end -%>

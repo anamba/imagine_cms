@@ -1,0 +1,188 @@
+<script type="text/javascript">
+    var resize_ratio = 1.0;
+    var aspect_ratio = <%= @width %>.0 / <%= @height %>;
+    var imageSizeLocked = false;
+    
+    try {
+        if (cropper) cropper.remove();
+    } catch (e) {}
+    
+    onEndCrop = function (coords, dimensions) {
+        if (dimensions.width > 0 && dimensions.height > 0) {
+            var size_changed = false;
+            
+            $('image_x1').value = coords.x1;
+            $('image_y1').value = coords.y1;
+            $('image_x2').value = coords.x2;
+            $('image_y2').value = coords.y2;
+            
+            if (dimensions.width != $('image_width').value) {
+                $('image_width').value = dimensions.width;
+                size_changed = true;
+            }
+            if (dimensions.height != $('image_height').value) {
+                $('image_height').value = dimensions.height;
+                size_changed = true;
+            }
+            
+            if (size_changed) {
+                setResizeRatio();
+                aspect_ratio = 1.0 * dimensions.width / dimensions.height;
+                
+                $('selection_x2').value = dimensions.width;
+                $('selection_y2').value = dimensions.height;
+                
+                if (!imageSizeLocked) {
+                    if (resize_ratio) {
+                        $('image_max_width').value = Math.round(dimensions.width * resize_ratio);
+                        $('image_max_height').value = Math.round(dimensions.height * resize_ratio);
+                    } else {
+                        $('image_max_width').value = dimensions.width;
+                        $('image_max_height').value = dimensions.height;
+                    }
+                }
+                
+                $('aspect_ratio').innerHTML = setPrecision(dimensions.width/dimensions.height, 3);
+            }
+        }
+    }
+    
+    resizeCropper = function () {
+        width = $('selection_x2').value;
+        height = $('selection_y2').value;
+        end_x = parseInt(width) + parseInt(cropper.areaCoords.x1);
+        end_y = parseInt(height) + parseInt(cropper.areaCoords.y1);
+        cropper.setAreaCoords(cropper.cloneCoords({ x1:parseInt(cropper.areaCoords.x1),
+                                                    y1:parseInt(cropper.areaCoords.y1),
+                                                    x2:end_x,
+                                                    y2:end_y }), false, false, 1);
+        cropper.selArea.show();
+        cropper.drawArea();
+        cropper.endCrop();
+        
+        setResizeRatio();
+    }
+    
+    resizeCropperScaled = function () {
+        if (imageSizeLocked) {
+            width = parseInt($('image_max_width').value);
+            height = parseInt($('image_max_height').value);
+            if (width > 10 && height > 10) {
+                cropper.options.ratioDim = { x: width, y: height };
+                reloadCropper();
+            }
+        } else {
+            $('selection_x2').value = Math.round($('image_max_width').value / resize_ratio);
+            $('selection_y2').value = Math.round($('image_max_height').value / resize_ratio);
+            resizeCropper();
+        }
+    }
+    
+    setResizeRatio = function () {
+        crop_width = parseInt($('image_max_width').value);
+        selection_width = parseInt($('selection_x2').value); // this is correct... x2 is the sel width
+        
+        if (crop_width > 10 && selection_width > 10) {
+            resize_ratio = 1.0 * $('image_max_width').value / $('selection_x2').value;
+        } else {
+            resize_ratio = 1.0;
+        }
+    }
+    
+    lockImageSize = function () {
+        imageSizeLocked = true;
+        cropper.options.ratioDim = { x: parseInt($('image_max_width').value),
+                                     y: parseInt($('image_max_height').value) };
+        reloadCropper();
+        
+        $('icon_unlocked').hide();
+        $('icon_locked').show();
+    }
+    
+    unlockImageSize = function () {
+        imageSizeLocked = false;
+        cropper.options.ratioDim = { x: 0, y: 0 };
+        reloadCropper();
+        
+        $('icon_locked').hide();
+        $('icon_unlocked').show();
+    }
+    
+    reloadCropper = function () {
+        oldOptions = cropper.options;
+        oldOptions.displayOnInit = 1;
+        if (($('image_x1').value == $('image_x2').value) && ($('image_y1').value == $('image_y2').value)) {
+            $('image_x1').value = '0';
+            $('image_x2').value = $('image_max_width').value;
+            $('image_y1').value = '0';
+            $('image_y2').value = $('image_max_height').value;
+        }
+        oldOptions.onloadCoords = { x1: $('image_x1').value, y1: $('image_y1').value,
+                                    x2: $('image_x2').value, y2: $('image_y2').value };
+        cropper.remove();
+        cropper = new Cropper.Img('testImage', oldOptions);
+    }
+    
+    recalculateWidth = function () {
+        if (imageSizeLocked) {
+            $('image_max_width').value = Math.round(parseInt($('image_max_height').value) / aspect_ratio);
+        }
+    }
+    
+    recalculateHeight = function () {
+        if (imageSizeLocked) {
+            $('image_max_height').value = Math.round(parseInt($('image_max_width').value) / aspect_ratio);
+        }
+    }
+</script>
+
+<h3>Crop Thumbnail</h3>
+
+Crop the image by clicking and dragging the mouse over the image.<br/>
+Pressing "Save Thumbnail" will crop the thumbnail and set it as the new thumbnail for this page.
+<br/>
+
+<center>
+  <%= cropper_image_tag({ :url => File.join('content', @pg.path, @image_file) }) %><br/>
+</center>
+<br/>
+
+<center>
+  <%- form_remote_tag :update => 'select_thumbnail_dialog_content',
+                      :url => { :action => "save_crop_thumb", :id => @pg, :filename => @image_file } do -%>
+    <table cellpadding="10">
+      <tr>
+        <td>
+          <fieldset style="padding: 10px 15px; text-align: center; display: none;">
+            <legend>Adjust Crop:</legend>
+            <%= text_field :selection, :x2, :size => 3, :onkeyup => "resizeCropper();" %> x <%= text_field :selection, :y2, :size => 3, :onkeyup => "resizeCropper();" %>
+          </fieldset>
+          
+          <fieldset style="padding: 10px 15px; text-align: center;">
+            <legend>Final Image Dimensions:</legend>
+            <%= text_field :image, :max_width, :size => 3, :value => @width, :onchange => "recalculateHeight();" %>
+             x <%= text_field :image, :max_height, :size => 3, :value => @height, :onchange => "recalculateWidth();" %>
+            <%= javascript_tag "$('image_max_width').onkeydown = disableEnterKey; $('image_max_height').onkeydown = disableEnterKey;" %>
+            
+            <%= image_tag('/assets/management/icon_unlocked.png', :id => 'icon_unlocked', :onclick => "lockImageSize();") %>
+            <%= image_tag('/assets/management/icon_locked.png', :id => 'icon_locked', :onclick => "unlockImageSize();", :style => 'display: none;') %>
+            
+            <%= link_to_function "Apply", "resizeCropperScaled();" %> |
+            <%= link_to_function "Reset", "cropper.reset(); resize_ratio = 1.0;" %>
+            
+            <span id="aspect_ratio" style="display: none;"><%= sprintf("%.3f", @aspect_ratio) %></span><br/>
+            <%= text_field :image, :x1, :style => "display: none" %>
+            <%= text_field :image, :y1, :style => "display: none"  %>
+            <%= text_field :image, :x2, :style => "display: none"  %>
+            <%= text_field :image, :y2, :style => "display: none"  %>
+            <%= text_field :image, :width, :style => "display: none"  %>
+            <%= text_field :image, :height, :style => "display: none"  %>
+          </fieldset>
+        </td>
+      </tr>
+    </table>
+    
+    <%= submit_tag 'Save Thumbnail', :class => 'form_button', :style => 'width: 90px;', :onclick => 'cropper.remove(); this.disabled = true; this.value = "Saving...";' %>
+    <%= link_to_function "Cancel", "cancelSelectThumbnail()" %>
+  <%- end -%>
+</center>

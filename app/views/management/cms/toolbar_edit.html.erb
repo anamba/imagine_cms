@@ -1,0 +1,269 @@
+<div class="ccs-toolbar EditorToolbarDomNode EditorToolbarSmallBg">
+  <table cellpadding="1" cellspacing="0" border="0">
+    <tbody>
+      <tr valign="top" align="left">
+        <td onclick="document.forms.page_content_form.elements.btn_save.click();">
+          <!-- save -->
+          <span class="iconContainer">
+            <span title="Save" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
+          </span>
+        </td>
+        <td onclick="document.forms.page_content_form.elements.btn_save.click();" style="vertical-align: middle; cursor: pointer">
+          <span title="Save" style="font-family: Arial">Save</span>
+        </td>
+        <td onclick="if (confirm('Are you sure you want to throw away any changes to this page since your last save?')) { location.href = '<%= '/' + @pg.path + (@pg.path == '' ? '' : '/') %>version/<%= @pg.version %>'; }">
+          <!-- cancel -->
+          <span class="iconContainer">
+            <span title="Cancel" class="dojoE2TBIcon dojoE2TBIcon_Cancel" style="cursor: pointer">&nbsp;</span>
+          </span>
+        </td>
+        <td onclick="if (confirm('Are you sure you want to throw away any changes to this page since your last save?')) { location.href = '<%= '/' + @pg.path + (@pg.path == '' ? '' : '/') %>version/<%= @pg.version %>'; }" style="vertical-align: middle; cursor: pointer">
+          <span title="Cancel" style="font-family: Arial">Cancel</span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- undo -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="undo">
+            <!-- FIXME: should we have the text "undo" here? -->
+            <span class="dojoE2TBIcon dojoE2TBIcon_Undo">&nbsp;</span>
+          </span>
+        </td>
+
+        <td>
+          <!-- redo -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="redo">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Redo">&nbsp;</span>
+          </span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <select class="dojoEditorToolbarItem" style="font-size: 8pt" dojoETItemName="plainformatblock">
+            <!-- FIXME: using "p" here inserts a paragraph in most cases! -->
+            <option value="">-- format --</option>
+            <option value="p">Normal</option>
+            <option value="pre">Fixed Font</option>
+            <option value="h1">Main Heading (H1)</option>
+            <option value="h2">Section Heading (H2)</option>
+            <option value="h3">Sub-Heading (H3)</option>
+            <option value="h4">Sub-Heading (H4)</option>
+            <option value="blockquote">Block Quote</option>
+          </select>
+        </td>
+        <td>
+          <!-- bold -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="bold">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Bold">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- italic -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="italic">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Italic">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- underline -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="underline">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Underline">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- strikethrough -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="strikethrough"><span 
+              class="dojoE2TBIcon dojoE2TBIcon_StrikeThrough">&nbsp;</span>
+          </span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- subscript -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="subscript">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Subscript">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- superscript -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="superscript">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Superscript">&nbsp;</span>
+          </span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- removeformat -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="removeformat">
+            <span class="dojoE2TBIcon dojoE2TBIcon_RemoveFormat">&nbsp;</span>
+          </span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- justify left -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="justifyleft">
+            <span class="dojoE2TBIcon dojoE2TBIcon_LeftJustify">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- justify center -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="justifycenter">
+            <span class="dojoE2TBIcon dojoE2TBIcon_CenterJustify">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- justify right -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="justifyright">
+            <span class="dojoE2TBIcon dojoE2TBIcon_RightJustify">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- justify full -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="justifyfull">
+            <span class="dojoE2TBIcon dojoE2TBIcon_BlockJustify">&nbsp;</span>
+          </span>
+        </td> 
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- inserthorizontalrule -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="inserthorizontalrule">
+            <span class="dojoE2TBIcon dojoE2TBIcon_HorizontalLine">&nbsp;</span>
+          </span>
+        </td>
+
+        <td>
+          <!-- link -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="createlink">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Link">&nbsp;</span>
+          </span>
+        </td>
+
+        <td>
+          <!-- insertsymbol -->
+          <!--span class="iconContainer dojoEditorToolbarItem" dojoETItemName="insertsymbol_symbol">
+            <span class="dojoE2TBIcon dojoE2TBIcon_insertsymbol_symbol">&nbsp;</span>
+          </span-->
+        </td>
+        <td>
+          <!-- insertsmiley -->
+          <!--span class="iconContainer dojoEditorToolbarItem" dojoETItemName="insertsymbol_smiley">
+            <span class="dojoE2TBIcon dojoE2TBIcon_insertsymbol_smiley">&nbsp;</span>
+          </span-->
+        </td>
+
+        <td>
+          <!-- inserttable -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="inserttable">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Table">&nbsp;</span>
+          </span>
+        </td>
+
+        <td onclick="insertImage('<%= url_for :action => 'upload_image', :id => @pg.id %>');">
+          <span class="iconContainer dojoEditorToolbarItem" onmouseover="this.className = 'iconContainer dojoEditorToolbarItem ToolbarButtonHighlighted';" onmouseout="this.className = 'iconContainer dojoEditorToolbarItem';">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Image" title="Insert/Edit Image">&nbsp;</span>
+          </span>
+        </td>
+
+        <td onclick="insertFile('<%= url_for :action => 'upload_file', :id => @pg.id %>');">
+          <span class="iconContainer dojoEditorToolbarItem" onmouseover="this.className = 'iconContainer dojoEditorToolbarItem ToolbarButtonHighlighted';" onmouseout="this.className = 'iconContainer dojoEditorToolbarItem';">
+            <span class="dojoE2TBIcon" title="Create/Edit Download Link" style="background-image: url('/assets/management/icon_download.gif'); background-repeat: no-repeat; background-position: 3px 1px;">&nbsp;</span>
+          </span>
+        </td>
+
+        <td>
+          <!-- insertaudio -->
+          <!--span class="iconContainer dojoEditorToolbarItem" 
+            dojoETItemName="insertaudio">
+            <span class="dojoE2TBIcon dojoE2TBIcon_Audio">&nbsp;</span>
+          </span-->
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- inserthtml -->
+          <!--span class="iconContainer dojoEditorToolbarItem" dojoETItemName="inserthtmldialog">
+            <span class="dojoE2TBIcon dojoE2TBIcon_InsertHtml">&nbsp;</span>
+          </span-->
+        </td>
+
+        <td>
+          <!-- insertunorderedlist -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="insertunorderedlist">
+            <span title="Insert Bullet List" 
+              class="dojoE2TBIcon dojoE2TBIcon_BulletedList">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- insertorderedlist -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="insertorderedlist">
+            <span title="Insert Numbered List" 
+              class="dojoE2TBIcon dojoE2TBIcon_NumberedList">&nbsp;</span>
+          </span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- indent -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="indent">
+            <span title="Indent Selection" class="dojoE2TBIcon dojoE2TBIcon_Indent" 
+              unselectable="on">&nbsp;</span>
+          </span>
+        </td>
+        <td>
+          <!-- outdent -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="outdent">
+            <span title="Outdent Selection" class="dojoE2TBIcon dojoE2TBIcon_Outdent" 
+              unselectable="on">&nbsp;</span>
+          </span>
+        </td>
+
+        <td isSpacer="true">
+          <!-- spacer -->
+          <span class="dojoE2TBIcon dojoE2TBIcon_Sep"></span>
+        </td>
+
+        <td>
+          <!-- htmltoggle -->
+          <span class="iconContainer dojoEditorToolbarItem" dojoETItemName="htmltoggle">
+            <span title="Toggle Rich Text and HTML Markup Editing Modes" class="dojoE2TBIcon dojoE2TBIcon_HtmlToggle">&nbsp;</span>
+          </span>
+        </td>
+
+        <td width="*">&nbsp;</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
