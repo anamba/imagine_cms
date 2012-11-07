@@ -28,15 +28,23 @@ class Management::UsersController < Management::ApplicationController
   end
   
   def edit
-    @user = authenticate_user
-    unless @user.is_superuser || @user.can_manage_users || @user.id.to_s == params[:id]
+    user = authenticate_user
+    unless user.is_superuser || user.can_manage_users || user.id.to_s == params[:id]
       render :layout => true, :text => "Sorry, you don't have permission to access this section." and return false
     end
     
     @user = User.find(params[:id])
     
     if request.post?
-      @user.update_attributes(params[:user])
+      if user.is_superuser || user.can_manage_users
+        params[:user].each { |k,v| @user.send("#{k}=", v) }
+      elsif user.id.to_s == params[:id]
+        @user.first_name = params[:user][:first_name]
+        @user.last_name = params[:user][:last_name]
+        @user.email_address = params[:user][:email_address]
+        @user.password = params[:user][:password]
+        @user.password_confirmation = params[:user][:password_confirmation]
+      end
       
       if @user.save
         flash[:notice] = 'User updated successfully. Please note that the user must log out and log back in for permission changes to take effect.'
