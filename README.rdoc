@@ -21,7 +21,7 @@ be a good time to get on board.
 
 =Roadmap
 
-Current status: Original functionality 25% restored
+Current status: Original functionality 75% restored
 
 Here's what's coming up:
 
