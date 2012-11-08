@@ -1,20 +1,20 @@
 =About Imagine CMS
 
-Imagine CMS is a content management system originally developed for internal use at Bigger Bird Creative (biggerbird.com) in 2006. Every other CMS was too difficult: fine for daily users, but clients who only used it once a month or so would never remember how to use the system the next time they logged in. Simpler systems didn't have the flexibility to allow us to do what we wanted to do as designers and developers.
+Imagine CMS is a content management system developed by Bigger Bird Creative (biggerbird.com) in 2006 for its clients. Other systems had a learning curve: fine for daily users, but clients who only used it once a month or so would never remember how to use the system the next time they logged in. Simpler systems didn't allow us enough flexibility as designers and developers.
 
 =History and Roadmap
 
-Imagine was created in the Rails 1.0 days, to run regular content sites (as opposed to highly interactive web apps). I wanted to provide a way to create and manage static content while also allowing some automation (navigation, RSS feeds, etc.) while also allowing unlimited custom development. However, because engines were quite limited in those days, Imagine was implemented by monkey-patching core parts of the Rails framework itself, and this approach proved extremely difficult to port to newer Rails versions. Thus, sites using Imagine have been stuck on Rails 1.2 since time immemorial.
+Thus, Imagine was created in the Rails 1.0 days, to run a large number of technically simple content-based sites (versus the one or two highly customized web applications most Rails developers were building at the time). We wanted to provide a way to create and manage static content while also allowing some automation (navigation, RSS feeds, etc.) while also allowing limitless custom development. However, because plugins/engines were quite limited in those days, Imagine was implemented by monkey-patching core parts of Rails and creating a new framework on top of Rails. Although this allowed us great insight into the inner workings of Rails (and led to a minor contribution to Rails core), this approach proved extremely difficult to port to Rails 2. Thus, sites using Imagine have been stuck on Rails 1.2 since time immemorial.
 
-This project changes all that. By extracting Imagine functionality out into a gem (a Rails Engine), we should be able to achieve compatibility with Rails 4.0 (hopefully around the time it is released). However, at the same time, backwards compatibility with existing sites is extremely important, as the whole reason for doing this is to allow us to upgrade existing sites to a modern, supported version of Rails.
+All that is now firmly in the past. By extracting Imagine functionality into a gem (a Rails Engine), we have achieved compatibility with Rails 3.2 and Ruby 1.9 and removed roadblocks to a future upgrade to Rails 4 and Ruby 2, all while remaining backwards compatible with the legacy Imagine CMS database structure.
 
-Thus the project will proceed in three phases:
+Of the three original phases of this project, two remain:
 
-* Imagine 3.0 (Rails 3.2): [DONE] 90% restored functionality. Can function on existing sites with no database changes.
-* Imagine 3.1 (Rails 3.2): 100% restored functionality plus a few extras. May require a few simple migrations.
-* Imagine 4.0 (Rails 4.0): Upgrade to Rails 4; refactor & rewrite the worst parts (substitutions); drop ERB templating for something safer, like Liquid; switch to a cross-browser editor; drop Prototype for jQuery; modernize HTML, CSS, JS
+* Imagine 3.0 (Rails 3.2, Ruby 1.9): [DONE] 90% restored functionality, no database changes.
+* Imagine 3.1 (Rails 3.2, Ruby 1.9/2.0): 100% restored functionality, plus a few extras. May require a few simple migrations.
+* Imagine 4.0 (Rails 4.0, Ruby 2.0): Upgrade to Rails 4; refactor & rewrite the worst parts (substitutions); drop ERB templating for something safer, like Liquid; switch to a cross-browser editor; drop Prototype for jQuery; modernize HTML, CSS, JS
 
-(Imagine 1.x and 2.x version numbers have already been used internally, so we might as well start at 3.0.)
+(Imagine 1.x and 2.x version numbers have already been used internally, so we started at 3.0.)
 
 =Current Status
 
@@ -22,13 +22,13 @@ Imagine 3.0 is finally ready for production use internally at Bigger Bird, but i
 
 One major feature is still missing: browser-based editing of application layout and stylesheets. While convenient, this was probably not ever a good idea, so I'm working on a better solution. Might need to go into 3.1. Once 3.0 has stabilized in production (December 2012-ish), I'll branch off 3.0-stable and begin work on 3.1 on master.
 
-If you can, wait until the second phase of this project (Imagine 4). Why? Well, the purpose of Imagine 3 is strictly to port legacy sites to Rails 3.2 as simply as possible. Imagine 3 will always be held back by its need to remain compatible with legacy installations. The ERB templating language can be dangerous (it allows all Ruby, including shell escapes), and the editor (powered by an ancient version of Dojo) is Firefox-only. It also uses Prototype, which has become a bit unfashionable these days.
+Unless you are interested in contributing to development, it might be best to wait until the second phase of this project (Imagine 4). Why? Well, the purpose of Imagine 3 is strictly to port legacy sites to Rails 3.2 as simply as possible. Imagine 3 will always be held back by its need to remain compatible with legacy installations dating back to 2006. The ERB templating language can be dangerous (it allows all Ruby, including shell escapes), and the editor (powered by an ancient version of Dojo) is Firefox-only. It also uses Prototype, which has become a bit unfashionable these days.
 
-Once we are into the 4.x era, when we can move ahead without worrying about backward compatibility, it will be a good time to get on board.
+Imagine 4 will be a clean break from all of these "traditions," and thus will be a good time to get on board.
 
 =Getting Help
 
-Get paid support and hosting for Imagine CMS straight from the people who made it: {Bigger Bird Creative, Inc.}[https://www.biggerbird.com]. Neither is required, of course. :-) Free support is up top (Issues).
+Get paid support and hosting for Imagine CMS straight from the people who made it: {Bigger Bird Creative, Inc.}[https://www.biggerbird.com] Neither is required, of course. :-) Free support is up top (Issues).
 
 =Contributing
 
