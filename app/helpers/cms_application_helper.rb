@@ -1092,12 +1092,12 @@ EOF
   
   
   def cropper_image_tag(options)
-    ret = image_tag(options[:url] || '', :id => "testImage")
-    ret += javascript_tag "cropper = new Cropper.Img('testImage', { minWidth: 0, minHeight: 0, captureKeys: false, onEndCrop: onEndCrop });"
+    ret = "<img id=\"testImage\" src=\"/assets/#{options[:url]}\" />".html_safe
+    ret += javascript_tag("cropper = new Cropper.Img('testImage', { minWidth: 0, minHeight: 0, captureKeys: false, onEndCrop: onEndCrop });")
   end
   
   def page_image_tag(page, filename)
-    image_tag File.join('content', page.path, File.basename(filename))
+    "<img id=\"testImage\" src=\"/#{File.join('assets', 'content', page.path, File.basename(filename))}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
   end
   
   def copyright_year(year)
