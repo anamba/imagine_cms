@@ -28,7 +28,7 @@ Once we are into the 4.x era, when we can move ahead without worrying about back
 
 =Getting Help
 
-Get paid support and hosting for Imagine CMS straight from the people who made it: <a href="https://www.biggerbird.com">Bigger Bird Creative, Inc.</a>. Neither is required, of course. :-) Free support is up top (Issues).
+Get paid support and hosting for Imagine CMS straight from the people who made it: {Bigger Bird Creative, Inc.}[https://www.biggerbird.com]. Neither is required, of course. :-) Free support is up top (Issues).
 
 =Contributing
 
