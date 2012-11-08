@@ -1,6 +1,6 @@
 =About Imagine CMS
 
-Imagine CMS is a content management system developed by Bigger Bird Creative (biggerbird.com) in 2006 for its clients. Other systems had a learning curve: fine for daily users, but clients who only used it once a month or so would never remember how to use the system the next time they logged in. Simpler systems didn't allow us enough flexibility as designers and developers.
+Imagine CMS is a content management system developed by {Bigger Bird Creative, Inc.}[https://www.biggerbird.com] in 2006 for its clients. Other systems came with a learning curve: fine for daily users, but clients who only used it once a month or so would never remember how to use the system the next time they logged in. Simpler systems didn't allow us enough flexibility as designers and developers.
 
 =History and Roadmap
 
