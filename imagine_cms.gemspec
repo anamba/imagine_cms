@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email       = ["aaron@biggerbird.com"]
   s.homepage    = "https://github.com/anamba/imagine_cms"
   s.summary     = %q{Imagine Content Management System for Rails}
-  s.description = %q{Don't use this for now. See README for details.}
+  s.description = %q{See README for details.}
 
   s.rubyforge_project = "imagine_cms"
 

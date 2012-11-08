@@ -1,39 +1,55 @@
 =About Imagine CMS
 
-Imagine CMS is a content management system originally developed for internal use at Bigger Bird
-Creative (biggerbird.com). However, it was so strongly bound to Rails that it became difficult to
-port to newer Rails versions. Thus, sites using Imagine have been stuck on Rails 1.2 since time
-immemorial.
+Imagine CMS is a content management system originally developed for internal use at Bigger Bird Creative (biggerbird.com) in 2006. Every other CMS was too difficult: fine for daily users, but clients who only used it once a month or so would never remember how to use the system the next time they logged in. Simpler systems didn't have the flexibility to allow us to do what we wanted to do as designers and developers.
 
-This project intends to fix all that. By extracting Imagine functionality out into a gem, we should
-be able to achieve compatibility with Rails 4.0 (hopefully around the time it is released). However,
-at the same time, backwards compatibility with existing sites is extremely important, as the whole
-reason for doing this is to allow us to upgrade existing sites to a modern, supported version of
-Rails.
+=History and Roadmap
 
-So... don't use this. I'm not even including a license right now. (But it will probably be AGPLv3.)
+Imagine was created in the Rails 1.0 days, to run regular content sites (as opposed to highly interactive web apps). I wanted to provide a way to create and manage static content while also allowing some automation (navigation, RSS feeds, etc.) while also allowing unlimited custom development. However, because engines were quite limited in those days, Imagine was implemented by monkey-patching core parts of the Rails framework itself, and this approach proved extremely difficult to port to newer Rails versions. Thus, sites using Imagine have been stuck on Rails 1.2 since time immemorial.
 
-Wait until the second phase of this project (Imagine 4.x). Why? Well, the 3.x versions, while
-usable, will be hobbled by their need to remain compatible with Bigger Bird's existing sites. The
-ERB templating language is dangerous (allows shell escapes) and the editor is Firefox-only. Once we
-are into the 4.x era, when we can move ahead without worrying about backward compatibility, it will
-be a good time to get on board.
+This project changes all that. By extracting Imagine functionality out into a gem (a Rails Engine), we should be able to achieve compatibility with Rails 4.0 (hopefully around the time it is released). However, at the same time, backwards compatibility with existing sites is extremely important, as the whole reason for doing this is to allow us to upgrade existing sites to a modern, supported version of Rails.
 
-=Roadmap
+Thus the project will proceed in three phases:
 
-Current status: Original functionality 75% restored
+* Imagine 3.0 (Rails 3.2): [DONE] 90% restored functionality. Can function on existing sites with no database changes.
+* Imagine 3.1 (Rails 3.2): 100% restored functionality plus a few extras. May require a few simple migrations.
+* Imagine 4.0 (Rails 4.0): Upgrade to Rails 4; refactor & rewrite the worst parts (substitutions); drop ERB templating for something safer, like Liquid; switch to a cross-browser editor; drop Prototype for jQuery; modernize HTML, CSS, JS
 
-Here's what's coming up:
+(Imagine 1.x and 2.x version numbers have already been used internally, so we might as well start at 3.0.)
 
-* Imagine 3.0 (Rails 3.2): 90% restored functionality, can function on existing sites with no database changes
-* Imagine 3.1 (Rails 3.2): 100% restored functionality, may require a few simple migrations
-* Imagine 4.0 (Rails 4.0): Refactoring & rewriting of the worst parts (substitutions); move away from ERB templating, to something like Liquid; switch to a cross-browser editor; switch to jQuery
+=Current Status
 
-(Imagine 1.x and 2.x version numbers have already been used internally, so might as well start at 3.0.)
+Imagine 3.0 is finally ready for production use internally at Bigger Bird, but it's not quite ready for general use yet. For starters, it has no install generator or migrations, so good luck figuring out the database schema on your own. Probably still buggy, not all functionality has been properly exercised. No tests or documentation yet, I'll tackle this for 4.0 as we modernize the internals.
 
-Dependencies:
-* Rails 3.2
-* acts_as_tree
-* acts_as_versioned
-* mini_magick
-* net-dns
+One major feature is still missing: browser-based editing of application layout and stylesheets. While convenient, this was probably not ever a good idea, so I'm working on a better solution. Might need to go into 3.1. Once 3.0 has stabilized in production (December 2012-ish), I'll branch off 3.0-stable and begin work on 3.1 on master.
+
+If you can, wait until the second phase of this project (Imagine 4). Why? Well, the purpose of Imagine 3 is strictly to port legacy sites to Rails 3.2 as simply as possible. Imagine 3 will always be held back by its need to remain compatible with legacy installations. The ERB templating language can be dangerous (it allows all Ruby, including shell escapes), and the editor (powered by an ancient version of Dojo) is Firefox-only. It also uses Prototype, which has become a bit unfashionable these days.
+
+Once we are into the 4.x era, when we can move ahead without worrying about backward compatibility, it will be a good time to get on board.
+
+=Getting Help
+
+Get paid support and hosting for Imagine CMS straight from the people who made it: <a href="https://www.biggerbird.com">Bigger Bird Creative, Inc.</a>. Neither is required, of course. :-) Free support is up top (Issues).
+
+=Contributing
+
+Pull requests always appreciated (recommend getting in touch first). If companies or individuals are willing to sponsor major features on the roadmap (or features that meet their own needs) development can proceed more quickly.
+
+=License and Copyright
+
+Imagine 3 is licensed under AGPLv3, meaning that if you run a modified version on a publicly-accessible server, you need to offer source code. With Github, that's quite easy: just don't make any private forks, and link to your Github site.
+
+imagine_cms - The Imagine Content Management System
+Copyright (c) 2012 Aaron Namba (aaron@biggerbird.com)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
