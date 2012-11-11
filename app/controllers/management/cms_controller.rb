@@ -403,11 +403,20 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         @page_objects[key] = obj.content.html_safe
       end
       
-      @dynamic_javascripts ||= []
-      @dynamic_javascripts << url_for(:action => 'page_tags_for_lookup')
+      # set "legacy" vars
+      @content_levels = @pg.path.split('/')
+      params[:section] = @content_levels.size < 1 ? '' : @content_levels.first
+      params[:subsection] = @content_levels[1] unless @content_levels.size < 3
+      if @content_levels.size == 1
+        params[:page] = 'index'
+      elsif @content_levels.size > 1
+        params[:page] = @content_levels.last
+      end
       
-      @stylesheets ||= []
-      @stylesheets << 'imagine_ccs'
+      @page_title = @pg.title
+      
+      @cms_head ||= ''
+      @cms_head << "<script type=\"text/javascript\" src=\"#{url_for(:action => 'page_tags_for_lookup')}\"></script>"
       
       @template_content = substitute_placeholders(@pg.template.content, @pg)
       render :layout => 'application'

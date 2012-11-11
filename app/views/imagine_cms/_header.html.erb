@@ -1,0 +1,40 @@
+<%#= javascript_tag 'var djConfig = { isDebug: true };' %>
+
+<script type="text/javascript">
+    var load_dojo = false;
+    if (<%= @load_dojo || 'false' %>) {
+      load_dojo = true;
+    }
+    
+    function readCookie(name) {
+        var ca = document.cookie.split(';');
+        for (var i=0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(name+'=') == 0) return c.substring((name+'=').length, c.length);
+        }
+        return null;
+    }
+    
+    function loggedIn() {
+        return readCookie('user_auth_status') == 'authenticated';
+    }
+    
+    if (loggedIn() || load_dojo) {
+        document.writeln('<scr' + 'ipt src="/assets/dojo/dojo.js" type="text/javascript"></scr' + 'ipt>');
+    }
+</script>
+
+<script type="text/javascript">
+    if (loggedIn()) {
+        dojo.require("dojo.widget.Editor2");
+        dojo.require("dojo.widget.Editor2Plugin.TableOperation");
+    }
+</script>
+
+<%- for feed in [].concat(@rss_feeds || []) -%>
+  <%= auto_discovery_link_tag(:rss, { :controller => '/cms/content', :action => 'rss_feed', :page_id => @pg.id, :page_list_name => feed }, :title => feed) if @pg && @pg.id %>
+<%- end -%>
+
+<%=raw @cms_head %>
+<%= @pg.html_head if @pg && @pg.respond_to?(:html_head) %>

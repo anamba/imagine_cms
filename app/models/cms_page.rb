@@ -10,6 +10,7 @@ class CmsPage < ActiveRecord::Base
   has_many :objects, :class_name => 'CmsPageObject', :dependent => :destroy
   has_many :tags, :class_name => 'CmsPageTag', :dependent => :destroy
   has_many :versions, :class_name => 'CmsPageVersion', :dependent => :destroy
+  has_many :sub_pages, :class_name => 'CmsPage', :foreign_key => :parent_id, :conditions => [ 'published_version >= 0' ], :order => 'position, title, name'
   
   validates_format_of :name, :with => /\A[-\w\d%]+\Z/
   validates_uniqueness_of :path, :message => 'conflicts with an existing page'
@@ -35,12 +36,6 @@ class CmsPage < ActiveRecord::Base
     
     self.published_version ||= -1
     self.published_date ||= self.created_on || Time.now
-  end
-  
-  def sub_pages(options = {})
-    # not using options just yet, but you can override if you like
-    conditions = [ 'published_version >= 0' ]
-    self.children.find(:all, :conditions => conditions, :order => 'position')
   end
   
   def tags_as_css_classes

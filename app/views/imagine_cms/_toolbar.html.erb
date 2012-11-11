@@ -1,0 +1,26 @@
+<%- if params[:action] != 'preview_template' -%>
+  <table id="mainCCSToolbar" cellpadding="0" cellspacing="0" border="0" width="100%" style="display: none">
+    <%- if [ 'content', 'cms' ].include?(controller.controller_name) && params[:action] != 'preview_template' -%>
+      <tr>
+        <td>
+      <%- if is_editing_page? -%>
+        <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="true" focusOnLoad="false"
+          toolbarTemplatePath="<%= url_for :controller => '/management/cms', :action => 'toolbar_edit', :id => @pg, :version => params[:version] %>"
+          toolbarTemplateCssPath="/assets/dojo/src/widget/templates/EditorToolbarFullFeature.css"
+          toolbarAlwaysVisible="true" style="height: 25px; vertical-align: middle" toolbarGroup="main">
+        </div>
+      <%- else -%>
+        <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="false" focusOnLoad="false"
+          toolbarTemplatePath="<%= url_for :controller => '/management/cms', :action => 'toolbar_preview', :id => @pg, :version => params[:version] %>"
+          toolbarTemplateCssPath="/assets/dojo/src/widget/templates/EditorToolbarFullFeature.css"
+          toolbarAlwaysVisible="true" style="height: 25px; vertical-align: middle">
+        </div>
+      <%- end -%>
+        </td>
+      </tr>
+    <%- end -%>
+      </td>
+    </tr>
+  </table>
+  <%= javascript_tag "if (loggedIn()) $('mainCCSToolbar').show();" %>
+<%- end -%>

@@ -15,6 +15,7 @@
     <%#= javascript_tag 'var djConfig = { isDebug: true };' %>
     <%- if is_logged_in_user? -%>
       <script src="/assets/dojo/dojo.js" type="text/javascript"></script>
+      <script src="/assets/codepress/codepress.js" type="text/javascript"></script>
     <%- end -%>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= stylesheet_link_tag    "manage", :media => "all" %>
@@ -60,5 +61,9 @@
       <!-- Main Content -->
       <%= yield %>
     </div>
+    
+    <footer>
+      
+    </footer>
   </body>
 </html>
