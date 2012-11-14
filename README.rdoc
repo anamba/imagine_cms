@@ -30,13 +30,13 @@ Imagine 4 will be a clean break from all of these "traditions," and thus will be
 
 Get paid support and hosting for Imagine CMS straight from the people who made it: {Bigger Bird Creative, Inc.}[https://www.biggerbird.com] Neither is required, of course. :-) Free support is up top (Issues).
 
-=Contributing
+=Customizing & Contributing
 
 Pull requests always appreciated (recommend getting in touch first). If companies or individuals are willing to sponsor major features on the roadmap (or features that meet their own needs) development can proceed more quickly.
 
 =License and Copyright
 
-Imagine 3 is licensed under AGPLv3, meaning that if you run a modified version on a publicly-accessible server, you need to offer source code. With Github, that's quite easy: just don't make any private forks, and link to your Github site.
+Imagine 3 is licensed under AGPLv3, meaning that if you run a modified version on a publicly-accessible server, you need to (1) make it clear that you've modified it and (2) offer source code (Github makes that a snap).
 
 imagine_cms - The Imagine Content Management System
 Copyright (c) 2012 Aaron Namba (aaron@biggerbird.com)
