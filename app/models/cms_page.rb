@@ -88,6 +88,8 @@ class CmsPage < ActiveRecord::Base
   def set_parent_id!(new_id)
     self.parent_id = new_id
     self.save_without_revision
+    pg.children.each { |subpg| subpg.save_without_revision }
+    self.valid?
   end
   
   
