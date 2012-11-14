@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
   
-  s.add_dependency "rails",               "~> 3.2.8"
+  s.add_dependency "rails",               "~> 3.2.0"
   s.add_dependency "prototype-rails"
   # s.add_dependency "redactor-rails"
   s.add_dependency "mini_magick",         "~> 3.4"
