@@ -5,14 +5,14 @@
 
 <fieldset>
   <legend>Single Image</legend>
-  
+
   <p>Select an image, then click "Finish" to upload and insert it if you are
   certain your image is already web-ready. Otherwise, click "Next" to crop and
   resize your image before using it.</p>
-  
+
   <%= form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg },
-                                    { :finish => "if (arguments[0] == 'success') { $('filename').value = arguments[0]; $('mainform').submit(); }" }) do -%>
-<table>
+                                    { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+  <table>
     <tr>
       <td width="70">Image file:</td>
       <td><%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %></td>
@@ -33,14 +33,13 @@
     </tr>
   </table>
   <%- end -%>
-</fieldset>
-<br/>
+</fieldset><br/>
 
 <fieldset>
-  <legend>Photo Gallery</legend>
-  
+  <legend>New Photo Gallery</legend>
+
   <p>Upload a zip file of images to create a photo gallery.</p>
-  
+
   <%= form_tag_with_upload_progress({ :action => 'receive_gallery', :id => @pg },
                                     { :finish => "if (arguments[0]) { $('dirname').value = arguments[0]; $('mainform_gallery').onsubmit(); }" }) do -%>
   <table>
@@ -60,7 +59,7 @@
     </tr>
   </table>
   <%- end -%>
-</fieldset>
+</fieldset><br/>
 
 <%= form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform' },
                     :url => { :action => 'crop_image', :id => @pg }) do -%>

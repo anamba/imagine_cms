@@ -714,51 +714,24 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def receive_image
     @pg = CmsPage.find_by_id(params[:id])
-    begin
-      data = params[:file][:data]
-      original_filename = data.original_filename
-      target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-      localfile = File.join(target_dir, original_filename)
-      
-      begin
-        FileUtils.mkdir_p target_dir
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
+    
+    data = params[:file][:data]
+    original_filename = data.original_filename
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    localfile = File.join(target_dir, original_filename)
+    
+    FileUtils.mkdir_p target_dir
+    
+    unless params[:overwrite].to_i == 1
+      count = 0
+      while File.exists?(localfile)
+        count += 1
+        localfile = File.join(target_dir, File.basename(original_filename, File.extname(original_filename))) + "-#{count}" + File.extname(original_filename)
       end
-      
-      unless params[:overwrite].to_i == 1
-        count = 0
-        while File.exists?(localfile)
-          count += 1
-          localfile = File.join(target_dir, File.basename(original_filename, File.extname(original_filename))) + "-#{count}" + File.extname(original_filename)
-        end
-      end
-      
-      begin
-        File.open(localfile, 'wb') { |f| f.write('test') }
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-      
-      begin
-        File.open(localfile, 'wb') { |f| f.write(data.read) }
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-    rescue Exception => e
-      logger.debug params.inspect
-      # logger.debug "Exception: #{e}"
-      log_error(e)
-      finish_upload_status "''" and return
     end
     
-    upload_progress.message = "File received successfully."
+    FileUtils.cp(data.tempfile, localfile)
+    
     finish_upload_status "'#{File.basename(localfile)}'" and return
   end
   
@@ -835,6 +808,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     orig_im.write(localfile) if dirty
     @image_file = localfile
     File.unlink testfile
+    upload_to_s3(localfile, @pg)
     
     render :partial => 'crop_results'
   end
@@ -886,8 +860,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         entries.each_with_index do |zipentry, index|
           upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
           ext = File.extname(zipentry.name)
-          #name = File.basename(zipentry.name, ext)
-          #localfile = File.join(localdir, 'temp', name.downcase.gsub(/[^\w\d]/, '') + ext.downcase)
           localfile = File.join(localdir, 'temp', (index+1).to_s + ext.downcase)
           jpgfile = File.join(localdir, 'temp', (index+1).to_s + '.jpg')
           
@@ -1399,8 +1371,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     x1 = params[:image][:x1].to_i * scale
     y1 = params[:image][:y1].to_i * scale
-    # x2 = params[:image][:x2].to_i * scale
-    # y2 = params[:image][:y2].to_i * scale
     width = params[:image][:width].to_i * scale
     height = params[:image][:height].to_i * scale
     
@@ -1483,8 +1453,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     x1 = params[:image][:x1].to_i * scale
     y1 = params[:image][:y1].to_i * scale
-    # x2 = params[:image][:x2].to_i * scale
-    # y2 = params[:image][:y2].to_i * scale
     width = params[:image][:width].to_i * scale
     height = params[:image][:height].to_i * scale
     
@@ -1518,12 +1486,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   
-  private
+  protected
   
     def load_page_objects
       @page_objects = HashObject.new
       @template_options = HashObject.new
-    
+      
       if @pg.new_record? && @parent
         # This does not appear to be a beneficial feature any longer
         # @tags = @parent.tags.collect { |t| t.name }.join(', ')
@@ -1547,7 +1515,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         end
       end
     end
-  
+    
     def load_template_options
       begin
         render_to_string :inline => @pg.template.content
@@ -1555,65 +1523,65 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         logger.debug e
       end
     end
-  
+    
     def garbage_collect
       GC.start
     end
-  
+    
     def create_captions_file(pg_id, options = {})
       gallery_id = (!options[:gallery_id] ? params[:gallery_id] : options[:gallery_id])
-    
+      
       @pg = CmsPage.find_by_id(pg_id)
       galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
       captions_location = File.join(gallery_dir, 'captions.yml')
-    
+      
       return if File.exists?(captions_location)
-    
+      
       File.open(captions_location, 'w') { |f| YAML.dump([0], f) }
     end
-  
+    
     # prerequisites: @pg (CmsPage)
     def load_gallery_settings_from_file(gallery_id, options = {})
       galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
       settings_location = File.join(gallery_dir, 'settings.yml')
-    
+      
       ret = {}
-    
+      
       if File.exists?(settings_location)
         File.open(settings_location, 'r') { |f| ret = YAML.load(f.read) }
       else
         File.open(settings_location, 'w') { |f| YAML.dump({}, f) }
       end
-    
+      
       # set a few defaults
       ret[:slide_duration] ||= 0
       ret[:show_thumbs] ||= true
-    
+      
       return HashObject.new(ret)
     end
-  
+    
     # prerequisites: @pg (CmsPage)
     def save_gallery_settings_to_file(gallery_id, settings_hash, options = {})
       settings_hash = settings_hash.hash if settings_hash.kind_of?(HashObject)
-    
+      
       galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
       settings_location = File.join(gallery_dir, 'settings.yml')
-    
+      
       File.open(settings_location, 'w') { |f| YAML.dump(settings_hash, f) }
     end
-  
+    
     def resize_image(localfile)
       ext = File.extname(localfile)
-    
+      
       # AKN: this would change all files to jpeg format... commenting out for now
       # filename = File.join(File.dirname(localfile), File.basename(localfile, ext) + '.jpg')
       filename = localfile
-    
+      
       im = MiniMagick::Image::from_file(localfile)
-    
+      
       if im[:width] > GalleryMaxWidth || im[:height] > GalleryMaxHeight
         im.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}")
         im.write(filename)
@@ -1686,9 +1654,9 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       s3retries = 0
       s3success = false
       
-      filename = File.join(Rails.root, 'public', 'assets', 'content', page.path, filename)
       
       if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
+        filename = File.join(Rails.root, 'public', 'assets', 'content', page.path, File.basename(filename))
         prefix = ImagineCmsConfig['amazon_s3'][Rails.env]['image_prefix']
         bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
         while s3retries < 2 && !s3success
