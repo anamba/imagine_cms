@@ -34,22 +34,46 @@ Get paid support and hosting for Imagine CMS straight from the people who made i
 
 Pull requests always appreciated (recommend getting in touch first). If companies or individuals are willing to sponsor major features on the roadmap (or features that meet their own needs) development can proceed more quickly.
 
-=License and Copyright
+=Migrating from Imagine 2.x
 
-Imagine 3 is licensed under AGPLv3, meaning that if you run a modified version on a publicly-accessible server, you need to (1) make it clear that you've modified it and (2) offer source code (Github makes that a snap).
+Putting this at the end because this information may not useful to the general public at the moment. It will evolve over time into a general getting started guide.
 
-imagine_cms - The Imagine Content Management System
-Copyright (c) 2012 Aaron Namba (aaron@biggerbird.com)
+File/code changes:
+* Rename all .rhtml files to .html.erb, .rxml to .xml.builder
+* Find and replace: RAILS_ROOT => Rails.root
+* Find and replace: SITE_ROOT => Rails.root
+* Find and replace: RAILS_ENV => Rails.env (not all instances: constants only, leave environment variables)
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Assets:
+* Delete prototype.js, effect.js, controls.js, dragdrop.js, imagine.js, reset.css, manage.css; move everything else to assets
+* Create symlinks to assets in public (images, javascripts, stylesheets, files)
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
+Config changes:
+* Move constants from config/environment.rb to config/initializers/imagine_cms.rb. Use Object.send(:remove_const, :ConstantName) as needed to override default values (bit of a stupid workaround but it works).
+* Create config/amazon_s3.yml and add AWS account credentials (preferably IAM, not master account)
 
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Third party libraries no longer included:
+* Install fop in vendor/ if needed.
+
+Layout changes:
+* Under app/views/application: Update three partial paths: 'shared/ccs_header' => 'imagine_cms/header', 'shared/ccs_toolbar' => 'imagine_cms/toolbar', '/management/dialogs' => 'imagine_cms/dialogs'
+* Add: <%= csrf_meta_tags %>
+* Change to standard Rails includes, plus print:
+    <%= stylesheet_link_tag 'application', :media => 'all' %>
+    <%= stylesheet_link_tag 'print', :media => 'print' %>
+    <%= javascript_include_tag 'application' %>
+
+View changes:
+* Change <% form_tag do %> and similar to <%= form_tag %>
+
+Major functions that were (re)moved, and how to get them back:
+* script/clear_cache: Use rake imagine_cms:cache:clear
+* Exception emails: Install exception_notifier gem and add to config/environments/production.rb:
+  config.middleware.use ExceptionNotifier,
+    :email_prefix => "[EXCEPTION] ",
+    :sender_address => %{"Exception Notifier" <sender@example.com>},
+    :exception_recipients => %w{recipient@example.com}
+
+Recommended Rails config changes:
+* config.assets.compile = true (optional, easy way out for sites with a lot of customizations)
+* config.assets.precompile += %w( ... ) (if compile = false, this must be updated properly)
