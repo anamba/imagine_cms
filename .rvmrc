@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ruby_string="ruby-1.9.3-p286"
+ruby_string="ruby-1.9.3-p327"
 gemset_name="imagine_cms"
 
 alias rails='bundle exec rails'
