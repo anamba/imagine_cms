@@ -1097,7 +1097,13 @@ EOF
   end
   
   def page_image_tag(page, filename)
-    "<img id=\"testImage\" src=\"/#{File.join('assets', 'content', page.path, File.basename(filename))}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
+    if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
+      prefix = ImagineCmsConfig['amazon_s3'][Rails.env]['image_prefix']
+      hostname = ImagineCmsConfig['amazon_s3'][Rails.env]['image_hostname']
+      "<img src=\"//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
+    else
+      "<img src=\"/#{File.join('assets', 'content', page.path, File.basename(filename))}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
+    end
   end
   
   def copyright_year(year)

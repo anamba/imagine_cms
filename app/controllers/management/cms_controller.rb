@@ -602,6 +602,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         @pg.published_version = params[:pg][:published_version]
         @pg.update_index
         @pg.save_without_revision
+        logger.debug @pg.errors.full_messages.inspect
       end
     end
     
@@ -768,6 +769,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
       @image_file = localfile
+      upload_to_s3(localfile, @pg)
+      
       render :partial => 'crop_results' and return
     end
     
@@ -1517,166 +1520,186 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   private
   
-  def load_page_objects
-    @page_objects = HashObject.new
-    @template_options = HashObject.new
+    def load_page_objects
+      @page_objects = HashObject.new
+      @template_options = HashObject.new
     
-    if @pg.new_record? && @parent
-      # This does not appear to be a beneficial feature any longer
-      # @tags = @parent.tags.collect { |t| t.name }.join(', ')
-      @parent.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
-        key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
-        @page_objects[key] = obj.content
-      end
-      @parent.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
-        key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
-        @page_objects[key] = obj.content
-      end
-    else
-      @tags = @pg.tags.collect { |t| t.name }.join(', ')
-      @pg.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
-        key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
-        @page_objects[key] = obj.content
-      end
-      @pg.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
-        key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
-        @page_objects[key] = obj.content
-      end
-    end
-  end
-  
-  def load_template_options
-    begin
-      render_to_string :inline => @pg.template.content
-    rescue Exception => e
-      logger.debug e
-    end
-  end
-  
-  def garbage_collect
-    GC.start
-  end
-  
-  def create_captions_file(pg_id, options = {})
-    gallery_id = (!options[:gallery_id] ? params[:gallery_id] : options[:gallery_id])
-    
-    @pg = CmsPage.find_by_id(pg_id)
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    gallery_dir = File.join(galleries_dir, gallery_id)
-    captions_location = File.join(gallery_dir, 'captions.yml')
-    
-    return if File.exists?(captions_location)
-    
-    File.open(captions_location, 'w') { |f| YAML.dump([0], f) }
-  end
-  
-  # prerequisites: @pg (CmsPage)
-  def load_gallery_settings_from_file(gallery_id, options = {})
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    gallery_dir = File.join(galleries_dir, gallery_id)
-    settings_location = File.join(gallery_dir, 'settings.yml')
-    
-    ret = {}
-    
-    if File.exists?(settings_location)
-      File.open(settings_location, 'r') { |f| ret = YAML.load(f.read) }
-    else
-      File.open(settings_location, 'w') { |f| YAML.dump({}, f) }
-    end
-    
-    # set a few defaults
-    ret[:slide_duration] ||= 0
-    ret[:show_thumbs] ||= true
-    
-    return HashObject.new(ret)
-  end
-  
-  # prerequisites: @pg (CmsPage)
-  def save_gallery_settings_to_file(gallery_id, settings_hash, options = {})
-    settings_hash = settings_hash.hash if settings_hash.kind_of?(HashObject)
-    
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    gallery_dir = File.join(galleries_dir, gallery_id)
-    settings_location = File.join(gallery_dir, 'settings.yml')
-    
-    File.open(settings_location, 'w') { |f| YAML.dump(settings_hash, f) }
-  end
-  
-  def resize_image(localfile)
-    ext = File.extname(localfile)
-    
-    # AKN: this would change all files to jpeg format... commenting out for now
-    # filename = File.join(File.dirname(localfile), File.basename(localfile, ext) + '.jpg')
-    filename = localfile
-    
-    im = MiniMagick::Image::from_file(localfile)
-    
-    if im[:width] > GalleryMaxWidth || im[:height] > GalleryMaxHeight
-      im.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}")
-      im.write(filename)
-    elsif filename != localfile
-      im.write(filename)
-    end
-    
-    File.unlink(localfile) unless localfile == filename
-    
-    filename
-  end
-  
-  def create_preview_image(src_file, dest, force = 0, overlay = 'gallery_small_overlay.png', thumb_size = 90)
-    require 'RMagick'
-    
-    dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
-    if !File.exists?(dest) || force == 1
-      im = Magick::Image::read(src_file)[0]
-      im_overlay = Magick::Image::read(File.join(Rails.root, 'public', 'images', 'management', overlay))[0]
-      
-      im.crop_resized!(thumb_size, thumb_size)
-      im = im.composite(im_overlay, Magick::CenterGravity, Magick::OverCompositeOp)
-      
-      im.write(dest)
-      File.chmod(0644, dest)
-      
-      im = im_overlay = nil
-      GC.start
-      
-      nil
-    end
-  end
-  
-  def create_preview_images(options = {})
-    # assumes @pg has already been set before calling
-    
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    session[:broken_galleries] = []
-    
-    # create preview images if not already made
-    Dir.glob("#{galleries_dir}/gallery_*").each do |g|
-      begin
-        management_dir = File.join(g, 'management')
-        FileUtils.mkdir_p(management_dir) unless File.exists?(management_dir)
-        
-        images = Dir.glob("#{g}/*.{jpg,jpeg,png,gif}")
-        preview_images = []
-        images.each { |img| preview_images << img unless File.basename(img).include?('thumb') }
-        
-        # gallery preview image
-        preview_image_location = File.join(management_dir, 'preview.jpg')
-        unless File.exists?(preview_image_location)
-          preview_image = preview_images.first
-          create_preview_image(preview_image, preview_image_location, options[:force], 'gallery_preview_overlay.png', 130)
+      if @pg.new_record? && @parent
+        # This does not appear to be a beneficial feature any longer
+        # @tags = @parent.tags.collect { |t| t.name }.join(', ')
+        @parent.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
+          key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
+          @page_objects[key] = obj.content
         end
-        
-        # photo preview images
-        preview_images.each { |img| create_preview_image(img, management_dir, options[:force]) }
-        
-      rescue Exception => e
-        # some error handling here
-        session[:broken_galleries] << File.basename(g)
-        
-        log_error(e)
+        @parent.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
+          key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
+          @page_objects[key] = obj.content
+        end
+      else
+        @tags = @pg.tags.collect { |t| t.name }.join(', ')
+        @pg.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
+          key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
+          @page_objects[key] = obj.content
+        end
+        @pg.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
+          key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
+          @page_objects[key] = obj.content
+        end
       end
     end
-  end
   
+    def load_template_options
+      begin
+        render_to_string :inline => @pg.template.content
+      rescue Exception => e
+        logger.debug e
+      end
+    end
+  
+    def garbage_collect
+      GC.start
+    end
+  
+    def create_captions_file(pg_id, options = {})
+      gallery_id = (!options[:gallery_id] ? params[:gallery_id] : options[:gallery_id])
+    
+      @pg = CmsPage.find_by_id(pg_id)
+      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      gallery_dir = File.join(galleries_dir, gallery_id)
+      captions_location = File.join(gallery_dir, 'captions.yml')
+    
+      return if File.exists?(captions_location)
+    
+      File.open(captions_location, 'w') { |f| YAML.dump([0], f) }
+    end
+  
+    # prerequisites: @pg (CmsPage)
+    def load_gallery_settings_from_file(gallery_id, options = {})
+      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      gallery_dir = File.join(galleries_dir, gallery_id)
+      settings_location = File.join(gallery_dir, 'settings.yml')
+    
+      ret = {}
+    
+      if File.exists?(settings_location)
+        File.open(settings_location, 'r') { |f| ret = YAML.load(f.read) }
+      else
+        File.open(settings_location, 'w') { |f| YAML.dump({}, f) }
+      end
+    
+      # set a few defaults
+      ret[:slide_duration] ||= 0
+      ret[:show_thumbs] ||= true
+    
+      return HashObject.new(ret)
+    end
+  
+    # prerequisites: @pg (CmsPage)
+    def save_gallery_settings_to_file(gallery_id, settings_hash, options = {})
+      settings_hash = settings_hash.hash if settings_hash.kind_of?(HashObject)
+    
+      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      gallery_dir = File.join(galleries_dir, gallery_id)
+      settings_location = File.join(gallery_dir, 'settings.yml')
+    
+      File.open(settings_location, 'w') { |f| YAML.dump(settings_hash, f) }
+    end
+  
+    def resize_image(localfile)
+      ext = File.extname(localfile)
+    
+      # AKN: this would change all files to jpeg format... commenting out for now
+      # filename = File.join(File.dirname(localfile), File.basename(localfile, ext) + '.jpg')
+      filename = localfile
+    
+      im = MiniMagick::Image::from_file(localfile)
+    
+      if im[:width] > GalleryMaxWidth || im[:height] > GalleryMaxHeight
+        im.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}")
+        im.write(filename)
+      elsif filename != localfile
+        im.write(filename)
+      end
+      
+      File.unlink(localfile) unless localfile == filename
+      
+      filename
+    end
+    
+    def create_preview_image(src_file, dest, force = 0, overlay = 'gallery_small_overlay.png', thumb_size = 90)
+      require 'RMagick'
+      
+      dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
+      if !File.exists?(dest) || force == 1
+        im = Magick::Image::read(src_file)[0]
+        im_overlay = Magick::Image::read(File.join(Rails.root, 'public', 'images', 'management', overlay))[0]
+        
+        im.crop_resized!(thumb_size, thumb_size)
+        im = im.composite(im_overlay, Magick::CenterGravity, Magick::OverCompositeOp)
+        
+        im.write(dest)
+        File.chmod(0644, dest)
+        
+        im = im_overlay = nil
+        GC.start
+        
+        nil
+      end
+    end
+    
+    def create_preview_images(options = {})
+      # assumes @pg has already been set before calling
+      
+      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      session[:broken_galleries] = []
+      
+      # create preview images if not already made
+      Dir.glob("#{galleries_dir}/gallery_*").each do |g|
+        begin
+          management_dir = File.join(g, 'management')
+          FileUtils.mkdir_p(management_dir) unless File.exists?(management_dir)
+          
+          images = Dir.glob("#{g}/*.{jpg,jpeg,png,gif}")
+          preview_images = []
+          images.each { |img| preview_images << img unless File.basename(img).include?('thumb') }
+          
+          # gallery preview image
+          preview_image_location = File.join(management_dir, 'preview.jpg')
+          unless File.exists?(preview_image_location)
+            preview_image = preview_images.first
+            create_preview_image(preview_image, preview_image_location, options[:force], 'gallery_preview_overlay.png', 130)
+          end
+          
+          # photo preview images
+          preview_images.each { |img| create_preview_image(img, management_dir, options[:force]) }
+          
+        rescue Exception => e
+          # some error handling here
+          session[:broken_galleries] << File.basename(g)
+          
+          log_error(e)
+        end
+      end
+    end
+    
+    def upload_to_s3(filename, page)
+      s3retries = 0
+      s3success = false
+      
+      filename = File.join(Rails.root, 'public', 'assets', 'content', page.path, filename)
+      
+      if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
+        prefix = ImagineCmsConfig['amazon_s3'][Rails.env]['image_prefix']
+        bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
+        while s3retries < 2 && !s3success
+          response = AWS::S3::S3Object.store("#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}", open(filename), bucket, :access => :public_read)
+          s3success = response.code == 200
+          s3retries += 1
+        end
+        File.unlink(filename) if s3success
+      end
+      
+      s3success
+    end
+    
 end
