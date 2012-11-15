@@ -14,8 +14,8 @@ module ImagineCms
     # activate gems as needed
     #
     require 'prototype-rails'
-    # require 'redactor-rails'
     require 'mini_magick'
+    require 'RMagick'
     require 'rails_rinku'
     require 'net/dns'
     require 'acts_as_tree'
