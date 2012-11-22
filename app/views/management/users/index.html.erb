@@ -18,7 +18,7 @@
     <td><%= link_to u.username, :action => 'edit', :id => u %></td>
     <td><%= u.first_name %></td>
     <td><%= u.last_name %></td>
-    <td><%= u.active ? 'Y' : 'N' %>
+    <td><%= u.active? ? 'Y' : 'N' %>
     <td><%= button_to((u.active ? 'Disable' : 'Enable'), { :action => (u.active ? 'disable' : 'enable'), :id => u}, { :class => 'form_button' }) if u.username != session[:user_username] %></td>
     <td><%= button_to('Delete', { :action => 'destroy', :id => u }, { :confirm => 'Are you sure you want to delete ' + u.username + '?', :class => 'form_button' }) if u.username != session[:user_username] %></td>
   </tr>
