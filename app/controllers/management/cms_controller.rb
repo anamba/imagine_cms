@@ -719,7 +719,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     FileUtils.mkdir_p target_dir
     
     data = params[:file][:data]
-    localfile = File.join(target_dir, data.original_filename)
+    original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+    localfile = File.join(target_dir, original_filename)
     FileUtils.cp(data.tempfile, localfile)
     
     finish_upload_status "'#{File.basename(localfile)}'"
@@ -1234,7 +1235,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     FileUtils.mkdir_p target_dir
     
     data = params[:file][:data]
-    original_filename = data.original_filename.downcase.gsub(/[^\.\w\d]+/, '_')
+    original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
     localfile = File.join(target_dir, original_filename)
     FileUtils.cp(data.tempfile, localfile)
     
@@ -1243,8 +1244,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def create_file_link
     @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join('files', 'content', @pg.path)
-    @filename = File.join(target_dir, File.basename(params[:filename]))
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    
+    @filename = localfile + "?#{File.mtime(localfile).to_i}"
+    upload_to_s3(localfile, @pg, ImagineCmsConfig['amazon_s3'][Rails.env]['file_bucket'],
+                                 ImagineCmsConfig['amazon_s3']['file_prefix'])
+    
     render :partial => 'create_file_link'
   end
   
@@ -1423,8 +1428,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @template_options = HashObject.new
       
       if @pg.new_record? && @parent
-        # This does not appear to be a beneficial feature any longer
-        # @tags = @parent.tags.collect { |t| t.name }.join(', ')
         @parent.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
@@ -1504,29 +1507,17 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     
     def resize_image(localfile)
-      ext = File.extname(localfile)
-      
-      # AKN: this would change all files to jpeg format... commenting out for now
-      # filename = File.join(File.dirname(localfile), File.basename(localfile, ext) + '.jpg')
-      filename = localfile
-      
       im = MiniMagick::Image::from_file(localfile)
       
       if im[:width] > GalleryMaxWidth || im[:height] > GalleryMaxHeight
         im.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}")
-        im.write(filename)
-      elsif filename != localfile
-        im.write(filename)
+        im.write(localfile)
       end
       
-      File.unlink(localfile) unless localfile == filename
-      
-      filename
+      localfile
     end
     
     def create_preview_image(src_file, dest, force = 0, overlay = 'gallery_small_overlay.png', thumb_size = 90)
-      require 'RMagick'
-      
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
       if !File.exists?(dest) || force == 1
         im = Magick::Image::read(src_file)[0]
@@ -1545,9 +1536,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       end
     end
     
+    # prerequisites: @pg (CmsPage)
     def create_preview_images(options = {})
-      # assumes @pg has already been set before calling
-      
       galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       session[:broken_galleries] = []
       
@@ -1580,13 +1570,13 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       end
     end
     
-    def upload_to_s3(filename, page)
+    def upload_to_s3(filename, page, bucket = nil, prefix = nil)
       s3retries = 0
       s3success = false
       
       if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
-        prefix = ImagineCmsConfig['amazon_s3']['image_prefix']
-        bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
+        bucket ||= ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
+        prefix ||= ImagineCmsConfig['amazon_s3']['image_prefix']
         
         # set options + metadata
         options = ImagineCmsConfig['amazon_s3']['metadata']

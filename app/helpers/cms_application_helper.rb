@@ -1097,11 +1097,24 @@ EOF
   end
   
   # filename should include version number in query string
+  def page_file_path(page, filename)
+    if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
+      prefix = ImagineCmsConfig['amazon_s3']['file_prefix']
+      hostname = ImagineCmsConfig['amazon_s3'][Rails.env]['file_hostname']
+      filename, timestamp = File.basename(filename).split('?')
+      "//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{ERB::Util.url_encode filename}?#{timestamp}"
+    else
+      "/#{File.join('assets', 'content', page.path, File.basename(filename))}"
+    end
+  end
+  
+  # filename should include version number in query string
   def page_image_path(page, filename)
     if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
       prefix = ImagineCmsConfig['amazon_s3']['image_prefix']
       hostname = ImagineCmsConfig['amazon_s3'][Rails.env]['image_hostname']
-      "//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}"
+      filename, timestamp = File.basename(filename).split('?')
+      "//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{ERB::Util.url_encode filename}?#{timestamp}"
     else
       "/#{File.join('assets', 'content', page.path, File.basename(filename))}"
     end
