@@ -38,7 +38,7 @@
     <td>
       <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;', :onchange => '' %>
       
-      <div id="edit_page_template_options" style="background-color: white; width: 100%; height: 80px; overflow: auto; border: 1px solid #aaaaaa">
+      <div id="edit_page_template_options" style="background-color: white; width: 100%; height: 60px; overflow: auto; border: 1px solid #aaaaaa">
         <%= render :partial => 'template_options' %>
       </div>
       <%= observe_field 'pg_cms_template_id', :update => 'edit_page_template_options', :with => 'template_id',
@@ -106,18 +106,18 @@
       <%- if @pg.new_record? -%>
         A thumbnail cannot be added until you save this page.
       <%- else -%>
-      <div id="thumbnail_preview">
+      <div id="thumbnail_preview" style="width: 100%; overflow: auto;">
         <%- if @pg.thumbnail_path.empty? -%>
           no thumbnail image selected
         <%- else -%>
-          <%= image_tag(@pg.thumbnail_path) %>
+          <%= image_tag(@pg.thumbnail_path, :onclick => "jQuery('#pg_thumbnail_path').show();") %>
         <%- end -%>
       </div>
       <%= button_to_function "Select Thumbnail...",
-                             "selectThumbnail('#{url_for :action => 'upload_thumb', :id => @pg.id}');",
+                             "selectThumbnail('#{url_for :action => 'upload_thumb', :id => @pg}');",
                              :class => 'form_button' %>
       <%- end -%>
-      <%= text_field :pg, :thumbnail_path, :class => 'form', :style => 'width: 350px; display: inline;' %>
+      <%= text_field :pg, :thumbnail_path, :class => 'form', :style => 'width: 100%; display: none;' %>
     </td>
   </tr>
   <%- if @pg.respond_to?(:feature_image_path) -%>
@@ -127,18 +127,18 @@
       <%- if @pg.new_record? -%>
         A feature image cannot be added until you save this page.
       <%- else -%>
-      <div id="feature_image_preview">
+      <div id="feature_image_preview" style="width: 100%; overflow: auto;">
         <%- if @pg.feature_image_path.empty? -%>
           no feature image selected
         <%- else -%>
-          <%= image_tag(@pg.feature_image_path) %>
+          <%= image_tag(@pg.feature_image_path, :onclick => "jQuery('#pg_feature_image_path').show();") %>
         <%- end -%>
       </div>
       <%= button_to_function "Select Feature Image...",
-                             "selectThumbnail('#{url_for :action => 'upload_feature_image', :id => @pg.id}');",
+                             "selectThumbnail('#{url_for :action => 'upload_feature_image', :id => @pg}');",
                              :class => 'form_button' %>
       <%- end -%>
-      <%= text_field :pg, :feature_image_path, :class => 'form', :style => 'width: 350px; display: inline;' %>
+      <%= text_field :pg, :feature_image_path, :class => 'form', :style => 'width: 100%; display: none;' %>
     </td>
   </tr>
   <%- end -%>
@@ -158,7 +158,7 @@
           </td>
         </tr>
       </table>
-      <div id="custom_attributes" style="background-color: white; height: 100px; overflow: auto; border: 1px solid #aaaaaa">
+      <div id="custom_attributes" style="background-color: white; height: 80px; overflow: auto; border: 1px solid #aaaaaa">
         <%- @page_objects.each do |key,val| -%>
           <%- key =~ /^obj-(\w+?)-(.+?)$/ -%>
           <%= render :partial => 'page_attribute', :locals => { :name => $2 } if $1 == 'attribute' %>
