@@ -280,7 +280,7 @@ module CmsApplicationHelper
   
   
   def load_page_objects(obj_type = nil, name = nil)
-    if params[:version].to_i > 0 && params[:version].to_i != @pg.published_version
+    if params[:version].to_i > 0 && params[:version].to_i != @pg.published_version && !(@pg.published_version == 0 && params[:version].to_i == @pg.version)
       if is_logged_in_user?
         if user_has_permission?(:manage_cms)
           @pg.revert_to(params[:version].to_i)
