@@ -50,10 +50,16 @@ module Cms # :nodoc:
     # Renders app/views/errors/404.rhtml with http status 404 Not Found.
     def not_found
       # logger.error "404 from #{request.referer}"
-      # render :template => 'errors/404', :status => 404
+      # render :template => 'imagine_cms/errors/404', :status => 404
       
       # let Rails handle 404s natively (override if you want to handle manually)
       raise ActionController::RoutingError.new('404 Not Found')
+    end
+    
+    def rendering_error(exception = nil)
+      logger.error "500 from #{request.referer} (exception: #{exception})"
+      @exception = exception.message
+      render :template => 'imagine_cms/errors/500', :status => 500
     end
     
     def show_from_db
@@ -183,8 +189,9 @@ module Cms # :nodoc:
           end
         end
       rescue Exception => e
-        logger.debug "Error rendering from db: #{e.inspect.gsub(/</, '&lt;')} #{e.backtrace}"
-        log_error(e)
+        logger.debug "Error rendering from db: #{e.class}: #{e.message}"
+        # log_error(e)
+        return rendering_error(e)
       end
       
       # if we haven't rendered something from the db by now, return false

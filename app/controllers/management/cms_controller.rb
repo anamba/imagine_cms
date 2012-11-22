@@ -30,7 +30,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def check_permissions
     if !user_has_permission?(:manage_cms)
-      render '/errors/permission_denied'
+      render '/imagine_cms/errors/permission_denied'
       return false
     end
   end
@@ -38,7 +38,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def block_basic_users
     return true unless UseCmsAccessLevels
     unless user_has_permission?(:manage_cms_full_access) && @user.cms_allowed_sections.to_s.strip.blank?
-      render '/errors/permission_denied'
+      render '/imagine_cms/errors/permission_denied'
       return false
     end
   end
