@@ -1329,6 +1329,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
       @image_file = localfile
+      upload_to_s3(localfile, @pg)
       render :partial => 'crop_results_thumb' and return
     end
     
@@ -1395,6 +1396,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     @image_file = localfile
     File.unlink testfile
+    upload_to_s3(localfile, @pg)
     
     render :partial => 'crop_results_thumb'
   end
@@ -1411,6 +1413,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
       @image_file = localfile
+      upload_to_s3(localfile, @pg)
       render :partial => 'crop_results_feature_image' and return
     end
     
@@ -1477,6 +1480,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     @image_file = localfile
     File.unlink testfile
+    upload_to_s3(localfile, @pg)
     
     render :partial => 'crop_results_feature_image'
   end
@@ -1649,7 +1653,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     def upload_to_s3(filename, page)
       s3retries = 0
       s3success = false
-      
       
       if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
         filename = File.join(Rails.root, 'public', 'assets', 'content', page.path, File.basename(filename))
