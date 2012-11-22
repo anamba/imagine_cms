@@ -308,7 +308,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         render :update do |page|
           case params[:return_to]
           when 'preview'
-            page.redirect_to "/#{@pg.path}"
+            page.redirect_to "/#{@pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
           else
             flash[:notice] = 'Page saved.'
             session[:cms_pages_path] = @pg.path
