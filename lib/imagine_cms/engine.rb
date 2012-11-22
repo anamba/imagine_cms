@@ -17,6 +17,7 @@ module ImagineCms
     require 'aws/s3'
     require 'RMagick'
     require 'mini_magick'
+    require 'zip/zip'
     require 'rails_rinku'
     require 'net/dns'
     require 'acts_as_tree'

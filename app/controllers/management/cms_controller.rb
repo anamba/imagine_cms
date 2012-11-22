@@ -814,8 +814,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def receive_gallery
-    require 'zip/zip'
-    
     @pg = CmsPage.find_by_id(params[:id])
     begin
       data = params[:gallery_file][:data]
@@ -1151,8 +1149,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       create_preview_images(:force => 1)
       
     elsif ext == '.zip'
-      require 'zip/zip'
-      
       begin
         Zip::ZipFile.foreach(data.path) do |zipentry|
           next if ![ '.jpg', '.jpeg', '.png', '.gif' ].include?(File.extname(zipentry.name).downcase) || zipentry.size < 1000
