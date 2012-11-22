@@ -885,6 +885,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     render :partial => 'gallery_setup'
   end
   
+  
   def complete_gallery
     @pg = CmsPage.find(params[:id])
     target_dir = File.join('assets', 'content', @pg.path)
@@ -1522,7 +1523,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
       if !File.exists?(dest) || force == 1
         im = Magick::Image::read(src_file)[0]
-        im_overlay = Magick::Image::read(File.join(Rails.root, 'public', 'assets', 'management', overlay))[0]
+        im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'assets', 'images', 'management', overlay))[0]
         
         im.crop_resized!(thumb_size, thumb_size)
         im = im.composite(im_overlay, Magick::CenterGravity, Magick::OverCompositeOp)
@@ -1594,4 +1595,22 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       s3success
     end
     
+end
+
+module MiniMagick
+  class Image
+    def crop_resized(ncols, nrows, gravity='Center')
+      columns = self[:width].to_i
+      rows = self[:height].to_i
+
+      if ncols != columns || nrows != rows
+        scale = [ncols/columns.to_f, nrows/rows.to_f].max
+        resize("#{scale*(columns+0.5).to_i}x#{scale*(rows+0.5).to_i}")
+      end
+      
+      columns = self[:width].to_i
+      rows = self[:height].to_i
+      crop("#{ncols}x#{nrows}+0+0", "-gravity", "#{gravity}") if ncols != columns || nrows != rows
+    end
+  end
 end
