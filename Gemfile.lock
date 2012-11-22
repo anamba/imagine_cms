@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    imagine_cms (3.0.0.beta10)
+    imagine_cms (3.0.0.beta11)
       acts_as_tree (~> 1.1)
       aws-s3 (~> 0.6.3)
       mini_magick (~> 3.3)
