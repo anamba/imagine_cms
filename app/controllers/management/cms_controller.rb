@@ -434,6 +434,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           @pg.published_version = @pg.version
         end
         
+        @pg.updated_on = Time.now.utc
         @pg.save
         
         # do a little bit of classification... for now, just identify page lists
