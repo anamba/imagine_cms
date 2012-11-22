@@ -1,0 +1,39 @@
+amazon_s3:
+  enabled: true
+  
+  metadata:
+    'Cache-Control': 'max-age=2592000'
+    
+  image_prefix: site1/images
+  file_prefix: site1/files
+  media_prefix: site1/media
+  
+  development:
+    access_key_id: 
+    secret_access_key: 
+    image_bucket: abc-dev
+    file_bucket: abc-dev
+    media_bucket: abc-dev
+    image_hostname: abc-dev.s3.amazonaws.com
+    file_hostname: abc-dev.s3.amazonaws.com
+    media_hostname: abc-dev.s3.amazonaws.com
+    
+  test:
+    access_key_id: AKIAIBZNS5FMNCMWOQCQ
+    secret_access_key: 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
+    image_bucket: abc-test
+    file_bucket: abc-test
+    media_bucket: abc-test
+    image_hostname: abc-test.s3.amazonaws.com
+    media_hostname: abc-test.s3.amazonaws.com
+    media_hostname: abc-test.s3.amazonaws.com
+    
+  production:
+    access_key_id: AKIAJG6SL2GZP4C6GYFA
+    secret_access_key: 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
+    image_bucket: abc
+    file_bucket: abc
+    media_bucket: abc
+    image_hostname: abc123.cloudfront.net
+    file_hostname: abc123.cloudfront.net
+    media_hostname: abc123.cloudfront.net

@@ -2,6 +2,10 @@
 
 Imagine CMS is a content management system developed by {Bigger Bird Creative, Inc.}[https://www.biggerbird.com] in 2006 for its clients. Other systems came with a learning curve: fine for daily users, but clients who only used it once a month or so would never remember how to use the system the next time they logged in. Simpler systems didn't allow us enough flexibility as designers and developers.
 
+=Demo
+
+Working on this... it needs to be fairly resilient to hacking attempts, not a trivial thing to set up.
+
 =History and Roadmap
 
 Thus, Imagine was created in the Rails 1.0 days, to run a large number of technically simple content-based sites (versus the one or two highly customized web applications most Rails developers were building at the time). We wanted to provide a way to create and manage static content while also allowing some automation (navigation, RSS feeds, etc.) while also allowing limitless custom development. However, because plugins/engines were quite limited in those days, Imagine was implemented by monkey-patching core parts of Rails and creating a new framework on top of Rails. Although this allowed us great insight into the inner workings of Rails (and led to a minor contribution to Rails core), this approach proved extremely difficult to port to Rails 2. Thus, sites using Imagine have been stuck on Rails 1.2 since time immemorial.
@@ -50,7 +54,7 @@ Assets:
 
 Config changes:
 * Move constants from config/environment.rb to config/initializers/imagine_cms.rb. Use Object.send(:remove_const, :ConstantName) as needed to override default values (bit of a stupid workaround but it works).
-* Create config/amazon_s3.yml and add AWS account credentials (preferably IAM, not master account)
+* [To enable S3 asset storage] Create config/imagine_cms.yml (see sample in test/dummy/config) and add AWS account credentials (preferably IAM, not master account). If using CloudFront, enable "Forward Query Strings" (Behaviors > Edit) to make sure visitors see the latest versions of uploaded assets.
 
 Third party libraries no longer included:
 * Install fop in vendor/ if needed.
