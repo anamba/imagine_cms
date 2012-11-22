@@ -703,7 +703,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def upload_image
     @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     
     if File.exists?(target_dir)
       redirect_to :action => 'select_gallery', :id => @pg, :gallery_id => params[:gallery_id]
@@ -739,7 +739,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     
     # if we're still here... let's crop!
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
@@ -759,7 +759,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def save_crop
     @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     testfile = File.join(target_dir, File.basename(params[:filename]))
     localfile = testfile.split(/-croptest/).join('')
     
@@ -854,7 +854,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def gallery_setup
     @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join('images', 'content', @pg.path)
+    target_dir = File.join('assets', 'content', @pg.path)
     @dirname = File.join(target_dir, File.basename(params[:dirname]), 'temp')
     Dir.chdir(File.join(Rails.root, 'public'))
     @images = Dir.glob("#{@dirname}/*.{jpg,jpeg,png,gif}").sort
@@ -885,7 +885,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def complete_gallery
     @pg = CmsPage.find(params[:id])
-    target_dir = File.join('images', 'content', @pg.path)
+    target_dir = File.join('assets', 'content', @pg.path)
     @dirname = File.join(target_dir, File.basename(params[:dirname]))
     @thumbs = session[:gallery_thumbs_ordered]
     max_width = params[:max_width].to_i
@@ -936,7 +936,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
 
   def gallery_management
     @pg = CmsPage.find_by_id(params[:id])
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     @galleries = Dir.glob("#{galleries_dir}/gallery_*")
     gallery_dir = File.join(galleries_dir, params[:gallery_id].to_s)
     
@@ -958,7 +958,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def select_gallery
     @pg = CmsPage.find_by_id(params[:id])
-    @target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    @target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     @galleries = Dir.glob("#{@target_dir}/gallery_*")
     
     create_preview_images
@@ -985,7 +985,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def sort_images
     @pg = CmsPage.find_by_id(params[:id])
-    gallery_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path, params[:gallery_id])
+    gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, params[:gallery_id])
     
     @images = Dir.glob("#{gallery_dir}/*.{jpg,jpeg,png,gif}").reject { |img| img.include?('thumb') }.map { |img| File.basename(img).split('.').first.to_i }.sort
     
@@ -999,7 +999,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def sort_images_save
     @pg = CmsPage.find_by_id(params[:id])
-    gallery_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path, params[:gallery_id])
+    gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, params[:gallery_id])
     temp_dir = File.join(gallery_dir, 'temp')
     sorted_images = session[:gallery_images_sorted] || []
     
@@ -1049,7 +1049,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def image_details
-    gallery_dir = File.join(Rails.root, 'public', 'images', 'content', params[:path].to_s, params[:gallery_id])
+    gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', params[:path].to_s, params[:gallery_id])
     
     # create blank captions.yml if it doesn't already exist
     create_captions_file(params[:id])
@@ -1063,7 +1063,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def update_caption
     if request.post?
-      gallery_dir = File.join(Rails.root, 'public', 'images', 'content', params[:path].to_s, params[:gallery_id])
+      gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', params[:path].to_s, params[:gallery_id])
       
       image_id = params[:image].split('.')[0].to_i
       
@@ -1081,7 +1081,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def add_to_gallery
     @pg = CmsPage.find_by_id(params[:id])
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     @galleries = Dir.entries(galleries_dir).sort
     @gallery_dir = File.join(galleries_dir, params[:gallery_id])    
     images = Dir.glob("#{@gallery_dir}/*-thumb.{jpg,jpeg,png,gif}")
@@ -1170,7 +1170,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def delete_photo
     if request.post?
-      gallery_dir = File.join(Rails.root, 'public', 'images', 'content', params[:path].to_s, params[:gallery_id])
+      gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', params[:path].to_s, params[:gallery_id])
       
       image_id = params[:image].split('.')[0].to_i
       
@@ -1213,7 +1213,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def delete_gallery
     @pg = CmsPage.find_by_id(params[:id])
-    galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     gallery_dir = File.join(galleries_dir, params[:gallery_id])
     
     FileUtils.rm_rf(gallery_dir)
@@ -1267,7 +1267,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     
     # if we're still here... let's crop!
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
@@ -1287,7 +1287,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def save_crop_thumb
     @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     testfile = File.join(target_dir, File.basename(params[:filename]))
     localfile = testfile.split(/-croptest/).join('')
     
@@ -1350,7 +1350,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     
     # if we're still here... let's crop!
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
@@ -1370,7 +1370,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def save_crop_feature_image
     @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     testfile = File.join(target_dir, File.basename(params[:filename]))
     localfile = testfile.split(/-croptest/).join('')
     
@@ -1462,7 +1462,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       gallery_id = (!options[:gallery_id] ? params[:gallery_id] : options[:gallery_id])
       
       @pg = CmsPage.find_by_id(pg_id)
-      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
       captions_location = File.join(gallery_dir, 'captions.yml')
       
@@ -1473,7 +1473,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     # prerequisites: @pg (CmsPage)
     def load_gallery_settings_from_file(gallery_id, options = {})
-      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
       settings_location = File.join(gallery_dir, 'settings.yml')
       
@@ -1496,7 +1496,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     def save_gallery_settings_to_file(gallery_id, settings_hash, options = {})
       settings_hash = settings_hash.hash if settings_hash.kind_of?(HashObject)
       
-      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
       settings_location = File.join(gallery_dir, 'settings.yml')
       
@@ -1530,7 +1530,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
       if !File.exists?(dest) || force == 1
         im = Magick::Image::read(src_file)[0]
-        im_overlay = Magick::Image::read(File.join(Rails.root, 'public', 'images', 'management', overlay))[0]
+        im_overlay = Magick::Image::read(File.join(Rails.root, 'public', 'assets', 'management', overlay))[0]
         
         im.crop_resized!(thumb_size, thumb_size)
         im = im.composite(im_overlay, Magick::CenterGravity, Magick::OverCompositeOp)
@@ -1548,7 +1548,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     def create_preview_images(options = {})
       # assumes @pg has already been set before calling
       
-      galleries_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
+      galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       session[:broken_galleries] = []
       
       # create preview images if not already made

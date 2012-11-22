@@ -182,7 +182,7 @@ Pressing "Save Feature Image" will crop the image and set it as the new feature 
       </tr>
     </table>
     
-    <%= submit_tag 'Save Feature Image', :class => 'form_button', :style => 'width: 90px;', :onclick => 'cropper.remove(); this.disabled = true; this.value = "Saving...";' %>
+    <%= submit_tag 'Save Feature Image', :class => 'form_button', :onclick => 'cropper.remove(); this.disabled = true; this.value = "Saving...";' %>
     <%= link_to_function "Cancel", "cancelSelectThumbnail()" %>
   <%- end -%>
 </center>
