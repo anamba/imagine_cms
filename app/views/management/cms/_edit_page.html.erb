@@ -106,7 +106,7 @@
       <%- if @pg.new_record? -%>
         A thumbnail cannot be added until you save this page.
       <%- else -%>
-      <div id="thumbnail_preview" style="width: 100%; overflow: auto;">
+      <div id="thumbnail_preview" style="width: 385px; overflow: auto;">
         <%- if @pg.thumbnail_path.empty? -%>
           no thumbnail image selected
         <%- else -%>
@@ -127,7 +127,7 @@
       <%- if @pg.new_record? -%>
         A feature image cannot be added until you save this page.
       <%- else -%>
-      <div id="feature_image_preview" style="width: 100%; overflow: auto;">
+      <div id="feature_image_preview" style="width: 385px; overflow: auto;">
         <%- if @pg.feature_image_path.empty? -%>
           no feature image selected
         <%- else -%>
