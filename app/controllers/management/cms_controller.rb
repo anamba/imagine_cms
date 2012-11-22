@@ -715,33 +715,23 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def receive_image
     @pg = CmsPage.find_by_id(params[:id])
     
-    data = params[:file][:data]
-    original_filename = data.original_filename
     target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    localfile = File.join(target_dir, original_filename)
-    
     FileUtils.mkdir_p target_dir
     
-    unless params[:overwrite].to_i == 1
-      count = 0
-      while File.exists?(localfile)
-        count += 1
-        localfile = File.join(target_dir, File.basename(original_filename, File.extname(original_filename))) + "-#{count}" + File.extname(original_filename)
-      end
-    end
-    
+    data = params[:file][:data]
+    localfile = File.join(target_dir, data.original_filename)
     FileUtils.cp(data.tempfile, localfile)
     
-    finish_upload_status "'#{File.basename(localfile)}'" and return
+    finish_upload_status "'#{File.basename(localfile)}'"
   end
   
   def crop_image
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.basename(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
-      @image_file = localfile
+      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
       upload_to_s3(localfile, @pg)
       
       render :partial => 'crop_results' and return
@@ -750,7 +740,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     # if we're still here... let's crop!
     target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    localfile = File.join(target_dir, localfile)
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
@@ -806,7 +795,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     
     orig_im.write(localfile) if dirty
-    @image_file = localfile
+    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
     File.unlink testfile
     upload_to_s3(localfile, @pg)
     
@@ -815,73 +804,52 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def receive_gallery
     @pg = CmsPage.find_by_id(params[:id])
-    begin
-      data = params[:gallery_file][:data]
-      target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-      localdir = File.join(target_dir, 'gallery_1')
+    
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    FileUtils.mkdir_p target_dir
+    
+    count = 1
+    localdir = File.join(target_dir, 'gallery_1')
+    while File.exists?(localdir) && count < 100
+      count += 1
+      localdir = File.join(target_dir, "gallery_#{count}")
+    end
+    FileUtils.mkdir_p File.join(localdir, 'temp')
+    
+    data = params[:gallery_file][:data]
+    # read zip file
+    
+    entries = []
+    Zip::ZipFile.foreach(data.path) do |zipentry|
+      next if ![ '.jpg', '.jpeg', '.png', '.gif' ].include?(File.extname(zipentry.name).downcase) || zipentry.size < 1000
+      next if File.basename(zipentry.name) =~ /^\._/
       
-      begin
-        FileUtils.mkdir_p target_dir
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-      
-      unless params[:overwrite].to_i == 1
-        count = 1
-        while File.exists?(localdir)
-          count += 1
-          localdir = File.join(target_dir, "gallery_#{count}")
-        end
-      end
-      
-      begin
-        FileUtils.mkdir_p File.join(localdir, 'temp')
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-      
-      # read zip file
-      entries = []
-      Zip::ZipFile.foreach(data.path) do |zipentry|
-        next if ![ '.jpg', '.jpeg', '.png', '.gif' ].include?(File.extname(zipentry.name).downcase) || zipentry.size < 1000
-        next if File.basename(zipentry.name) =~ /^\._/
+      entries << zipentry
+    end
+    entries.sort! { |a,b| File.basename(a.name).downcase <=> File.basename(b.name).downcase }
+    
+    Zip::ZipFile.open(data.path) do |zipfile|
+      entries.each_with_index do |zipentry, index|
+        upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
+        ext = File.extname(zipentry.name)
+        localfile = File.join(localdir, 'temp', (index+1).to_s + ext.downcase)
+        jpgfile = File.join(localdir, 'temp', (index+1).to_s + '.jpg')
         
-        entries << zipentry
-      end
-      entries.sort! { |a,b| File.basename(a.name).downcase <=> File.basename(b.name).downcase }
-      
-      Zip::ZipFile.open(data.path) do |zipfile|
-        entries.each_with_index do |zipentry, index|
-          upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
-          ext = File.extname(zipentry.name)
-          localfile = File.join(localdir, 'temp', (index+1).to_s + ext.downcase)
-          jpgfile = File.join(localdir, 'temp', (index+1).to_s + '.jpg')
+        begin
+          zipentry.extract(localfile)
           
-          begin
-            zipentry.extract(localfile)
-            
-            im = MiniMagick::Image.from_file(localfile)
-            im.write(jpgfile)
-            
-            File.unlink(localfile) if localfile != jpgfile
-            
-          rescue Exception => e
-            log_error(e)
-          end
+          im = MiniMagick::Image.from_file(localfile)
+          im.write(jpgfile)
+          
+          File.unlink(localfile) if localfile != jpgfile
+          
+        rescue Exception => e
+          log_error(e)
         end
       end
-    rescue Exception => e
-      logger.debug params.inspect
-      log_error(e)
-      finish_upload_status "''" and return
     end
     
-    upload_progress.message = "File received successfully."
-    finish_upload_status "'#{File.basename(localdir)}'" and return
+    finish_upload_status "'#{File.basename(localdir)}'"
   end
   
   def gallery_setup
@@ -1261,52 +1229,16 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def receive_file
     @pg = CmsPage.find_by_id(params[:id])
-    begin
-      data = params[:file][:data]
-      original_filename = data.original_filename.downcase.gsub(/[^\.\w\d]+/, '_')
-      target_dir = File.join(Rails.root, 'public', 'files', 'content', @pg.path)
-      localfile = File.join(target_dir, original_filename)
-      
-      begin
-        FileUtils.mkdir_p target_dir
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-      
-      unless params[:overwrite].to_i == 1
-        count = 0
-        while File.exists?(localfile)
-          count += 1
-          localfile = File.join(target_dir, File.basename(original_filename, File.extname(original_filename))) + "-#{count}" + File.extname(original_filename)
-        end
-      end
-      
-      begin
-        File.open(localfile, 'wb') { |f| f.write('test') }
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-      
-      begin
-        File.open(localfile, 'wb') { |f| f.write(data.read) }
-      rescue Exception => e
-        logger.debug "Exception: #{e}"
-        log_error(e)
-        finish_upload_status "''" and return
-      end
-    rescue Exception => e
-      logger.debug params.inspect
-      # logger.debug "Exception: #{e}"
-      log_error(e)
-      finish_upload_status "''" and return
-    end
     
-    upload_progress.message = "File received successfully."
-    finish_upload_status "'#{File.basename(localfile)}'" and return
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    FileUtils.mkdir_p target_dir
+    
+    data = params[:file][:data]
+    original_filename = data.original_filename.downcase.gsub(/[^\.\w\d]+/, '_')
+    localfile = File.join(target_dir, original_filename)
+    FileUtils.cp(data.tempfile, localfile)
+    
+    finish_upload_status "'#{File.basename(localfile)}'"
   end
   
   def create_file_link
@@ -1324,11 +1256,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def crop_thumb
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.basename(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
-      @image_file = localfile
+      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
       upload_to_s3(localfile, @pg)
       render :partial => 'crop_results_thumb' and return
     end
@@ -1336,7 +1268,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     # if we're still here... let's crop!
     target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    localfile = File.join(target_dir, localfile)
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
@@ -1394,7 +1325,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     orig_im.write(localfile) if dirty
     File.chmod(0644, localfile)
     
-    @image_file = localfile
+    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
     File.unlink testfile
     upload_to_s3(localfile, @pg)
     
@@ -1408,11 +1339,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def crop_feature_image
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.basename(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
-      @image_file = localfile
+      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
       upload_to_s3(localfile, @pg)
       render :partial => 'crop_results_feature_image' and return
     end
@@ -1420,7 +1351,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     # if we're still here... let's crop!
     target_dir = File.join(Rails.root, 'public', 'images', 'content', @pg.path)
-    localfile = File.join(target_dir, localfile)
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
@@ -1478,7 +1408,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     orig_im.write(localfile) if dirty
     File.chmod(0644, localfile)
     
-    @image_file = localfile
+    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
     File.unlink testfile
     upload_to_s3(localfile, @pg)
     
