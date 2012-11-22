@@ -92,5 +92,8 @@ h1 .volunteer { background-color: #5E14CD; }
 h1 .booth { background-color: #0AC153; }
 h1 .shift { background-color: #0A612C; }
 
+table.imagine-management tr:hover { background-color: #fff8c6; }
+table.imagine-management th { background-color: #dedede; text-transform: uppercase; }
+
 table.stats th { text-align: center; padding: 1px 8px; border: 1px solid gray; border-collapse: true; }
 table.stats td { text-align: center; padding: 4px 8px; border: 1px solid gray; border-collapse: true; }

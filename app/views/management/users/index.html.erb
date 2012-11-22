@@ -1,15 +1,15 @@
-<h2>Manage Users</h2><br/>
+<h2>CMS &raquo; Users</h2>
 
-<%= link_to raw('Create a new user &raquo;'), :action => 'create' %>
+<p><%= button_to 'Create New User', :action => 'create' %></p>
 
 <%= flash_message %>
 
-<table cellspacing="3" cellpadding="1" border="0" width="95%">
+<table cellpadding="3" width="95%" class="imagine-management">
   <tr>
-    <td bgcolor="#dedede" width="26%"><b>USERNAME</b></td>
-    <td bgcolor="#dedede" width="22%"><b>FIRST NAME</b></td>
-    <td bgcolor="#dedede" width="22%"><b>LAST NAME</b></td>
-    <td bgcolor="#dedede" width="10%"><b>Active?</b></td>
+    <th width="26%">Username</th>
+    <th width="22%">First Name</th>
+    <th width="22%">Last Name</th>
+    <th width="10%">Active?</th>
     <td bgcolor="#dedede" width="10%">&nbsp;</td>
     <td bgcolor="#dedede" width="10%">&nbsp;</td>
   </tr>
@@ -23,4 +23,4 @@
     <td><%= button_to('Delete', { :action => 'destroy', :id => u }, { :confirm => 'Are you sure you want to delete ' + u.username + '?', :class => 'form_button' }) if u.username != session[:user_username] %></td>
   </tr>
   <% end %>
-</table><br/>
+</table>

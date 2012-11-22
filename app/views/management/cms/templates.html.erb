@@ -1,14 +1,12 @@
 <h2>CMS &raquo; Templates</h2>
 
+<p><%= button_to 'Create New Template', :action => 'edit_template' %></p>
+
 <%= flash_message %>
 
-<button onclick="location.href = '<%= url_for :action => 'edit_template' %>'" class="form_button">Create Template</button>
-<br/>
-<br/>
-
-<table>
+<table cellpadding="3" width="400" class="imagine-management">
   <tr>
-    <td>Name</td>
+    <th>Name</th>
   </tr>
   <%= render :partial => 'temp', :collection => @temps %>
 </table>
