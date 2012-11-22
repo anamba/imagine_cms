@@ -1,1 +1,1 @@
-<%= javascript_tag "$('pg_thumbnail_path').value = '/#{File.join('images', 'content', @pg.path, File.basename(@image_file))}'; $('thumbnail_preview').innerHTML = '#{page_image_tag(@pg, @image_file)}'; cancelSelectThumbnail();" %>
+<%= javascript_tag "$('pg_thumbnail_path').value = '#{page_image_path(@pg, @image_file)}'; $('thumbnail_preview').innerHTML = '#{page_image_tag(@pg, @image_file)}'; cancelSelectThumbnail();" %>

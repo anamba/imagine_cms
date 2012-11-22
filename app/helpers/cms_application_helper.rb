@@ -1096,14 +1096,18 @@ EOF
     ret += javascript_tag("cropper = new Cropper.Img('testImage', { minWidth: 0, minHeight: 0, captureKeys: false, onEndCrop: onEndCrop });")
   end
   
-  def page_image_tag(page, filename)
+  def page_image_path(page, filename)
     if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
       prefix = ImagineCmsConfig['amazon_s3'][Rails.env]['image_prefix']
       hostname = ImagineCmsConfig['amazon_s3'][Rails.env]['image_hostname']
-      "<img src=\"//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
+      "//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}"
     else
-      "<img src=\"/#{File.join('assets', 'content', page.path, File.basename(filename))}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
+      "/#{File.join('assets', 'content', page.path, File.basename(filename))}"
     end
+  end
+  
+  def page_image_tag(page, filename)
+    "<img src=\"#{page_image_path(page, filename)}\" alt=\"#{File.basename(filename, '.*').sub(/-[[:xdigit:]]{32}\z/, '').capitalize}\" />".html_safe
   end
   
   def copyright_year(year)
