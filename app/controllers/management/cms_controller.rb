@@ -1655,11 +1655,15 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       s3success = false
       
       if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
-        filename = File.join(Rails.root, 'public', 'assets', 'content', page.path, File.basename(filename))
-        prefix = ImagineCmsConfig['amazon_s3'][Rails.env]['image_prefix']
+        prefix = ImagineCmsConfig['amazon_s3']['image_prefix']
         bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
+        
+        # set options + metadata
+        options = ImagineCmsConfig['amazon_s3']['metadata']
+        options[:access] = :public_read
+        
         while s3retries < 2 && !s3success
-          response = AWS::S3::S3Object.store("#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}", open(filename), bucket, :access => :public_read)
+          response = AWS::S3::S3Object.store("#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}", open(filename), bucket, options)
           s3success = response.code == 200
           s3retries += 1
         end

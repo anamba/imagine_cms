@@ -1096,9 +1096,10 @@ EOF
     ret += javascript_tag("cropper = new Cropper.Img('testImage', { minWidth: 0, minHeight: 0, captureKeys: false, onEndCrop: onEndCrop });")
   end
   
+  # filename should include version number in query string
   def page_image_path(page, filename)
     if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
-      prefix = ImagineCmsConfig['amazon_s3'][Rails.env]['image_prefix']
+      prefix = ImagineCmsConfig['amazon_s3']['image_prefix']
       hostname = ImagineCmsConfig['amazon_s3'][Rails.env]['image_hostname']
       "//#{hostname}/#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}"
     else
