@@ -22,13 +22,17 @@ Of the three original phases of this project, two remain:
 
 =Current Status
 
-Imagine 3.0 is finally ready for production use internally at Bigger Bird, but it's not quite ready for general use yet. For starters, it has no install generator or migrations, so good luck figuring out the database schema on your own. Probably still buggy, not all functionality has been properly exercised. No tests or documentation yet, I'll tackle this for 4.0 as we modernize the internals.
+Imagine 3.0 is finally ready for production use internally at Bigger Bird, but it's not quite ready for general use yet. Probably still buggy, not all functionality has been properly exercised, and there are no tests yet, I'll tackle this for 4.0 as we modernize the internals.
 
-One major feature is still missing: browser-based editing of application layout and stylesheets. While convenient, this was probably not ever a good idea, so I'm working on a better solution. Might need to go into 3.1. Once 3.0 has stabilized in production (December 2012-ish), I'll branch off 3.0-stable and begin work on 3.1 on master.
+One major feature is still missing: browser-based editing of view layouts and stylesheets. While convenient, this was probably not ever a good idea, so I'm working on a better solution.
 
 Unless you are interested in contributing to development, it might be best to wait until the second phase of this project (Imagine 4). Why? Well, the purpose of Imagine 3 is strictly to port legacy sites to Rails 3.2 as simply as possible. Imagine 3 will always be held back by its need to remain compatible with legacy installations dating back to 2006. The ERB templating language can be dangerous (it allows all Ruby, including shell escapes), and the editor (powered by an ancient version of Dojo) is Firefox-only. It also uses Prototype, which has become a bit unfashionable these days.
 
 Imagine 4 will be a clean break from all of these "traditions," and thus will be a good time to get on board.
+
+=Hosting
+
+Imagine 3 can run on most "standard" Rails hosting platforms, anything that uses Passenger, Unicorn, etc. On hosts that don't allow/recommend writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (this has not been tested).
 
 =Getting Help
 
