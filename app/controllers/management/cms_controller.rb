@@ -867,9 +867,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       next if img.include?('-thumb')
       
       thumbfile = File.join(Rails.root, 'public', @dirname, File.basename(img, File.extname(img))) + '-thumb.jpg'
-      #@thumbs << File.basename(img, File.extname(img))
-      @thumbs << File.join(@dirname, File.basename(img, File.extname(img))) + 
-'-thumb.jpg'
+      @thumbs << File.join(@dirname, File.basename(img, File.extname(img))) + '-thumb.jpg'
       
       next if File.exists?(thumbfile)
       

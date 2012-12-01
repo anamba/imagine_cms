@@ -63,6 +63,9 @@ module Cms # :nodoc:
     end
     
     def show_from_db
+      @@cms_page_table_exists ||= CmsPage.table_exists?
+      return unless @@cms_page_table_exists
+      
       logger.debug 'Rendering content from database'
       
       begin
