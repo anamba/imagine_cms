@@ -9,12 +9,17 @@ Gem::Specification.new do |s|
   s.name        = "imagine_cms"
   s.version     = ImagineCms::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Aaron Namba"]
-  s.email       = ["aaron@biggerbird.com"]
+  s.author      = "Aaron Namba"
+  s.email       = "aaron@biggerbird.com"
   s.homepage    = "https://github.com/anamba/imagine_cms"
   s.summary     = %q{Imagine Content Management System for Rails}
   s.description = %q{See README for details.}
 
+  s.required_ruby_version     = '>= 1.9.3'
+  s.required_rubygems_version = '>= 1.8.11'
+
+  s.license = 'AGPLv3'
+  
   s.rubyforge_project = "imagine_cms"
 
   s.files         = `git ls-files`.split("\n")
