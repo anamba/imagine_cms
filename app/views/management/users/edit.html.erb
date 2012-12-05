@@ -1,66 +1,54 @@
 <%= flash_message %>
 
-<%= form_tag do %>
+<%= form_for(@user) do |f| %>
 <table>
   <tr>
     <td>First name:</td>
-    <td><%= text_field :user, :first_name %></td>
+    <td><%= f.text_field :first_name %></td>
   </tr>
   <tr>
     <td>Last name:</td>
-    <td><%= text_field :user, :last_name %></td>
+    <td><%= f.text_field :last_name %></td>
   </tr>
   <tr>
     <td>Email address:</td>
-    <td><%= text_field :user, :email_address %></td>
+    <td><%= f.text_field :email_address %></td>
   </tr>
   
   <tr>
     <td>Username:</td>
-    <td><%= text_field :user, :username %></td>
+    <td><%= f.text_field :username %></td>
   </tr>
   <tr>
     <td>New Password:</td>
-    <td><%= password_field :user, :password %></td>
+    <td><%= f.password_field :password %></td>
   </tr>
   <tr>
     <td>Confirm:</td>
-    <td><%= password_field :user, :password_confirmation %></td>
+    <td><%= f.password_field :password_confirmation %></td>
   </tr>
   
-  <tr>
-    <td>Administrator:</td>
-    <td><%= check_box :user, :is_superuser %></td>
-  </tr>
-  
-  <tr>
-    <td colspan="2">-- OR -- </td>
-  </tr>
-  
-  <tr>
-    <td>Manage Restaurants:</td>
-    <td><%= check_box :user, :can_manage_restaurants %></td>
-  </tr>
-  <tr>
-    <td>Manage Recipes:</td>
-    <td><%= check_box :user, :can_manage_recipes %></td>
-  </tr>
-  <tr>
-    <td>Manage Blog Posts:</td>
-    <td><%= check_box :user, :can_manage_blog %></td>
-  </tr>
-  <tr>
-    <td>Manage Requests:</td>
-    <td><%= check_box :user, :can_manage_reqs %></td>
-  </tr>
-  <tr>
-    <td>Manage Members:</td>
-    <td><%= check_box :user, :can_manage_members %></td>
-  </tr>
-  <tr>
-    <td>Manage Users:</td>
-    <td><%= check_box :user, :can_manage_users %></td>
-  </tr>
+  <%- if @user.username != session[:user_username] -%>
+    <tr>
+      <td>This user is allowed to:</td>
+      <td>
+        <%= f.check_box :can_manage_cms %>
+          <label for="user_can_manage_cms">Create and edit web site content</label><br/>
+        <%- if UseCmsAccessLevels -%>
+        <%= f.check_box :can_manage_cms_publishing, :style => 'margin-left: 20px;' %>
+          <label for="user_can_manage_cms_publishing">Publish new page versions and create new pages</label><br/>
+          <div style="margin-left: 40px;" title="Example: /programs/abc, /about/news">
+            <label for="user_cms_allowed_sections">...but only in these sections (leave blank for unrestricted access):</label><br/>
+            <%= f.text_field :cms_allowed_sections, :style => 'width: 350px;' %>
+          </div>
+        <%= f.check_box :can_manage_cms_full_access, :style => 'margin-left: 20px;' %>
+          <label for="user_can_manage_cms_full_access">Edit templates and snippets</label><br/>
+        <%- end -%>
+        <%= f.check_box :can_manage_users %>
+          <label for="user_can_manage_users">Create users and control their access</label><br/>
+      </td>
+    </tr>
+  <%- end -%>
   
   <tr>
     <td></td>

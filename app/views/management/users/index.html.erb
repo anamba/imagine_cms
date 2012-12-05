@@ -1,6 +1,6 @@
 <h2>CMS &raquo; Users</h2>
 
-<p><%= button_to 'Create New User', :action => 'create' %></p>
+<p><%= button_to 'Create New User', new_user_path, :method => :get %></p>
 
 <%= flash_message %>
 

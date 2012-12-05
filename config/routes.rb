@@ -8,7 +8,17 @@ Rails.application.routes.draw do
   
   match 'manage/cms/preview_template'           => 'cms/content#preview_template'
   match 'manage/cms(/:action(/:id))'            => 'management/cms'
-  match 'manage/users(/:action(/:id))'          => 'management/users'
+  
+  # slowly convert to resourceful routes
+  # match 'manage/users(/:action(/:id))'          => 'management/users'
+  resources :users, :path => 'manage/users', :controller => 'management/users' do
+      member do
+        post :enable
+        post :disable
+        post :edit     # COMPAT: Remove for 3.1
+      end
+    end
+  # end
   
   match 'util/date_picker'                      => 'util#date_picker', :as => :date_picker
   
