@@ -1,5 +1,4 @@
-.bundle/
-log/*.log
+Gemfile.lock
 pkg/
 rdoc/
 test/dummy/db/*.sqlite3
