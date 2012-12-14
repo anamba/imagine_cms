@@ -10,7 +10,7 @@ class Management::UsersController < Management::ApplicationController
   ###
   
   def index
-    @users = User.all
+    @users = User.order('active desc, username').all
   end
   
   def new
