@@ -1,16 +1,16 @@
 <script type="text/javascript">
   attrlist = new Array(<%= @attrs.size %>)
   
-  <% @attrs.each_with_index do |attr, i| -%>
+  <%- @attrs.each_with_index do |attr, i| -%>
   attrlist[<%= i %>]="<%=h attr %>"
-  <% end -%>
+  <%- end -%>
 </script>
 
 <div id="save_errors" class="error"></div>
 
 <%= form_remote_tag :url => { :action => 'edit_page', :id => @pg },
-                   :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';",
-                   :html => { :onsubmit => 'teardownTextFieldHints();' } do -%>
+                    :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';",
+                    :html => { :onsubmit => 'teardownTextFieldHints();' } do %>
 <table>
   <col width="120"><col width="*"><col width="5">
 <%- if (@pg.id || 2) > 1 -%>
@@ -56,7 +56,7 @@
             <%= date_picker :pg, :article_date, :default_value => (@pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %>
           </td>
           <td width="120">
-            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"' %>>&ndash; <%= date_picker :pg, :article_end_date, :default_value => (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %></div>
+            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"'.html_safe %>>&ndash; <%= date_picker :pg, :article_end_date, :default_value => (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %></div>
           </td>
           <td align="right" width="180">
             <input type="checkbox" name="use_article_date_range" value="1" onclick="$('div_article_end_date').toggle();"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? ' checked="checked"' : '' %> /><label for="use_article_date_range">Use date range</label>
