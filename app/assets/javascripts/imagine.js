@@ -382,8 +382,6 @@ function showDatePicker(object, method_prefix) {
     var el = $('date_picker_' + object + '_' + method_prefix + 'main');
     el.hide();
     el.style.position = 'absolute';
-/*    el.style.left = (coords[0] - 120) + 'px';*/
-/*    el.style.top  = (coords[1] + 14) + 'px';*/
     el.show();
 }
 
@@ -652,7 +650,7 @@ function hideDojoDialog(id) {
 
 function editProperties(url, titleText) {
     $('properties_dialog_content').innerHTML = 'Loading...';
-    new Ajax.Updater('properties_dialog_content', url, {asynchronous:true, evalScripts:true});
+    new Ajax.Updater('properties_dialog_content', url, {method:'get', asynchronous:true, evalScripts:true});
     
     showDojoDialog('properties_dialog', titleText);
 }

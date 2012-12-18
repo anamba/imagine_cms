@@ -863,7 +863,7 @@ module CmsApplicationHelper
                     "'&exclude_days=#{exclude_days.join(',')}' + " +
                     "'&onchange=#{escape_javascript(options[:onchange])}' + " +
                     "'&object=#{object}' + " +
-                    "'&method_prefix=#{method_prefix}', {asynchronous:true, evalScripts:true})"
+                    "'&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true})"
     
     ret = <<EOF
   <span><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><span id="date_picker_#{object}_#{method_prefix}_value">#{default_value.strftime('%a %m/%d/%y')}</span></a></span>
@@ -926,7 +926,7 @@ EOF
                     "'&year=' + $('event_calendar_year_sel').value + " +
                     "'&min_time=#{start_date.to_i}&max_time=#{end_date.to_i}" +
                     "&calendar_id=#{calendar_id}&css_prefix=#{css_prefix}" +
-                    "&popout_direction=#{popout_direction.to_s}', {asynchronous:true, evalScripts:true})"
+                    "&popout_direction=#{popout_direction.to_s}', {method:'get', asynchronous:true, evalScripts:true})"
     
     # keep all this junk in sync with what's in UtilController
     @month = Time.now.month
