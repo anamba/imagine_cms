@@ -671,7 +671,7 @@ function insertImage(url) {
         w.show();
     } else {
         $('insert_image_dialog_content').innerHTML = 'Loading...';
-        new Ajax.Updater('insert_image_dialog_content', url, {asynchronous:true, evalScripts:true});
+        new Ajax.Updater('insert_image_dialog_content', url, {method:'get', asynchronous:true, evalScripts:true});
         showDojoDialog('insert_image_dialog');
     }
     try { if (cropper) cropper.remove(); } catch (e) {}
@@ -692,7 +692,7 @@ function insertFile(url) {
     }
     
     $('insert_file_dialog_content').innerHTML = 'Loading...';
-    new Ajax.Updater('insert_file_dialog_content', url, {asynchronous:true, evalScripts:true});
+    new Ajax.Updater('insert_file_dialog_content', url, {method:'get', asynchronous:true, evalScripts:true});
     showDojoDialog('insert_file_dialog');
 }
 
