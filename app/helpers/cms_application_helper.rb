@@ -37,36 +37,30 @@ module CmsApplicationHelper
     end
     
     @user = User.find(session[:user_id]) rescue nil
-    session[:user_is_superuser] = @user.is_superuser rescue nil
+    session[:user_is_superuser] = @user.is_superuser? rescue nil
     
     @user
   end
   
   # Takes a symbol/string or array of symbols/strings and returns true if user has all
   # of the named permissions.
-  #
-  # Result is stored in the session to speed up future checks.
   def user_has_permissions?(*permission_set)
     return false if !(@user ||= authenticate_user)
     
-    if !permission_set.is_a? Array
-      permission_set = [ permission_set ]
-    end
+    permission_set = [ permission_set ] unless permission_set.is_a?(Array)
     
     if session[:user_is_superuser]
-      for perm in permission_set
-        perm = perm.to_s
-        session[('user_can_' + perm).to_sym] ||= true
-      end
+      permission_set.each { |perm| session["user_can_#{perm}".to_sym] = true }
       return true
     end
     
-    for perm in permission_set
-      perm = perm.to_s
-      session[('user_can_' + perm).to_sym] = @user.send('can_' + perm)
-      # logger.debug "user_can_#{perm} = #{@user.send('can_' + perm)}"
-      return session[('user_can_' + perm).to_sym]
+    has_permissions = false
+    permission_set.each do |perm|
+      session["user_can_#{perm}".to_sym] = (@user.send("can_#{perm}").to_i == 1)
+      has_permissions = has_permissions && session["user_can_#{perm}".to_sym]
     end
+    
+    has_permissions
   end
   alias :user_has_permission? :user_has_permissions?
   
