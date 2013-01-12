@@ -54,7 +54,7 @@ module CmsApplicationHelper
       return true
     end
     
-    has_permissions = false
+    has_permissions = true
     permission_set.each do |perm|
       session["user_can_#{perm}".to_sym] = (@user.send("can_#{perm}").to_i == 1)
       has_permissions = has_permissions && session["user_can_#{perm}".to_sym]
