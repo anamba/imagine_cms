@@ -126,7 +126,7 @@ module Cms # :nodoc:
         test = db_path.last(3)
         
         if test.size == 3
-          if test[0] == 'segment' && !test[1].empty? && !test[2].empty?
+          if test[0] == 'segment' && !test[1].blank? && !test[2].blank?
             @page_list_segment = true
             params[:page_list_name] = db_path.pop
             params[:offset] = db_path.pop
@@ -242,7 +242,7 @@ module Cms # :nodoc:
         # table just for search. (this would be better because it would sort by relevance)
         # @pages.concat CmsPage.find(:all, :conditions => [ 'match (title, search_index) against (?)', params[:q] ])
       end
-      @pages = @pages.uniq.reject { |pg| pg.search_index.empty? }
+      @pages = @pages.uniq.reject { |pg| pg.search_index.blank? }
       
       @pg = CmsPage.new
       @pg.template = CmsTemplate.find_by_name('Search') || CmsTemplate.new

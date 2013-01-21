@@ -85,7 +85,7 @@ module ActionControllerExtensions
           
           # make options specified in snippets and templates accessible to
           # page list segments and rss feeds
-          @page_objects["#{key}-template"] = options[:template] if @page_objects["#{key}-template"].empty?
+          @page_objects["#{key}-template"] = options[:template] if @page_objects["#{key}-template"].blank?
           
           render_page_list_segment(name, pages, options, html_options)
         end

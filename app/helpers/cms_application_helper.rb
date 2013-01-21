@@ -126,7 +126,7 @@ module CmsApplicationHelper
   def first_non_empty(*args)
     while !args.empty?
       ret = args.shift
-      return ret unless ret.to_s.empty?
+      return ret unless ret.to_s.blank?
     end
     return ''
   end
@@ -337,12 +337,12 @@ module CmsApplicationHelper
         instance_tags_require << @page_objects["#{key}-sources-tag#{i}"]
       end
     end
-    include_tags = instance_tags_include.map { |t| t.strip }.reject { |t| t.empty? }
-    exclude_tags = instance_tags_exclude.map { |t| t.strip }.reject { |t| t.empty? }
-    require_tags = instance_tags_require.map { |t| t.strip }.reject { |t| t.empty? }
+    include_tags = instance_tags_include.map { |t| t.strip }.reject { |t| t.blank? }
+    exclude_tags = instance_tags_exclude.map { |t| t.strip }.reject { |t| t.blank? }
+    require_tags = instance_tags_require.map { |t| t.strip }.reject { |t| t.blank? }
     
     if include_tags.empty?
-      include_tags = (options[:include_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.empty? }
+      include_tags = (options[:include_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.blank? }
       include_tags.each do |t|
         i = @page_objects["#{key}-sources-tag-count"]
         @page_objects["#{key}-sources-tag#{i}"] = t
@@ -351,7 +351,7 @@ module CmsApplicationHelper
       end
     end
     if exclude_tags.empty?
-      exclude_tags = (options[:exclude_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.empty? }
+      exclude_tags = (options[:exclude_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.blank? }
       exclude_tags.each do |t|
         i = @page_objects["#{key}-sources-tag-count"]
         @page_objects["#{key}-sources-tag#{i}"] = t
@@ -360,7 +360,7 @@ module CmsApplicationHelper
       end
     end
     if require_tags.empty?
-      require_tags = (options[:require_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.empty? }
+      require_tags = (options[:require_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.blank? }
       require_tags.each do |t|
         i = @page_objects["#{key}-sources-tag-count"]
         @page_objects["#{key}-sources-tag#{i}"] = t
@@ -375,7 +375,7 @@ module CmsApplicationHelper
       folders << HashObject.new(:src => @page_objects["#{key}-sources-folder#{i}"].strip,
                                 :expand_folders => @page_objects["#{key}-sources-folder#{i}-expand-folders"])
     end
-    folders = folders.reject { |f| f.src.empty? }
+    folders = folders.reject { |f| f.src.blank? }
     
     if folders.empty?
       folders = (options[:folders] || '').split(',').map do |f|
@@ -396,7 +396,7 @@ module CmsApplicationHelper
         
         obj
       end
-      folders = folders.reject { |f| f.src.empty? }
+      folders = folders.reject { |f| f.src.blank? }
       
       @page_objects["#{key}-sources-folder-count"] = folders.size
       folders.each_with_index do |f, i|

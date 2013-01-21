@@ -20,8 +20,8 @@ EOF
   <div id="columnBrowser" style="width: <%= cbColWidthFull * (@page_levels.size) %>px;">
     <% @page_levels.each_with_index do |name, i| %>
       <%
-        if !name.empty?
-          @path << '/' if !@path.empty?
+        if !name.blank?
+          @path << '/' if !@path.blank?
           @path << name
         end
         @parent = @page

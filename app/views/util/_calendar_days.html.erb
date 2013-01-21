@@ -46,7 +46,7 @@
             <td>
               <div class="<%= @css_prefix %>event_rollover_body" style="border-width: 0 1px 0 1px; border-style: solid; padding: 7px 7px 0 7px; margin-<%= @popout_direction == 'right' ? 'left' : 'right' %>: 12px;">
                 <b><%= evt[:name] %></b>
-                <%= '<br/>' + evt[:html] unless evt[:html].empty? %>
+                <%= '<br/>' + evt[:html] unless evt[:html].blank? %>
               </div>
             </td>
           </tr>

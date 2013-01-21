@@ -173,7 +173,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   #     end
   #     
   #     begin
-  #       if params[:file_content].empty?
+  #       if params[:file_content].blank?
   #         flash[:error] = 'An error occurred, please contact support.'
   #       else
   #         File.open(filename, 'w') { |f| f.write(params[:file_content]) }
@@ -194,7 +194,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   # end
   
   def pages
-    @page_levels = [ '' ].concat((params[:path] || session[:cms_pages_path] || '').split('/').reject { |l| l.empty? })
+    @page_levels = [ '' ].concat((params[:path] || session[:cms_pages_path] || '').split('/').reject { |l| l.blank? })
     @page_levels << ''
     @path = ''
     @page = nil
@@ -276,7 +276,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         # now try to save tags
         begin
           tags_to_delete = @pg.tags
-          params[:tags].split(',').map { |t| t.strip }.reject { |t| t.empty? }.compact.each do |t|
+          params[:tags].split(',').map { |t| t.strip }.reject { |t| t.blank? }.compact.each do |t|
             @pg.tags.create(:name => t) unless @pg.tags.find_by_name(t)
             tags_to_delete.reject! { |tag| tag.name == t }
           end
@@ -290,7 +290,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           objects_to_delete = @pg.objects.find(:all, :conditions => [ "obj_type = 'attribute' or obj_type = 'option'" ])
           
           (params[:page_objects] || {}).each do |key,val|
-            next if key.empty? || val.empty?
+            next if key.blank? || val.blank?
             
             key =~ /^obj-(\w+?)-(.+?)$/
             obj = @pg.objects.find(:first, :conditions => [ "name = ? and obj_type = ?", $2, $1 ])
@@ -454,7 +454,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             for i in 0...@page_objects["#{key}-sources-tag-count"].to_i
               tags << @page_objects["#{key}-sources-tag#{i}"]
             end
-            tags.reject! { |tag| tag.empty? }
+            tags.reject! { |tag| tag.blank? }
             @page_objects["#{key}-sources-tag-count"] = tags.size
             tags.each_with_index do |tag, i|
               @page_objects["#{key}-sources-tag#{i}"] = tag
@@ -466,7 +466,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             for i in 0...@page_objects["#{key}-sources-folder-count"].to_i
               folders << @page_objects["#{key}-sources-folder#{i}"]
             end
-            folders.reject! { |folder| folder.empty? }
+            folders.reject! { |folder| folder.blank? }
             @page_objects["#{key}-sources-folder-count"] = folders.size
             folders.each_with_index do |folder, i|
               @page_objects["#{key}-sources-folder#{i}"] = folder
@@ -644,10 +644,10 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     case type.to_sym
     when :string
-      @page_objects[key] = options[:content] if @page_objects[key].empty?
+      @page_objects[key] = options[:content] if @page_objects[key].blank?
       text_field(:page_objects, key, options)
     when :text
-      @page_objects[key] = options[:content] if @page_objects[key].empty?
+      @page_objects[key] = options[:content] if @page_objects[key].blank?
       focusOnLoad = !defined?(@cms_text_editor_placed)
       @cms_text_editor_placed = true
       content = ''.html_safe

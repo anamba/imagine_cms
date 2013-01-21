@@ -71,7 +71,7 @@
   </tr>
   <tr>
     <td>Published Version:</td>
-    <td><%= select :pg, :published_version, [ [ '[ Offline ]', -1 ], [ '[ Latest Version ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.empty? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
+    <td><%= select :pg, :published_version, [ [ '[ Offline ]', -1 ], [ '[ Latest Version ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
   </tr>
   <tr>
     <td>Publish Date:</td>
@@ -107,7 +107,7 @@
         A thumbnail cannot be added until you save this page.
       <%- else -%>
       <div id="thumbnail_preview" style="width: 385px; overflow: auto;">
-        <%- if @pg.thumbnail_path.empty? -%>
+        <%- if @pg.thumbnail_path.blank? -%>
           no thumbnail image selected
         <%- else -%>
           <%= image_tag(@pg.thumbnail_path, :onclick => "jQuery('#pg_thumbnail_path').show();") %>
@@ -128,7 +128,7 @@
         A feature image cannot be added until you save this page.
       <%- else -%>
       <div id="feature_image_preview" style="width: 385px; overflow: auto;">
-        <%- if @pg.feature_image_path.empty? -%>
+        <%- if @pg.feature_image_path.blank? -%>
           no feature image selected
         <%- else -%>
           <%= image_tag(@pg.feature_image_path, :onclick => "jQuery('#pg_feature_image_path').show();") %>
