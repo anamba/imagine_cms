@@ -242,7 +242,7 @@ module Cms # :nodoc:
         # table just for search. (this would be better because it would sort by relevance)
         # @pages.concat CmsPage.find(:all, :conditions => [ 'match (title, search_index) against (?)', params[:q] ])
       end
-      @pages = @pages.uniq.reject { |pg| pg.search_index.blank? }
+      @pages = @pages.uniq.reject { |pg| pg.search_index.blank? }.first(100)
       
       @pg = CmsPage.new
       @pg.template = CmsTemplate.find_by_name('Search') || CmsTemplate.new
