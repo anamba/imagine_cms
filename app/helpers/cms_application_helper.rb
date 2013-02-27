@@ -557,8 +557,9 @@ module CmsApplicationHelper
       begin
         val = page.send(attr.downcase.underscore)
         case val.class.to_s
-        when 'String'
-          val
+        when 'ActiveSupport::TimeWithZone'
+          val = val.utc
+          val = val.strftime("(%a) ") + val.strftime("%B ") + val.day.to_s + val.strftime(", %Y")
         when 'Time'
           val = val.strftime("(%a) ") + val.strftime("%B ") + val.day.to_s + val.strftime(", %Y")
         when 'NilClass'
