@@ -136,3 +136,7 @@ div.auto_complete ul strong.highlight {
     color: white;
     background-color: #506D91;
 }
+
+
+table.imagine-management tr:hover { background-color: #fff8c6; }
+table.imagine-management th { background-color: #dedede; text-transform: uppercase; }

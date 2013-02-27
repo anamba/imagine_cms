@@ -3,7 +3,14 @@
   @subnav_sections = []
   
   if is_logged_in_user?
-    @nav_sections << [ 'Users', { :controller => '/management/users' } ] if user_has_permission?(:manage_users)
+    if user_has_permission?(:manage_cms)
+      @nav_sections << [ 'Pages', { :controller => '/management/cms', :action => 'pages' } ]
+      @nav_sections << [ 'Templates', { :controller => '/management/cms', :action => 'templates' } ]
+      @nav_sections << [ 'Snippets', { :controller => '/management/cms', :action => 'snippets' } ]
+    end
+    if user_has_permission?(:manage_users)
+      @nav_sections << [ 'Users', { :controller => '/management/users', :action => 'index' } ]
+    end
   end
 -%>
 <!DOCTYPE html>

@@ -1,15 +1,24 @@
-<%-
-  @nav_sections = []
-  
-  if is_logged_in_user?
-    @nav_sections << [ 'Users', { :controller => '/management/users' } ] if user_has_permission?(:manage_users)
-  end
--%>
+<%- if user_has_permission?(:manage_cms) || user_has_permission(:manage_users) -%>
+<h2>
+  Manage Your Site
+</h2>
 
-<ul>
-  <li>
-  <%= (@nav_sections.map { |nav| link_to(nav[0], nav[1]) }.safe_join('</li><li>')) %>
-  </li>
-</ul>
+<p>
+  <ul>
+    <%- if user_has_permission? :manage_cms -%>
+    <li><%= link_to 'CMS', :controller => '/management/cms', :action => 'index' %>
+        - Manage content management system</li>
+    <%- end -%>
+    <%- if user_has_permission? :manage_users -%>
+    <li><%= link_to 'Users', :controller => '/management/users', :action => 'index' %>
+        - Grant management access to employees</li>
+    <%- end -%>
+  </ul>
+</p>
+<%- end -%>
 
-<p>You should override this page in your own application.</p>
+<p>
+  <ul>
+    <li><%= link_to 'Change your password', :controller => '/management/users', :action => 'edit', :id => session[:user_id] %></li>
+  </ul>
+</p>
