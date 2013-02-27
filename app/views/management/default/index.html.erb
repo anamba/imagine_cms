@@ -2,7 +2,7 @@
   @nav_sections = []
   
   if is_logged_in_user?
-    @nav_sections << [ 'Users', { :controller => '/manage/users' } ] if user_has_permission?(:manage_users)
+    @nav_sections << [ 'Users', { :controller => '/management/users' } ] if user_has_permission?(:manage_users)
   end
 -%>
 

@@ -3,23 +3,19 @@
   @subnav_sections = []
   
   if is_logged_in_user?
-    @nav_sections << [ 'Users', { :controller => '/manage/users' } ] if user_has_permission?(:manage_users)
+    @nav_sections << [ 'Users', { :controller => '/management/users' } ] if user_has_permission?(:manage_users)
   end
 -%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
   <head>
     <title><%= controller.controller_path.split('/').concat([ params[:action] ]).map { |s| s.titlecase }.join(' > ') %></title>
-    <%#= javascript_tag 'var djConfig = { isDebug: true };' %>
     <%- if is_logged_in_user? -%>
       <script src="/assets/dojo/dojo.js" type="text/javascript"></script>
       <script src="/assets/codepress/codepress.js" type="text/javascript"></script>
     <%- end -%>
     <%= stylesheet_link_tag    "application", :media => "all" %>
-    <%= stylesheet_link_tag    "manage", :media => "all" %>
-    <%#= stylesheet_link_tag 'print', :media => 'print' %>
+    <%= stylesheet_link_tag    "management", :media => "all" %>
     <%= javascript_include_tag "application" %>
     <%= csrf_meta_tag %>
   </head>
@@ -31,14 +27,14 @@
         <%- if is_logged_in_user? -%>
           <!-- Header Navigation -->
           <div style="float: left; padding-top: 2px;">
-            <a href="/manage"><img src="/assets/manage/start.gif" width="44" height="14" alt="Start" /></a>
+            <a href="/manage"><img src="/assets/management/start.gif" width="44" height="14" alt="Start" /></a>
           </div>
           <div style="float: left; padding-left: 20px;">
             <%= raw @nav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.join(' | ') %>
           </div>
           <div style="float: right">
-            <%= link_to 'Change password', { :controller => '/manage/users', :action => 'edit', :id => session[:user_id] }, :style => 'color: white'%> |
-            <%= link_to 'Log out', { :controller => '/manage/user', :action => 'logout' }, :style => 'color: white' %>
+            <%= link_to 'Change password', { :controller => '/management/users', :action => 'edit', :id => session[:user_id] }, :style => 'color: white'%> |
+            <%= link_to 'Log out', { :controller => '/management/user', :action => 'logout' }, :style => 'color: white' %>
           </div>
         <%- end -%>
         </td>
