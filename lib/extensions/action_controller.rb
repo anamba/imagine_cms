@@ -97,7 +97,7 @@ module ActionControllerExtensions
           'Could not find snippet "' + name + '" in the database.'
         end
       when :photo_gallery
-        gallery_dir = File.join('images', 'content', @pg.path, File.basename(name))
+        gallery_dir = File.join('assets', 'content', @pg.path, File.basename(name))
         Dir.chdir(File.join(Rails.root, 'public'))
         all_images = Dir.glob("#{gallery_dir}/*.{jpg,jpeg,png,gif}")
         Dir.chdir(Rails.root)
