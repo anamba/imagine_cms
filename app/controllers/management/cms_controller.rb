@@ -1238,6 +1238,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
     localfile = File.join(target_dir, original_filename)
     FileUtils.cp(data.tempfile, localfile)
+    File.chmod(0644, localfile)
     
     finish_upload_status "'#{File.basename(localfile)}'"
   end
