@@ -26,7 +26,7 @@
           all_images.each { |img| images << img unless File.basename(img).include?('thumb') }
     -%>
       <div id="<%= File.basename(gallery) %>" style="float: left; width: 130px; margin: 0 20px 20px 0; text-align: center;">
-        <%= link_to_remote image_tag(File.join('content', @pg.path, File.basename(gallery), 'management', 'preview.jpg')),
+        <%= link_to_remote image_tag(File.join('/images/content', @pg.path, File.basename(gallery), 'management', 'preview.jpg')),
                            :url => { :action => 'select_gallery', :id => @pg, :gallery_id => File.basename(gallery) },
                            :update => 'select_gallery_container' %><br/>
         <strong><%= File.basename(gallery).titleize %></strong><br/>
