@@ -137,62 +137,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
   end
   
-  #
-  # AKN 2012-11-08: This was never really a good idea. Need to figure out a better way. Disabling for now.
-  #
-  
-  # def edit_master
-  #   @file_type = case params[:id]
-  #     when 'template' then 'html'
-  #     when 'web_stylesheet', 'print_stylesheet' then 'css'
-  #     else nil
-  #   end
-  #   
-  #   filename = case params[:id]
-  #     when 'template'         then File.join('app', 'views', 'layouts', 'application.rhtml')
-  #     when 'web_stylesheet'   then File.join('public', 'stylesheets', 'default.css')
-  #     when 'print_stylesheet' then File.join('public', 'stylesheets', 'print.css')
-  #     when 'ie_stylesheet'    then File.join('public', 'stylesheets', 'ie.css')
-  #     when 'ie6_stylesheet'   then File.join('public', 'stylesheets', 'ie6.css')
-  #   end
-  #   filename = File.join(Rails.root, filename)
-  #   
-  #   case request.method
-  #   when :get
-  #     @file_content = File.open(filename, 'r').read
-  #   when :post
-  #     begin
-  #       @pg = CmsPage.new
-  #       @page_objects = HashObject.new
-  #       render_to_string :inline => params[:file_content]
-  #     rescue Exception => e
-  #       message = e.message
-  #       flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>"
-  #       logger.debug e
-  #       return
-  #     end
-  #     
-  #     begin
-  #       if params[:file_content].blank?
-  #         flash[:error] = 'An error occurred, please contact support.'
-  #       else
-  #         File.open(filename, 'w') { |f| f.write(params[:file_content]) }
-  #         flash[:notice] = 'File saved.'
-  #       end
-  #       
-  #       CmsPage.find(:all).each do |page|
-  #         expire_page :controller => 'cms/content', :action => 'show', :content_path => page.path.split('/')
-  #       end
-  #       
-  #       redirect_to :action => 'edit_master', :id => params[:id]
-  #     rescue Exception => e
-  #       message = e.message
-  #       flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>"
-  #       log_error(e)
-  #     end
-  #   end
-  # end
-  
   def pages
     @page_levels = [ '' ].concat((params[:path] || session[:cms_pages_path] || '').split('/').reject { |l| l.blank? })
     @page_levels << ''
@@ -308,7 +252,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         render :update do |page|
           case params[:return_to]
           when 'preview'
-            page.redirect_to "/#{@pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
+            page.redirect_to "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
           else
             flash[:notice] = 'Page saved.'
             session[:cms_pages_path] = @pg.path
