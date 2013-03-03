@@ -364,7 +364,7 @@ module Cms # :nodoc:
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
-      logger.silence do
+      silence do
         template_content = render_to_string(:inline => template_content,
                                             :locals => { :page => page, :safe_level => 0 })
       end
@@ -374,7 +374,7 @@ module Cms # :nodoc:
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
-      logger.silence do
+      silence do
         template_content = render_to_string(:inline => template_content,
                                             :layout => 'application',
                                             :locals => { :page => page })
