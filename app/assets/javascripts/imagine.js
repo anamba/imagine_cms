@@ -850,7 +850,7 @@ function scanForPageObjects(page_id, parent_key, version) {
             cmsPageObjects[name] = type;
             new Ajax.Request('/manage/cms/insert_page_object_config/' + page_id + '?version= ' + version +
                              '&name=' + name + '&type=' + type + '&parent_key=' + parent_key,
-                             { asynchronous: true, evalScripts: true });
+                             { method:'get', asynchronous: true, evalScripts: true });
         }
     });
 }
