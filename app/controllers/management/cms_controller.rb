@@ -1467,7 +1467,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
       if !File.exists?(dest) || force == 1
         im = Magick::Image::read(src_file)[0]
-        im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'assets', 'images', 'management', overlay))[0]
+        im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'app', 'assets', 'images', 'management', overlay))[0]
         
         im.crop_resized!(thumb_size, thumb_size)
         im = im.composite(im_overlay, Magick::CenterGravity, Magick::OverCompositeOp)
