@@ -7,7 +7,9 @@ class CmsPageObject < ActiveRecord::Base
   
   
   def set_page_version
-    self.cms_page_version ||= page.version
+    if cms_page_version.to_i == 0
+      self.cms_page_version = page.version
+    end
   end
   
   def content=(value)
