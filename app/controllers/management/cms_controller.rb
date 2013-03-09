@@ -674,6 +674,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def crop_image
     @pg = CmsPage.find_by_id(params[:id])
     localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    File.chmod(0644, localfile)
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
@@ -741,6 +742,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     
     orig_im.write(localfile) if dirty
+    File.chmod(0644, localfile)
+    
     @image_file = localfile + "?#{File.mtime(localfile).to_i}"
     File.unlink testfile
     upload_to_s3(localfile, @pg)
@@ -1208,6 +1211,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def crop_thumb
     @pg = CmsPage.find_by_id(params[:id])
     localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    File.chmod(0644, localfile)
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
@@ -1291,6 +1295,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def crop_feature_image
     @pg = CmsPage.find_by_id(params[:id])
     localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    File.chmod(0644, localfile)
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
