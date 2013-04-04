@@ -1,0 +1,5 @@
+<%- if @pages.blank? -%>
+  Sorry, no pages matched your search.
+<%- else -%>
+  <%= render :partial => 'search_result', :collection => @pages %>
+<%- end -%>

@@ -1,0 +1,23 @@
+<%-
+  page = search_result
+  
+  title = page.title
+  
+  summary = 'error'
+  begin
+    summary = truncate(page.search_index, :length => 300)
+    summary = excerpt(page.search_index, @terms.first, 150) || truncate(page.search_index, :length => 300)
+  rescue Exception => e
+    logger.error "Error creating search index excerpt: #{e}"
+  end
+  
+  @terms.each do |term|
+    title = highlight(title, term)
+    summary = highlight(summary, term)
+  end
+-%>
+
+<p>
+  <a href="/<%= page.path %>"><%= title %></a><br/>
+  <%= summary %>
+</p>
