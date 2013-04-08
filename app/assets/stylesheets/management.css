@@ -98,6 +98,15 @@ img { display: inline; border: none; margin: 0; padding: 0; }
 #management-content ol { list-style-type: decimal; list-style-position: outside; margin: 0 0 15px 20px; }
 
 
+.form_button {
+    margin: 0;
+    font-size: 11px;
+    color: #ffffff;
+    text-decoration: none;
+    text-indent: 0;
+    background-color: #000000;
+}
+
 /** auto complete **/
 
 div.auto_complete {
