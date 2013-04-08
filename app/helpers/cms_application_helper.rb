@@ -122,7 +122,7 @@ module CmsApplicationHelper
     request.fullpath
   end
   
-  # Returns the first non-empty string in its arg list. Clearly, depends on nil_empty plugin.
+  # Returns the first non-blank string in its arg list.
   def first_non_empty(*args)
     while !args.empty?
       ret = args.shift

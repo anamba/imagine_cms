@@ -212,14 +212,14 @@ module Cms # :nodoc:
       @pages = []
       
       if params[:q]
-        @terms = params[:q].split(/\s+/).reject { |t| t.length < 3 }
+        @terms = params[:q].split(/[^\w\-]+/).reject { |t| t.length < 3 }
       end
       
       CmsPage.index_all
       unless @terms.empty?
         term_variants = []
         @terms.each do |term|
-          term_variants << [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
+          term_variants << [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\|\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
         end
         
         conds = [ 'published_version >= 0' ]
