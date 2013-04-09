@@ -70,8 +70,8 @@
     <td><%= text_field_tag :tags, @tags, :class => 'form', :style => 'width: 100%' %></td>
   </tr>
   <tr>
-    <td>Published Version:</td>
-    <td><%= select :pg, :published_version, [ [ '[ Offline ]', -1 ], [ '[ Latest Version ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
+    <td>Publish Version:</td>
+    <td><%= select :pg, :published_version, [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
   </tr>
   <tr>
     <td>Publish Date:</td>
