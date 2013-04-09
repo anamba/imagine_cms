@@ -29,14 +29,14 @@
   </tr>
 <%- if @pg.respond_to?(:html_head) -%>
   <tr>
-    <td valign="top"><div style="margin-top: 4px;">HTML Head:<br/>(for advanced users)</div></td>
-    <td><%= text_area :pg, :html_head, :class => 'form', :style => 'width: 100%; height: 50px; overflow: auto;' %></td>
+    <td valign="top"><div style="margin-top: 4px;">HTML Head:<br/>(advanced)</div></td>
+    <td><%= text_area :pg, :html_head, :class => 'form', :style => 'width: 100%; height: 35px; overflow: auto;' %></td>
   </tr>
 <%- end -%>
   <tr>
     <td valign="top"><div style="margin-top: 4px;">Template:</div></td>
     <td>
-      <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;', :onchange => '' %>
+      <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;' %>
       
       <div id="edit_page_template_options" style="background-color: white; width: 100%; height: 60px; overflow: auto; border: 1px solid #aaaaaa">
         <%= render :partial => 'template_options' %>
