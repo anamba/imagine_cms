@@ -1040,7 +1040,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     data = params[:gallery_file][:data]
     data_dest = File.join(temp_location, data.original_filename)
-    File.open(data_dest, "w") { |f| f.write(data.read) }
+    File.open(data_dest, 'wb') { |f| f.write(data.read) }
     
     last_id = images.size
     ext = File.extname(data_dest).downcase
