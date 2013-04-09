@@ -104,7 +104,7 @@ img { display: inline; border: none; margin: 0; padding: 0; }
     color: #ffffff;
     text-decoration: none;
     text-indent: 0;
-    background-color: #000000;
+    background-color: #333;
 }
 
 /** auto complete **/
