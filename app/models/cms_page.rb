@@ -2,7 +2,7 @@ class CmsPage < ActiveRecord::Base
   include ActsAsTree
   
   attr_accessible :cms_template_id, :cms_template_version, :parent_id,
-                  :name, :title, :path, :summary, :position,
+                  :name, :title, :path, :html_head, :summary, :position,
                   :article_date, :article_end_date, :published_date, :expiration_date, :expires,
                   :thumbnail_path, :feature_image_path, :comment_count, :version, :published_version,
                   :search_index, :updated_by, :updated_by_username
