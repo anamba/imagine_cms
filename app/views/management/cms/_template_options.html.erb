@@ -1,18 +1,24 @@
+<%- if @template_options.nil? || @template_options.empty? -%>
+  <%= javascript_tag "Element.hide('edit_page_template_options');" %>
+<%- else -%>
+  <%= javascript_tag "Element.show('edit_page_template_options');" %>
+<%- end -%>
+
 <%-
   @template_options.each do |name, type|
     key = name.gsub(/[^\w\d]/, '_')
 -%>
 <table width="100%">
   <col width="45%" /><col width="55%" />
-  <tr style="border-bottom: 1px solid #aaa;">
-    <td><%=h name %></td>
+  <tr>
+    <td><%= name %></td>
     <td>
       <%=
         case type
         when :checkbox
           check_box :page_objects, "obj-option-checkbox-#{key}"
         when :string, :text
-          text_field :page_objects, "obj-option-string-#{key}", :style => 'width: 100%'
+          text_field :page_objects, "obj-option-string-#{key}", :style => 'width: 100%;'
         end
       %>
     </td>

@@ -5,6 +5,8 @@ class HashObject
     @hash = HashWithIndifferentAccess.new(hash)
   end
   
+  def empty?        ; @hash.keys.empty?     ; end
+  
   def id            ; @hash['id']           ; end
   def id=(val)      ; @hash['id'] = val     ; end
   
