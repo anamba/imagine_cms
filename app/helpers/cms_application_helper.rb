@@ -126,7 +126,10 @@ module CmsApplicationHelper
   def first_non_empty(*args)
     while !args.empty?
       ret = args.shift
-      return ret unless ret.to_s.blank?
+      # TODO: This is what I want to do, but it caused a subtle change in behavior that was
+      #       unacceptable for existing sites. Implement in next major version (post-3.0).
+      # return ret unless ret.to_s.blank?
+      return ret unless ret.to_s == ''
     end
     return ''
   end
