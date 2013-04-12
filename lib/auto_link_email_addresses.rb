@@ -31,7 +31,7 @@ module ActionView::Helpers::TextHelper
         
         url = ''
         url_src.length.times do |i|
-          url << (i % 2 == 0 ? sprintf("%%%x", url_src[i]) : url_src[i])
+          url << (i % 2 == 0 ? sprintf("%%%x", url_src[i].ord) : url_src[i])
         end
         
         "#{a}#{url}#{c}"
