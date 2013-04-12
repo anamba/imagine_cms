@@ -44,6 +44,8 @@ module ImagineCms
     require 'upload_progress/lib/upload_progress'
     require 'upload_progress/lib/upload_progress_helper'
     
+    require 'auto_link_email_addresses'
+    
     #
     # load provided classes
     #

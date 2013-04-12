@@ -48,12 +48,14 @@ module ActionControllerExtensions
       when :string
         content = substitute_placeholders(@page_objects[key] || '', @pg)
         content = erb_render(content)
-        content = auto_link(content, :all, :target => '_blank') unless options[:disable_auto_link]
+        content = auto_link(content, :urls, :target => '_blank') unless options[:disable_auto_link]
+        content = auto_link_email_addresses(content) unless options[:disable_auto_link]
         content_tag :span, content, html_options
       when :text
         content = substitute_placeholders(@page_objects[key] || '', @pg)
         content = erb_render(content)
-        content = auto_link(content, :all, :target => '_blank') unless options[:disable_auto_link]
+        content = auto_link(content, :urls, :target => '_blank') unless options[:disable_auto_link]
+        content = auto_link_email_addresses(content) unless options[:disable_auto_link]
         content_tag :div, content, html_options
       when :page_list
         @rss_feeds ||= []
