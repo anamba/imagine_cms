@@ -192,9 +192,8 @@ module Cms # :nodoc:
           end
         end
       rescue Exception => e
-        logger.debug "Error rendering from db: #{e.class}: #{e.message}"
-        # log_error(e)
-        return rendering_error(e)
+        logger.error "Error rendering from db: #{e.class}: #{e.message}"
+        rendering_error(e) and return true
       end
       
       # if we haven't rendered something from the db by now, return false
