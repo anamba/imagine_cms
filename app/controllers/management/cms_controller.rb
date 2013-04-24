@@ -173,7 +173,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @pg.template ||= @parent.template
     end
     
-    @attrs = CmsPageObject.find(:all, :conditions => [ "obj_type = 'attribute'" ], :order => 'name').map { |attr| attr.name }.uniq
+    @attrs = CmsPageObject.where(:obj_type => 'attribute').uniq.pluck(:name).sort
     
     if params[:mode] == 'ajax_new' || params[:mode] == 'ajax_edit'
       @pg.published_version = -1 if params[:mode] == 'ajax_new'
@@ -526,7 +526,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def page_attributes_for_lookup
-    @attrs = CmsPageObject.find(:all, :conditions => [ "obj_type = 'attribute'" ], :order => 'name').map { |attr| attr.name }.uniq
+    @attrs = CmsPageObject.where(:obj_type => 'attribute').uniq.pluck(:name).sort
     headers['content-type'] = 'text/javascript'
     render :layout => false
   end
