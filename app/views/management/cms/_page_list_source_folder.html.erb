@@ -1,5 +1,5 @@
 <%-
-  i ||= 0
+  i = 0 if i.blank?
   @page_objects["#{key}-sources-folder#{i}-expand-folders"] ||= 'true' if @page_objects
 -%>
 <div style="border: 1px solid #f0f0f0;">

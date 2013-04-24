@@ -186,24 +186,16 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       params[:pg] ||= {}
       
       if params[:pg][:article_date_year]
-        params[:pg][:article_date] = Time.utc(params[:pg].delete(:article_date_year),
-                                                 params[:pg].delete(:article_date_month),
-                                                 params[:pg].delete(:article_date_day))
+        params[:pg][:article_date] = Time.zone.parse("#{params[:pg].delete(:article_date_year)}-#{params[:pg].delete(:article_date_month)}-#{params[:pg].delete(:article_date_day)}")
       end
       if params[:pg][:article_end_date_year]
-        params[:pg][:article_end_date] = Time.utc(params[:pg].delete(:article_end_date_year),
-                                                     params[:pg].delete(:article_end_date_month),
-                                                     params[:pg].delete(:article_end_date_day))
+        params[:pg][:article_end_date] = Time.zone.parse("#{params[:pg].delete(:article_end_date_year)}-#{params[:pg].delete(:article_end_date_month)}-#{params[:pg].delete(:article_end_date_day)}")
       end
       if params[:pg][:published_date_year]
-        params[:pg][:published_date] = Time.utc(params[:pg].delete(:published_date_year),
-                                                   params[:pg].delete(:published_date_month),
-                                                   params[:pg].delete(:published_date_day))
+        params[:pg][:published_date] = Time.zone.parse("#{params[:pg].delete(:published_date_year)}-#{params[:pg].delete(:published_date_month)}-#{params[:pg].delete(:published_date_day)}")
       end
       if params[:pg][:expires]
-        date = Time.utc(params[:pg].delete(:expiration_date_year),
-                           params[:pg].delete(:expiration_date_month),
-                           params[:pg].delete(:expiration_date_day))
+        date = Time.zone.parse("#{params[:pg].delete(:expiration_date_year)}-#{params[:pg].delete(:expiration_date_month)}-#{params[:pg].delete(:expiration_date_day)}")
         params[:pg][:expiration_date] = date if params[:pg][:expires] == 'true'
       end
       
@@ -218,36 +210,43 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       if @pg.send(save_function)
         # now try to save tags
-        begin
-          tags_to_delete = @pg.tags
-          params[:tags].split(',').map { |t| t.strip }.reject { |t| t.blank? }.compact.each do |t|
-            @pg.tags.create(:name => t) unless @pg.tags.find_by_name(t)
-            tags_to_delete.reject! { |tag| tag.name == t }
+        # begin
+          existing_tags = @pg.tags.map(&:name)
+          tags_to_delete = @pg.tags.all
+          params[:tags].split(',').map(&:strip).reject(&:blank?).each do |t|
+            if existing_tags.include?(t)
+              # still in use, don't delete
+              tags_to_delete.reject! { |tag| tag.name == t }
+            else
+              # doesn't exist, create
+              @pg.tags.create(:name => t)
+            end
           end
           tags_to_delete.each { |t| t.destroy }
-        rescue Exception => e
-          logger.debug e
-        end
+        # rescue Exception => e
+        #   logger.debug e
+        # end
         
         # now try to save page objects (just attributes in this case)
-        begin
-          objects_to_delete = @pg.objects.find(:all, :conditions => [ "obj_type = 'attribute' or obj_type = 'option'" ])
+        # begin
+          objects_to_delete = @pg.objects.where("obj_type = 'attribute' or obj_type = 'option'").all
           
           (params[:page_objects] || {}).each do |key,val|
-            next if key.blank? || val.blank?
+            next if val.blank?
             
-            key =~ /^obj-(\w+?)-(.+?)$/
-            obj = @pg.objects.find(:first, :conditions => [ "name = ? and obj_type = ?", $2, $1 ])
-            obj ||= @pg.objects.build(:name => $2, :obj_type => $1)
-            obj.content = val
-            obj.save
-            objects_to_delete.reject! { |obj| obj.name == $2 }
+            if key =~ /^obj-(\w+?)-(.+?)$/
+              obj = @pg.objects.where(:name => $2, :obj_type => $1).first
+              obj ||= @pg.objects.build(:name => $2, :obj_type => $1)
+              obj.content = val
+              obj.save
+              objects_to_delete.reject! { |obj| obj.name == $2 }
+            end
           end
           
           objects_to_delete.each { |t| t.destroy }
-        rescue Exception => e
-          logger.debug e
-        end
+        # rescue Exception => e
+        #   logger.debug e
+        # end
         
         render :update do |page|
           case params[:return_to]
@@ -368,7 +367,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     elsif request.post?
       CmsPage.transaction do
         # need to revise this later if we implement deletion of page objects
-        old_objs = @pg.objects.find(:all, :conditions => [ 'cms_page_version = ?', @pg.version ])
+        old_objs = @pg.objects.where(:cms_page_version => @pg.version).all
         
         @pg.updated_by = session[:user_id]
         @pg.updated_by_username = session[:user_username]
@@ -395,7 +394,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           # optimize source lists: tags
           if @page_objects["#{key}-sources-tag-count"].to_i > 0
             tags = []
-            for i in 0...@page_objects["#{key}-sources-tag-count"].to_i
+            @page_objects["#{key}-sources-tag-count"].to_i.times do |i|
+              logger.debug "Adding tag: #{@page_objects["#{key}-sources-tag#{i}"]}"
               tags << @page_objects["#{key}-sources-tag#{i}"]
             end
             tags.reject! { |tag| tag.blank? }
@@ -404,10 +404,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
               @page_objects["#{key}-sources-tag#{i}"] = tag
             end
           end
+          
           # optimize source lists: folders
           if @page_objects["#{key}-sources-folder-count"].to_i > 0
             folders = []
-            for i in 0...@page_objects["#{key}-sources-folder-count"].to_i
+            @page_objects["#{key}-sources-folder-count"].to_i.times do |i|
+              logger.debug "Adding folder: #{@page_objects["#{key}-sources-folder#{i}"]}"
               folders << @page_objects["#{key}-sources-folder#{i}"]
             end
             folders.reject! { |folder| folder.blank? }

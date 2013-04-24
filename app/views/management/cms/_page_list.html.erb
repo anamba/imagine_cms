@@ -13,14 +13,18 @@
       Select folders and/or tags to indicate which content to pull into this list.
       
       <div id="page_list_<%= key %>-source-list" style="margin: 10px;">
-        <%- for i in 0...@page_objects["#{key}-sources-folder-count"].to_i -%>
+        <%- @page_objects["#{key}-sources-folder-count"].to_i.times do |i| -%>
           <%= render :partial => 'page_list_source_folder', :locals => { :i => i, :key => key } %>
         <%- end -%>
-        <%- for i in 0...@page_objects["#{key}-sources-tag-count"].to_i -%>
+        <%- @page_objects["#{key}-sources-tag-count"].to_i.times do |i| -%>
           <%= render :partial => 'page_list_source_tag', :locals => { :i => i, :key => key } %>
         <%- end -%>
-        <%= text_field(:page_objects, "#{key}-sources-tag-count", :style => 'display: none') %>
-        <%= text_field(:page_objects, "#{key}-sources-folder-count", :style => 'display: none') %>
+        <%-
+          @page_objects["#{key}-sources-tag-count"] ||= 0
+          @page_objects["#{key}-sources-folder-count"] ||= 0
+        -%>
+        <%= text_field(:page_objects, "#{key}-sources-tag-count", :style => 'display: none;') %>
+        <%= text_field(:page_objects, "#{key}-sources-folder-count", :style => 'display: none;') %>
       </div>
       
       <table>
