@@ -457,7 +457,7 @@ function cbAddColumn() {
     var currentWidth = parseInt($('columnBrowser').style.width, 10);
     if (currentWidth < ((cbNumColumns+1) * cbColWidthFull)) $('columnBrowser').style.width = '' + ((cbNumColumns+1) * cbColWidthFull) + 'px';
     $('columnBrowser').innerHTML += "<div id=\"columnBrowserLevel" + cbNumColumns + "\" style=\"width: " + cbColWidth + "; height: " + cbColHeight + "; overflow: auto; float: left; border-width: " + cbBorderWidth + " " + cbBorderWidth + " " + cbBorderWidth + " " + (cbNumColumns == 0 ? cbBorderWidth : '0') + "; border-style: solid; border-color: gray;\">Loading...</div>";
-    $('columnBrowserLevel' + cbNumColumns).scrollIntoView();
+    $('columnBrowserContainer').scrollLeft = $('columnBrowserContainer').scrollWidth;
     cbNumColumns++;
 }
 
@@ -495,7 +495,7 @@ function cbSelectItem(el, currentLevel, urlForNextLevel) {
     
     cbAddColumn();
     el = $(el.id);
-    new Ajax.Updater('columnBrowserLevel' + (currentLevel+1), urlForNextLevel, {asynchronous:true, evalScripts:true});
+    new Ajax.Updater('columnBrowserLevel' + (currentLevel+1), urlForNextLevel, {method: 'GET', asynchronous:true, evalScripts:true});
     
     setScrollbarPosition(el.parentNode, coords);
 }

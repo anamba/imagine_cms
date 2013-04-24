@@ -8,13 +8,13 @@
     <tr>
       <td valign="top">Folder <%= i.to_i + 1 %>:</td>
       <td>
-        <%= text_field(:page_objects, "#{key}-sources-folder#{i}", :class => 'form', :style => 'margin: 0; border: 1px solid gray; width: 100%;') %><br/>
+        <%= text_field(:page_objects, "#{key}-sources-folder#{i}", :class => 'form', :style => 'margin: 0; padding: 2px; border: 1px solid gray; width: 98%;') %><br/>
         <%= check_box(:page_objects, "#{key}-sources-folder#{i}-expand-folders", { :class => 'form', :style => '' }, 'true', 'false') %>
         <label for="page_objects_<%= key %>-sources-folder<%= i %>-expand-folders">
           Include pages within subfolders
         </label>
       </td>
-      <td><button class="form_button" onclick="showPageBrowser('<%= "page_objects_#{key}-sources-folder#{i}" %>'); return false;">Select...</button></td>
+      <td valign="top"><button class="form_button" onclick="showPageBrowser('<%= "page_objects_#{key}-sources-folder#{i}" %>'); return false;">Select...</button></td>
     </tr>
   </table>
 </div>

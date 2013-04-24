@@ -54,4 +54,4 @@ EOF
     <% end -%>
   </div>
 </div>
-<%= javascript_tag "cbNumColumns = #{@page_levels.size - 1}; try { $('columnBrowserLevel' + cbNumColumns).scrollIntoView(); } catch (e) {}; $('page_browser_selection').value = '/#{@page.path}';" %>
+<%= javascript_tag "cbNumColumns = #{@page_levels.size - 1}; try { $('columnBrowserContainer').scrollLeft = $('columnBrowserContainer').scrollWidth; } catch (e) {}; $('page_browser_selection').value = '/#{@page.path}';" %>
