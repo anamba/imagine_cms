@@ -14,7 +14,7 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
     expire_page :controller => 'cms/content', :action => 'show', :content_path => nil
     
     # expire all other pages
-    CmsPage.find_each do |page|
+    CmsPage.select([ :id, :path ]).find_each do |page|
       expire_page :controller => 'cms/content', :action => 'show', :content_path => page.path.split('/')
     end
   end
