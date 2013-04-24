@@ -455,9 +455,11 @@ var cbColWidthFull = 202;
 
 function cbAddColumn() {
     var currentWidth = parseInt($('columnBrowser').style.width, 10);
-    if (currentWidth < ((cbNumColumns+1) * cbColWidthFull)) $('columnBrowser').style.width = '' + ((cbNumColumns+1) * cbColWidthFull) + 'px';
+    // if (currentWidth < ((cbNumColumns+1) * cbColWidthFull)) {
+      $('columnBrowser').style.width = '' + ((cbNumColumns+1) * cbColWidthFull) + 'px';
+      $('columnBrowserContainer').scrollLeft = $('columnBrowserContainer').scrollWidth;
+    // }
     $('columnBrowser').innerHTML += "<div id=\"columnBrowserLevel" + cbNumColumns + "\" style=\"width: " + cbColWidth + "; height: " + cbColHeight + "; overflow: auto; float: left; border-width: " + cbBorderWidth + " " + cbBorderWidth + " " + cbBorderWidth + " " + (cbNumColumns == 0 ? cbBorderWidth : '0') + "; border-style: solid; border-color: gray;\">Loading...</div>";
-    $('columnBrowserContainer').scrollLeft = $('columnBrowserContainer').scrollWidth;
     cbNumColumns++;
 }
 
