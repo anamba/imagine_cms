@@ -913,12 +913,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     if request.post?
       unless params[:gallery_id].downcase == "new"
-        redirect_to :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] and return
+        redirect_to :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id]
       else
-        render :partial => 'upload_image' and return
+        render :partial => 'upload_image'
       end
     else
-      render :partial => 'select_gallery' and return
+      render :partial => 'select_gallery'
     end
   end
   
@@ -1469,8 +1469,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     
     def create_preview_image(src_file, dest, force = 0, overlay = 'gallery_small_overlay.png', thumb_size = 90)
+      raise "Source file required" if src_file.blank?
+      
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
       if !File.exists?(dest) || force == 1
+        logger.debug "Reading source file #{src_file}"
         im = Magick::Image::read(src_file)[0]
         im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'app', 'assets', 'images', 'management', overlay))[0]
         
@@ -1551,7 +1554,7 @@ module MiniMagick
     def crop_resized(ncols, nrows, gravity='Center')
       columns = self[:width].to_i
       rows = self[:height].to_i
-
+      
       if ncols != columns || nrows != rows
         scale = [ncols/columns.to_f, nrows/rows.to_f].max
         resize("#{scale*(columns+0.5).to_i}x#{scale*(rows+0.5).to_i}")

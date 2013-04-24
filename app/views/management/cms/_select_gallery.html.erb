@@ -1,7 +1,7 @@
 <div id="delete_gallery_container">
   <div id="select_gallery_container">
   
-  <%- if session[:broken_galleries] and session[:broken_galleries].size > 0 -%>
+  <%- if session[:broken_galleries].is_a?(Array) && session[:broken_galleries].size > 0 -%>
     <div id="broken_galleries" style="margin-bottom: 10px; padding: 10px; background-color: #ffa7b9; border: 2px solid #f03;">
       <p><b>The following galleries have problems and require fixing:</b></p>
       <ul style="padding: 0; margin: 0 0 0 15px; list-style-type: disc;">
@@ -15,7 +15,7 @@
     </div>
   <%- end -%>
   
-  <%- if @galleries.size > 0 -%>
+  <%- if @galleries.is_a?(Array) && @galleries.size > 0 -%>
     <div id="select_gallery">
       <h2>Select gallery</h2>
     <%-
