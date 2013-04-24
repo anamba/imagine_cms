@@ -548,8 +548,8 @@ module CmsApplicationHelper
     temp.gsub!(/<#\s*tags_as_css_classes\s*#>/, page.tags_as_css_classes)
     
     # use full date/time format for created_on and updated_on
-    temp.gsub!(/<#\s*created_on\s*#>/, "#{page.created_on.getlocal.strftime('%a')} #{date_to_str(page.created_on)} #{time_to_str(page.created_on)}") if page.created_on
-    temp.gsub!(/<#\s*updated_on\s*#>/, "#{page.updated_on.getlocal.strftime('%a')} #{date_to_str(page.updated_on)} #{time_to_str(page.updated_on)}") if page.updated_on
+    temp.gsub!(/<#\s*created_on\s*#>/, "#{page.created_on.strftime('%a')} #{date_to_str(page.created_on)} #{time_to_str(page.created_on)}") if page.created_on
+    temp.gsub!(/<#\s*updated_on\s*#>/, "#{page.updated_on.strftime('%a')} #{date_to_str(page.updated_on)} #{time_to_str(page.updated_on)}") if page.updated_on
     
     # handle any custom substitutions
     temp = substitute_placeholders_custom(temp, page)
