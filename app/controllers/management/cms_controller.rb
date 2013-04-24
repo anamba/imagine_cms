@@ -291,7 +291,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def select_page
-    @page_levels = [ '' ].concat((params[:path] || session[:cms_pages_path] || '').split('/').reject { |l| l.empty? })
+    @page_levels = [ '' ].concat((params[:path].blank? ? session[:cms_pages_path] : params[:path]).to_s.split('/').reject { |l| l.blank? })
     @page_levels << ''
     @path = ''
     @page = nil
