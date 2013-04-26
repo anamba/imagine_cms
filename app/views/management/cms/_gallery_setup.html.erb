@@ -6,7 +6,7 @@
   <%- @thumbs.each_with_index do |thumb, index| -%>
   <table id="thumb_<%= File.basename(thumb, File.extname(thumb)).to_i %>" border="0" cellpadding="0" cellspacing="2" style="width: 90px; height: 90px; float: left;">
     <tr height="80">
-      <td align="center"><%= image_tag '/' + thumb %></td>
+      <td align="center"><%= image_tag "/#{thumb}?#{File.mtime(File.join(Rails.root, 'public', thumb)).to_i}" %></td>
     </tr>
   </table>
   <%- end -%>

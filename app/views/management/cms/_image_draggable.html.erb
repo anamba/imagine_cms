@@ -1,4 +1,7 @@
-<%- image = image_draggable -%>
+<%-
+  image = image_draggable
+  thumb = "assets/content/#{path}/#{gallery_id}/management/#{image}.jpg"
+-%>
 <div id="image_<%= image %>.jpg" style="float: left; cursor: move;">
-  <%= image_tag("/assets/content/#{path}/#{gallery_id}/management/#{image}.jpg", :size => '90x90') %>
+  <%= image_tag("/#{thumb}?#{File.mtime(File.join(Rails.root, 'public', thumb)).to_i}", :size => '90x90') %>
 </div>
