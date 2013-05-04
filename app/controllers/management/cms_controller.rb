@@ -958,41 +958,22 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       return
     end
     
-    FileUtils.rm_rf(temp_dir)
-    Dir.mkdir(temp_dir)
-    
     # create blank captions.yml if it doesn't already exist
     create_captions_file(@pg.id)
     
     original_captions = YAML.load_file(File.join(gallery_dir, 'captions.yml')).to_a
-    captions = []
-    captions << original_captions[0]
+    new_captions = [ original_captions[0] ]
+    
+    Dir.glob("#{gallery_dir}/**/*.jpg").each { |img| FileUtils.touch(img); FileUtils.mv(img, img + '.tmp') }
     
     sorted_images.each_with_index do |img, i|
-      localfile = File.join(gallery_dir, img)
-      thumbfile = File.join(gallery_dir, img.split('.')[0] + '-thumb.jpg')
-      
-      temp_localfile = File.join(temp_dir, (i + 1).to_s + '.jpg')
-      temp_thumbfile = File.join(temp_dir, (i + 1).to_s + '-thumb.jpg')
-      
-      begin ; FileUtils.cp(localfile, temp_localfile) ; rescue ; end
-      begin ; FileUtils.cp(thumbfile, temp_thumbfile) ; rescue ; end
-      
-      captions[i + 1] = original_captions[img.split('.')[0].to_i] || ''
+      FileUtils.mv(File.join(gallery_dir, "#{img.to_i}.jpg.tmp"), File.join(gallery_dir, "#{i+1}.jpg"))
+      FileUtils.mv(File.join(gallery_dir, "#{img.to_i}-thumb.jpg.tmp"), File.join(gallery_dir, "#{i+1}-thumb.jpg"))
+      FileUtils.mv(File.join(gallery_dir, 'management', "#{img.to_i}.jpg.tmp"), File.join(gallery_dir, 'management', "#{i+1}.jpg"))
+      new_captions << original_captions[img.to_i] || ''
     end
     
-    File.open(File.join(gallery_dir, 'captions.yml'), 'w') { |f| YAML.dump(captions, f) }
-    
-    images = Dir.glob("#{gallery_dir}/*.{jpg,jpeg,png,gif}")
-    temp_images = Dir.glob("#{temp_dir}/*.{jpg,jpeg,png,gif}")
-    
-    images.each { |img| File.delete(img) }
-    temp_images.each { |img| FileUtils.cp(img, File.join(gallery_dir, File.basename(img))) }
-    
-    FileUtils.rm_rf(File.join(gallery_dir, 'management'))
-    create_preview_images(:force => 1)
-    
-    FileUtils.rm_rf(temp_dir)
+    File.open(File.join(gallery_dir, 'captions.yml'), 'w') { |f| YAML.dump(new_captions, f) }
     session[:gallery_images_sorted] = nil
     
     redirect_to :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id]
