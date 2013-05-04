@@ -1004,7 +1004,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       captions = YAML.load_file(File.join(gallery_dir, 'captions.yml')).to_a
       captions[image_id] = params[:caption]
       
-      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| YAML.dump(captions, f) }
+      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| f << captions.to_yaml }
     end
     
     redirect_to :action => 'gallery_management', :id => params[:id], :gallery_id => params[:gallery_id]
