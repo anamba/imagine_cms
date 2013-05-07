@@ -3,6 +3,9 @@
  * in application.js            *
  ********************************/
 
+// Fixes gallery reordering (Scriptaculous Sortable)
+Position.includeScrollOffsets = true;
+
 var defaultXMenuOffset = 0;
 var defaultYMenuOffset = 0;
 var defaultXOffset = 0;
