@@ -259,6 +259,9 @@ module Cms # :nodoc:
         render :text => '', :status => '304 Not Modified' and return
       end
       
+      @@cms_page_table_exists ||= CmsPage.table_exists?
+      return not_found unless @@cms_page_table_exists
+      
       @pg = CmsPage.find_by_id(params[:page_id])
       render :nothing => true and return unless @pg && params[:page_list_name]
       key = "obj-page_list-#{params[:page_list_name].gsub(/[^\w]/, '_')}"
