@@ -150,7 +150,7 @@ module ActionControllerExtensions
         content << '<td>Page:&nbsp;</td>'
         num_segments.times do |seg|
           start = seg * limit
-          content << "<td><div"
+          content << "<td><a href=\"#\""
           if offset >= start && offset < (start + limit)
             content << " class=\"page_list_segment page_list_segment_selected\""
           else
@@ -161,7 +161,7 @@ module ActionControllerExtensions
             content << remote_function(:update => key, :url => { :content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]) })
             content << "; return false;\""
           end
-          content << ">#{seg+1}</div></td>"
+          content << ">#{seg+1}</a></td>"
         end
         content << '</tr></table>'
       end
