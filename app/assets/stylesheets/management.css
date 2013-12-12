@@ -84,9 +84,10 @@ h2 { margin: 0px 0px 8px 0px; color: #506D91;
 
 h3 { margin: 0px 0px 8px 0px; color: #666666;
      font-size: 14px; line-height: 16px; font-weight: normal; }
-    
-.error { font-size: 12px; line-height: 14px; color: #E10E12; }
-.notice { font-size: 12px; line-height: 14px; color: #3131FF; }
+
+.alert { font-size: 12px; line-height: 14px; margin-bottom: 20px; }
+.error { color: #E10E12; }
+.notice { color: #3131FF; }
 
 a         { font-weight: bold; }
 a:link    { text-decoration: underline; color: #506D91; }

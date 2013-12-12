@@ -719,10 +719,10 @@ module CmsApplicationHelper
   def flash_message
     output = ''.html_safe
     if (flash[:error] || @error || '') != ''
-      output << content_tag('div', :class => 'alert alert-error error') { flash[:error] || @error }
+      output << content_tag('div', flash[:error] || @error, :class => 'alert alert-error error')
     end
     if (flash[:notice] || @notice || '') != ''
-      output << content_tag('div', :class => 'alert alert-info notice') { flash[:notice] || @notice }
+      output << content_tag('div', flash[:notice] || @notice, :class => 'alert alert-info notice')
     end
     output
   end

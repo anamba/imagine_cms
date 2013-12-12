@@ -32,7 +32,8 @@ class Management::UsersController < Management::ApplicationController
         flash[:notice] = "User created successfully. Please check the boxes below to set this user's permissions, then click Save when you are done."
         redirect_to :action => 'edit', :id => @user.id
       else
-        flash.now[:error] = @user.errors.full_messages
+        flash.now[:error] = @user.errors.full_messages.join('; ')
+        render :action => 'new'
       end
     end
   end
@@ -75,7 +76,7 @@ class Management::UsersController < Management::ApplicationController
         redirect_to :controller => '/manage/default', :action => 'index'
       end
     else
-      flash.now[:error] = @user.errors.full_messages
+      flash.now[:error] = @user.errors.full_messages.join('; ')
       render :action => 'edit'
     end
   end

@@ -1,3 +1,3 @@
 module ImagineCms
-  VERSION = "3.0.23.1"
+  VERSION = "3.0.24"
 end
