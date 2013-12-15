@@ -131,7 +131,10 @@ module Cms # :nodoc:
             params[:page_list_name] = db_path.pop
             params[:offset] = db_path.pop
             db_path.pop
+            
+            # don't cache to disk, but do allow browsers and proxies to cache briefly
             @allow_caching = false
+            expires_in 5.minutes, :public => true
           end
         end
         
