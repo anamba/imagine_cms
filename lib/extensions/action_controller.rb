@@ -157,13 +157,14 @@ module ActionControllerExtensions
             content << " class=\"page_list_segment\""
             content << " onmouseover=\"this.className = 'page_list_segment page_list_segment_selected'\""
             content << " onmouseout=\"this.className = 'page_list_segment'\""
-            content << " onclick=\"this.style.cursor = 'wait';"
+            content << " onclick=\"$('#{key}').style.cursor = 'wait'; $('#{key}').style.opacity = 0.5; "
             content << remote_function(:update => key, :url => { :content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]) })
-            content << "; return false;\""
+            content << "; window.scrollBy(0, - 20 + document.getElementById('#{key}').getBoundingClientRect().top); return false;\""
           end
           content << ">#{seg+1}</a></td>"
         end
         content << '</tr></table>'
+        content << "<script type=\"text/javascript\">$('#{key}').style.opacity = 1; $('#{key}').style.cursor = 'default';</script>"
       end
       
       if options[:wrapper_div]
