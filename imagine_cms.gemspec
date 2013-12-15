@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
   
-  s.add_dependency "rails",               "~> 3.2.12"
+  s.add_dependency "rails",               "~> 3.2.16"
   s.add_dependency "prototype-rails",     "~> 3.2.0"
   s.add_dependency "aws-s3",              "~> 0.6.3"
   s.add_dependency "rmagick"
