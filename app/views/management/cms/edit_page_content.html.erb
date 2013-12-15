@@ -2,3 +2,9 @@
   <%= submit_tag 'Save', :id => 'btn_save', :style => 'display: none' %>
   <%= render :inline => @template_content %>
 <% end %>
+
+<script type="text/javascript">
+  window.onbeforeunload = function () {
+    return "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
+  };
+</script>
