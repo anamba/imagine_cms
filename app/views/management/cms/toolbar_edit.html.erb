@@ -2,22 +2,22 @@
   <table cellpadding="1" cellspacing="0" border="0">
     <tbody>
       <tr valign="top" align="left">
-        <td onclick="document.forms.page_content_form.elements.btn_save.click();">
+        <td onclick="window.onbeforeunload = null; document.forms.page_content_form.elements.btn_save.click();">
           <!-- save -->
           <span class="iconContainer">
             <span title="Save" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
           </span>
         </td>
-        <td onclick="document.forms.page_content_form.elements.btn_save.click();" style="vertical-align: middle; cursor: pointer">
+        <td onclick="window.onbeforeunload = null; document.forms.page_content_form.elements.btn_save.click();" style="vertical-align: middle; cursor: pointer">
           <span title="Save" style="font-family: Arial">Save</span>
         </td>
-        <td onclick="if (confirm('Are you sure you want to throw away any changes to this page since your last save?')) { location.href = '<%= '/' + @pg.path + (@pg.path == '' ? '' : '/') %>version/<%= @pg.version %>'; }">
+        <td onclick="if (confirm('Are you sure you want to throw away any changes to this page since your last save?')) { window.onbeforeunload = null; location.href = '<%= '/' + @pg.path + (@pg.path == '' ? '' : '/') %>version/<%= @pg.version %>'; }">
           <!-- cancel -->
           <span class="iconContainer">
             <span title="Cancel" class="dojoE2TBIcon dojoE2TBIcon_Cancel" style="cursor: pointer">&nbsp;</span>
           </span>
         </td>
-        <td onclick="if (confirm('Are you sure you want to throw away any changes to this page since your last save?')) { location.href = '<%= '/' + @pg.path + (@pg.path == '' ? '' : '/') %>version/<%= @pg.version %>'; }" style="vertical-align: middle; cursor: pointer">
+        <td onclick="if (confirm('Are you sure you want to throw away any changes to this page since your last save?')) { window.onbeforeunload = null; location.href = '<%= '/' + @pg.path + (@pg.path == '' ? '' : '/') %>version/<%= @pg.version %>'; }" style="vertical-align: middle; cursor: pointer">
           <span title="Cancel" style="font-family: Arial">Cancel</span>
         </td>
 
