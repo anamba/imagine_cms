@@ -771,7 +771,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     # read zip file
     
     entries = []
-    Zip::ZipFile.foreach(data.path) do |zipentry|
+    Zip::File.foreach(data.path) do |zipentry|
       next if ![ '.jpg', '.jpeg', '.png', '.gif' ].include?(File.extname(zipentry.name).downcase) || zipentry.size < 1000
       next if File.basename(zipentry.name) =~ /^\._/
       
@@ -779,7 +779,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     entries.sort! { |a,b| File.basename(a.name).downcase <=> File.basename(b.name).downcase }
     
-    Zip::ZipFile.open(data.path) do |zipfile|
+    Zip::File.open(data.path) do |zipfile|
       entries.each_with_index do |zipentry, index|
         upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
         ext = File.extname(zipentry.name)
@@ -1049,7 +1049,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
     elsif ext == '.zip'
       begin
-        Zip::ZipFile.foreach(data.path) do |zipentry|
+        Zip::File.foreach(data.path) do |zipentry|
           next if ![ '.jpg', '.jpeg', '.png', '.gif' ].include?(File.extname(zipentry.name).downcase) || zipentry.size < 1000
           upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
           localfile = File.join(temp_location, ((last_id+1).to_s + File.extname(zipentry.name)).downcase)

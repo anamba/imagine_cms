@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_dependency "aws-s3",              "~> 0.6.3"
   s.add_dependency "rmagick"
   s.add_dependency "mini_magick",         "~> 3.3"
-  s.add_dependency "rubyzip",             "< 1.0"
+  s.add_dependency "rubyzip",             "~> 1.0"
   s.add_dependency "rinku",               "~> 1.7.2"
   s.add_dependency "net-dns",             "~> 0.7.1"
   s.add_dependency "acts_as_tree",        "~> 1.1"
