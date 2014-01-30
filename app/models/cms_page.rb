@@ -21,6 +21,8 @@ class CmsPage < ActiveRecord::Base
   
   before_validation :compute_and_store_path, :set_versions
   
+  after_save :resave_children
+  
   def compute_and_store_path
     if self.parent
       if self.parent.path != ''
@@ -40,6 +42,13 @@ class CmsPage < ActiveRecord::Base
     
     self.published_version ||= -1
     self.published_date ||= self.created_on || Time.now
+  end
+  
+  def resave_children
+    # get all pages under this one (even the offline ones)
+    CmsPage.where(:parent_id => id).each do |subpg|
+      subpg.save_without_revision if subpg.valid?
+    end
   end
   
   def tags_as_css_classes
@@ -92,7 +101,6 @@ class CmsPage < ActiveRecord::Base
   def set_parent_id!(new_id)
     self.parent_id = new_id
     self.save_without_revision
-    pg.children.each { |subpg| subpg.save_without_revision }
     self.valid?
   end
   
