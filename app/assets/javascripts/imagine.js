@@ -720,37 +720,39 @@ function changeGalleryImage(galleryName, index) {
     var target = galleryName + '_image_' + index;
     var caption = galleryName + '_caption_' + index;
     if (!$(target)) return false;
-    
+
     var queue = Effect.Queues.get('global');
     queue.each(function(e) { e.cancel() });
-    
+
     for (var i = 0; i < gallerySize[galleryName]; i++) {
         el = $(galleryName + '_image_' + i);
         if (el.id != target && el.style.display != 'none') Effect.Fade(el, { duration: 0.6 });
-        
+
         el = $(galleryName + '_thumb_' + i);
         if (el) {
             if (i == index) {
-                el.style.borderColor = 'white';
+                el.oldOnmouseover = el.onmouseover;
+                el.oldOnmouseout = el.onmouseout;
                 el.onmouseover = null;
                 el.onmouseout = null;
+                el.addClassName('current');
             } else {
-                el.style.borderColor = '#6B6B6B';
-                el.onmouseover = function () { this.style.borderColor = 'white' };
-                el.onmouseout = function () { this.style.borderColor = '#6B6B6B' };
+                el.removeClassName('current');
+                if (!el.onmouseover) el.onmouseover = el.oldOnmouseover;
+                if (!el.onmouseout) el.onmouseout = el.oldOnmouseout;
             }
         }
     }
-    
+
     Effect.Appear(target, { duration: 0.6 });
-    
+
     if($(caption).innerHTML != '') {
         $(galleryName + '_caption').style.display = 'block';
         $(galleryName + '_caption').innerHTML = $(caption).innerHTML;
     } else {
         $(galleryName + '_caption').style.display = 'none';
     }
-    
+
     prevIndex = index == 0 ? gallerySize[galleryName] - 1 : index-1;
     nextIndex = index == gallerySize[galleryName] - 1 ? 0 : index+1;
     $(galleryName + '_prev_button').onclick = function () { changeGalleryImage(galleryName, prevIndex) };

@@ -1,0 +1,82 @@
+<%-
+  timeout ||= 0
+  captions = []
+  settings = HashObject.new({})
+  path = File.join(Rails.root, 'public', 'images', 'content', @pg.path, name)
+  
+  begin
+    captions = YAML.load(File.open(File.join(path, 'captions.yml')).read)
+  rescue
+  end
+  
+  autoplay = true
+  timeout = 6
+  
+  begin
+    settings = HashObject.new(YAML.load(File.open(File.join(path, 'settings.yml')).read))
+    timeout = settings.slide_duration.to_i
+    autoplay = (settings.autoplay == 'true')
+  rescue
+  end
+  
+  timeout = 5 if timeout < 1
+-%>
+<%= javascript_tag "gallerySize['#{name}'] = #{images.size};" %>
+
+<div class="slideshow">
+  
+  <div class="slideshow-images">
+    <%- images.each_with_index do |image, index| -%>
+      <table width="100%" id="<%= name %>_image_<%= index %>" class="<%= name %>_image slideshow-image" border="0" cellpadding="0" cellspacing="2" style="<%= index > 0 ? 'display: none;' : '' %>">
+        <tr>
+          <td align="center" style="vertical-align:middle;">
+            <%= image_tag '/' + image, :style => "border: 7px solid white" %>
+          </td>
+        </tr>
+      </table>
+    <%- end -%>
+    <br clear="all" />
+  </div>
+  
+  <div id="<%= name %>_caption" class="slideshow-caption" style="<%= "display: none;" if captions[1].blank? %>">
+    <%= captions[1] rescue '' %>
+  </div>
+  
+  <%- images.each_with_index do |image, index| -%>
+    <span id="<%= name %>_caption_<%= index %>" style="display: none;"><%= (captions[index + 1].to_s).gsub("\n", '<br/>') %></span>
+  <%- end -%>
+  
+
+  <div class="slideshow-nav">
+    <table width="100%" cellspacing="0" cellpadding="0" align="center">
+      <tr>
+        <td id="<%= name %>_prev_button" class="slideshow-nav-button" align="right" onclick="changeGalleryImage('<%= name %>', <%= images.size-1 %>);">
+          <img src="/assets/interface/photo_prev.gif" alt="prev" style="float: right; padding-right: 6px;" />
+        </td>
+        <td id="<%= name %>_play_button" class="slideshow-nav-button" style="<%= autoplay ? ' display: none' : '' %>" align="left" onclick="clearTimeout(galleryTimeouts['<%= name %>']); setTimeout(function () { advanceGallerySlideshow('<%= name %>', <%= timeout*1000 %>); }, <%= timeout*1000 %>); $('<%= name %>_play_button').hide(); $('<%= name %>_pause_button').show();">
+          <img src="/assets/interface/photo_play.gif" alt="play" style="float: left" />
+        </td>
+        <td id="<%= name %>_pause_button" class="slideshow-nav-button" style="<%= autoplay ? '' : ' display: none' %>" align="left" onclick="clearTimeout(galleryTimeouts['<%= name %>']); $('<%= name %>_pause_button').hide(); $('<%= name %>_play_button').show();">
+          <img src="/assets/interface/photo_pause.gif" alt="pause" style="float: left;" />
+        </td>
+        <td id="<%= name %>_next_button" class="slideshow-nav-button" align="left" onclick="changeGalleryImage('<%= name %>', 1);">
+          <img src="/assets/interface/photo_next.gif" alt="next" style="float: left; padding-left: 6px;" />
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <%- unless settings.show_thumbs == 'false' -%>
+  <div class="slideshow-thumbs">
+    <%- thumbs.each_with_index do |thumb, index| -%>
+      <div id="<%= name %>_thumb_<%= index %>" class="<%= name %>_thumb slideshow-thumb<%= index == 0 ? ' current' : '' %>" onmouseover="$(this).addClassName('current');" onmouseout="$(this).removeClassName('current');" onclick="changeGalleryImage('<%= name %>', <%= index %>);">
+        <%= image_tag '/' + thumb, :width => 39, :height => 39, :style => "float: left;" %>
+      </div>
+    <%- end -%>
+    <br clear="all" />
+  </div>
+  <%- end -%>
+  
+</div>
+
+<%= javascript_tag("$('#{name}_play_button').onclick();") if autoplay %>
