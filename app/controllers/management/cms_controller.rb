@@ -1176,12 +1176,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def create_file_link
     @pg = CmsPage.find_by_id(params[:id])
     localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    @filename = localfile.split('/').map { |s| CGI::escape(s) }.join('/') + "?#{File.mtime(localfile).to_i}"
     
     bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['file_bucket'] rescue nil
     prefix = ImagineCmsConfig['amazon_s3']['file_prefix'] rescue nil
     upload_to_s3(localfile, @pg, bucket, prefix)
-    
-    @filename = localfile.split('/').map { |s| CGI::escape(s) }.join('/') + "?#{File.mtime(localfile).to_i}"
     
     render :partial => 'create_file_link'
   end
