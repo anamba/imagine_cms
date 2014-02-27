@@ -1,4 +1,5 @@
 class CmsPage < ActiveRecord::Base
+  include ActiveModel::Dirty
   include ActsAsTree
   
   attr_accessible :cms_template_id, :cms_template_version, :parent_id,
@@ -45,9 +46,11 @@ class CmsPage < ActiveRecord::Base
   end
   
   def resave_children
-    # get all pages under this one (even the offline ones)
-    CmsPage.where(:parent_id => id).each do |subpg|
-      subpg.save_without_revision if subpg.valid?
+    if path_changed?
+      # get all pages under this one (even the offline ones)
+      CmsPage.where(:parent_id => id).each do |subpg|
+        subpg.save_without_revision if subpg.valid?
+      end
     end
   end
   
