@@ -22,6 +22,7 @@ table, caption, tbody, tfoot, thead {
 	border: 0;
 	outline: 0;
 	font-size: 100%;
+	text-align: left;
 	vertical-align: baseline;
 	background: transparent;
 	font-weight: normal; /* [+] */
