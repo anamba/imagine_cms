@@ -158,7 +158,8 @@ module ActionControllerExtensions
             content << " onmouseover=\"this.className = 'page_list_segment page_list_segment_selected'\""
             content << " onmouseout=\"this.className = 'page_list_segment'\""
             content << " onclick=\"$('#{key}').style.cursor = 'wait'; $('#{key}').style.opacity = 0.5; "
-            content << remote_function(:update => key, :method => :get, :url => { :content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]) })
+            # FIXME: Prototype
+            content << " new Ajax.Updater('#{key}', '#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]))}', {asynchronous:true, evalScripts:true, method:'get'});"
             content << "; window.scrollBy(0, - 20 + document.getElementById('#{key}').getBoundingClientRect().top); return false;\""
           end
           content << ">#{seg+1}</a></td>"
