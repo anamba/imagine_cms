@@ -864,7 +864,7 @@ module CmsApplicationHelper
                     "'&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true})"
     
     ret = <<EOF
-  <span><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><span id="date_picker_#{object}_#{method_prefix}_value">#{default_value.strftime('%a %m/%d/%y')}</span></a></span>
+  <span><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><span id="date_picker_#{object}_#{method_prefix}_value" style="font-weight: normal;">#{default_value.strftime('%a %m/%d/%y')}</span></a></span>
   <span id="date_picker_#{object}_#{method_prefix}icon"><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><img src="/assets/management/icon_time.gif" style="float: none" alt="date picker" /></a></span>
   <div id="date_picker_#{object}_#{method_prefix}main" style="display: none; background-color: white; border: 1px solid gray; padding: 3px; z-index: 101;" class="date-picker-main">
     <table width="190">
