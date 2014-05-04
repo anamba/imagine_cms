@@ -205,6 +205,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       end
       @pg.updated_by ||= session[:user_id]
       @pg.updated_by_username ||= session[:user_username]
+      @pg.published_version = 0 if @pg.redirect_enabled
       
       save_function = @pg.new_record? ? 'save' : 'save_without_revision'
       
