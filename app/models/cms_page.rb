@@ -6,7 +6,8 @@ class CmsPage < ActiveRecord::Base
                   :name, :title, :path, :html_head, :summary, :position,
                   :article_date, :article_end_date, :published_date, :expiration_date, :expires,
                   :thumbnail_path, :feature_image_path, :comment_count, :version, :published_version,
-                  :search_index, :updated_by, :updated_by_username
+                  :search_index, :updated_by, :updated_by_username,
+                  :redirect_enabled, :redirect_to
   
   acts_as_versioned
   acts_as_tree :order => 'path'

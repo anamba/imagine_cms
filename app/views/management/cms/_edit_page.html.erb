@@ -11,11 +11,11 @@
 <%= form_remote_tag :url => { :action => 'edit_page', :id => @pg },
                     :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';",
                     :html => { :onsubmit => 'teardownTextFieldHints();' } do %>
-<table>
+<table id="dlg-page-properties">
   <col width="120"><col width="*"><col width="5">
 <%- if (@pg.id || 2) > 1 -%>
   <tr>
-    <td>Name/URL:</td>
+    <td>Name (for URL):</td>
     <td>
       <%= text_field :pg, :name, :class => 'form', :style => 'margin-bottom: 0; width: 150px', :onchange => (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = $('original_name').value; };") %><br/>
       <%= text_field_tag :original_name, @pg.name, :style => 'display: none' %>
@@ -24,10 +24,31 @@
   </tr>
 <%- end -%>
   <tr>
-    <td>Title:</td>
+    <td>Page Title:</td>
     <td><%= text_field :pg, :title, :class => 'form', :style => 'width: 100%;' %></td>
   </tr>
+  <%- if @pg.respond_to?(:redirect_enabled) -%>
   <tr>
+    <td>Page Type:</td>
+    <td>
+      <%= radio_button :pg, :redirect_enabled, false %> Normal
+      <%= radio_button :pg, :redirect_enabled, true %> Redirect to:
+      <%= text_field :pg, :redirect_to %>
+      <script type="text/javascript">
+        jQuery('#pg_redirect_enabled_false').click(function () {
+          jQuery('#pg_redirect_to').prop('disabled', true);
+          jQuery('#dlg-page-properties tr.page-field').show();
+        });
+        jQuery('#pg_redirect_enabled_true').click(function () {
+          jQuery('#pg_redirect_to').prop('disabled', false);
+          jQuery('#dlg-page-properties tr.page-field').hide();
+        });
+        jQuery('#pg_redirect_enabled_<%= @pg.redirect_enabled == true %>').trigger('click');
+      </script>
+    </td>
+  </tr>
+  <%- end -%>
+  <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">Template:</div></td>
     <td>
       <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;' %>
@@ -41,19 +62,19 @@
                                                %>
     </td>
   </tr>
-  <tr>
+  <tr class="page-field">
     <td>Article Date:</td>
     <td>
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
-          <td width="110">
+          <td width="115">
             <%= date_picker :pg, :article_date, :default_value => (@pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %>
           </td>
           <td width="120">
             <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"'.html_safe %>>&ndash; <%= date_picker :pg, :article_end_date, :default_value => (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %></div>
           </td>
           <td align="right" width="180">
-            <input type="checkbox" name="use_article_date_range" value="1" onclick="$('div_article_end_date').toggle();"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? ' checked="checked"' : '' %> /><label for="use_article_date_range">Use date range</label>
+            <input type="checkbox" id="use_article_date_range" name="use_article_date_range" value="1" onclick="$('div_article_end_date').toggle();"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? ' checked="checked"' : '' %> /><label for="use_article_date_range">Use date range</label>
           </td>
         </tr>
       </table>
@@ -63,7 +84,7 @@
     <td>Tags:</td>
     <td><%= text_field_tag :tags, @tags, :class => 'form', :style => 'width: 100%' %></td>
   </tr>
-  <tr>
+  <tr class="page-field">
     <td>Publish Version:</td>
     <td><%= select :pg, :published_version, [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
   </tr>
@@ -90,7 +111,7 @@
       </table>
     </td>
   </tr>
-  <tr>
+  <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">Summary:</div></td>
     <td><%= text_area :pg, :summary, :class => 'form', :style => 'width: 100%; height: 50px;' %></td>
   </tr>
@@ -102,7 +123,7 @@
       <%- else -%>
       <div id="thumbnail_preview" style="width: 385px; overflow: auto;">
         <%- if @pg.thumbnail_path.blank? -%>
-          no thumbnail image selected
+          <!-- no thumbnail image selected -->
         <%- else -%>
           <%= image_tag(@pg.thumbnail_path, :onclick => "jQuery('#pg_thumbnail_path').show();") %>
         <%- end -%>
@@ -123,7 +144,7 @@
       <%- else -%>
       <div id="feature_image_preview" style="width: 385px; overflow: auto;">
         <%- if @pg.feature_image_path.blank? -%>
-          no feature image selected
+          <!-- no feature image selected -->
         <%- else -%>
           <%= image_tag(@pg.feature_image_path, :onclick => "jQuery('#pg_feature_image_path').show();") %>
         <%- end -%>
@@ -137,7 +158,7 @@
   </tr>
   <%- end -%>
   <%- if @pg.respond_to?(:html_head) -%>
-  <tr>
+  <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">HTML Head:<br>(advanced)</div></td>
     <td><%= text_area :pg, :html_head, :class => 'form', :style => 'width: 100%; height: 35px; overflow: auto;' %></td>
   </tr>
@@ -169,7 +190,7 @@
     <td></td>
     <td>
       <%= submit_tag 'Save', :id => 'btn_save', :class => 'form_button', :style => 'width: 70px;' %>
-      <%= link_to_function 'Cancel', "cancelEditProperties();" %>
+      <%= link_to_function 'Cancel', "cancelEditProperties();", :style => 'font-weight: normal;' %>
       <%= hidden_field_tag 'return_to', params[:return_to] %>
     </td>
   </tr>

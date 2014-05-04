@@ -157,6 +157,11 @@ module Cms # :nodoc:
               end
             end
             
+            # redirect if redirect enabled
+            if @pg.redirect_enabled
+              redirect_to @pg.redirect_to and return true
+            end
+            
             # load appropriate page version and associated objects
             # if we had to authenticate, load_page_objects = false, but return true so we don't call not_found
             load_page_objects or return true
