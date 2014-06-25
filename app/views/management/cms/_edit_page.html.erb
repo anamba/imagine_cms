@@ -38,10 +38,12 @@
         jQuery('#pg_redirect_enabled_false').click(function () {
           jQuery('#pg_redirect_to').prop('disabled', true);
           jQuery('#dlg-page-properties tr.page-field').show();
+          jQuery('#dlg-page-properties tr.redirect-field').hide();
         });
         jQuery('#pg_redirect_enabled_true').click(function () {
           jQuery('#pg_redirect_to').prop('disabled', false);
           jQuery('#dlg-page-properties tr.page-field').hide();
+          jQuery('#dlg-page-properties tr.redirect-field').show();
         });
         jQuery('#pg_redirect_enabled_<%= @pg.redirect_enabled == true %>').trigger('click');
       </script>
@@ -53,13 +55,16 @@
     <td>
       <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;' %>
       
-      <div id="edit_page_template_options" style="display: none; background-color: white; width: 100%; border: 1px solid #aaaaaa;">
+      <div id="edit_page_template_options">
         <%= render :partial => 'template_options' %>
       </div>
-      <%= observe_field 'pg_cms_template_id', :update => 'edit_page_template_options', :with => 'template_id',
-                                              :url => { :action => 'show_template_options', :id => @pg },
-                                              :loading => "$('edit_page_template_options').innerHTML = 'Loading...';"
-                                               %>
+      <script type="text/javascript">
+        jQuery('#pg_cms_template_id').change(function () {
+          jQuery.get('<%= url_for(:action => 'show_template_options', :id => @pg) %>?template_id=' + jQuery(this).val(), function (data) {
+            jQuery('#edit_page_template_options').html(data);
+          });
+        });
+      </script>
     </td>
   </tr>
   <tr class="page-field">

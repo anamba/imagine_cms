@@ -1,27 +1,23 @@
-<%- if @template_options.nil? || @template_options.empty? -%>
-  <%= javascript_tag "Element.hide('edit_page_template_options');" %>
-<%- else -%>
-  <%= javascript_tag "Element.show('edit_page_template_options');" %>
-<%- end -%>
-
-<%-
-  @template_options.each do |name, type|
-    key = name.gsub(/[^\w\d]/, '_')
--%>
-<table width="100%">
-  <col width="45%" /><col width="55%" />
-  <tr>
-    <td><%= name %></td>
-    <td>
-      <%=
-        case type
-        when :checkbox
-          check_box :page_objects, "obj-option-checkbox-#{key}"
-        when :string, :text
-          text_field :page_objects, "obj-option-string-#{key}", :style => 'width: 100%;'
-        end
-      %>
-    </td>
-  </tr>
-</table>
+<%- unless @template_options.empty? -%>
+<div style="background-color: white; width: 100%; border: 1px solid #aaaaaa;">
+  <%- @template_options.each do |name, type| -%>
+    <%- key = name.gsub(/[^\w\d]/, '_') -%>
+    <table width="100%">
+      <col width="45%" /><col width="55%" />
+      <tr>
+        <td><%= name %></td>
+        <td>
+          <%=
+            case type
+            when :checkbox
+              check_box :page_objects, "obj-option-checkbox-#{key}"
+            when :string, :text
+              text_field :page_objects, "obj-option-string-#{key}", :style => 'width: 100%;'
+            end
+          %>
+        </td>
+      </tr>
+    </table>
+  <%- end -%>
+</div>
 <%- end -%>
