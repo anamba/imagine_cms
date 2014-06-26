@@ -192,7 +192,7 @@ module Cms # :nodoc:
             
             render :inline => template_content
             
-            if perform_caching && UseCmsPageCaching && @allow_caching
+            if UseCmsPageCaching && @allow_caching && perform_caching && request.format == Mime::HTML
               cache_page
             end
             
