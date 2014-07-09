@@ -158,7 +158,7 @@ module Cms # :nodoc:
             end
             
             # redirect if redirect enabled
-            if @pg.redirect_enabled
+            if @pg.respond_to?(:redirect_enabled) && @pg.redirect_enabled
               redirect_to @pg.redirect_to and return true
             end
             
