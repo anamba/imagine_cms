@@ -38,4 +38,4 @@
 <%- end -%>
 
 <%=raw @cms_head %>
-<%= @pg.html_head if @pg && @pg.respond_to?(:html_head) %>
+<%= @pg.html_head.html_safe if @pg && @pg.respond_to?(:html_head) %>
