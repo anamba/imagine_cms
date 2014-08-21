@@ -10,7 +10,7 @@ module ActionView::Helpers::TextHelper
     re = %r{
             (<\w+[^\<\>]*?\>|[\s[:punct:]]|mailto:|^) # leading text
             (
-              [\w\.\!\#\$\%\-\+\.]+                   # username
+              [\w\.\!\#\$\%\-\+\.\/]+                 # username
               \@
               [-\w]+                                  # subdomain or domain
               (?:\.[-\w]+)+                           # remaining subdomains or domain
