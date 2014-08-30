@@ -2,13 +2,6 @@ class CmsPage < ActiveRecord::Base
   include ActiveModel::Dirty
   include ActsAsTree
   
-  # attr_accessible :cms_template_id, :cms_template_version, :parent_id,
-  #                 :name, :title, :path, :html_head, :summary, :position,
-  #                 :article_date, :article_end_date, :published_date, :expiration_date, :expires,
-  #                 :thumbnail_path, :feature_image_path, :comment_count, :version, :published_version,
-  #                 :search_index, :updated_by, :updated_by_username,
-  #                 :redirect_enabled, :redirect_to
-  
   acts_as_versioned
   acts_as_tree :order => 'path'
   
@@ -60,12 +53,12 @@ class CmsPage < ActiveRecord::Base
   end
   
   def self.index_all
-    CmsPage.find(:all, :conditions => [ 'search_index is null' ]).each { |pg| pg.update_index ; pg.save_without_revision }
+    where('search_index is null').each(&:update_index!)
     true
   end
   
   def self.reindex_all
-    CmsPage.find(:all).each { |pg| pg.update_index ; pg.save_without_revision }
+    find_each(&:update_index!)
     true
   end
   
@@ -102,6 +95,11 @@ class CmsPage < ActiveRecord::Base
     self.search_index = sanitize_index(content)
   end
   
+  def update_index!
+    update_index
+    self.class.without_revision { save }
+  end
+  
   def set_parent_id!(new_id)
     self.parent_id = new_id
     self.save_without_revision
@@ -116,24 +114,25 @@ class CmsPage < ActiveRecord::Base
   def article_date_yr    ; article_date.strftime("%y").to_i ; end
   
   
-  private
-  
-  def sanitize_index(html)
-    return html if html.blank?
-    if html.index("<")
-      text = ""
-      tokenizer = HTML::Tokenizer.new(html)
+  protected
+    
+    def sanitize_index(html)
+      return html if html.blank?
+      if html.index("<")
+        text = ""
+        tokenizer = HTML::Tokenizer.new(html)
       
-      while token = tokenizer.next
-        node = HTML::Node.parse(nil, 0, 0, token, false)
-        # result is only the content of any Text nodes
-        text << node.to_s if node.class == HTML::Text  
-      end
-      # strip any comments, and if they have a newline at the end (ie. line with
-      # only a comment) strip that too, as well as any erb stuff
-      text.gsub(/<!--(.*?)-->[\n]?/m, "").gsub(/\<%.*?%\>/m, '').gsub(/&\w+;/, '')
-    else
-      html # already plain text
-    end 
-  end
+        while token = tokenizer.next
+          node = HTML::Node.parse(nil, 0, 0, token, false)
+          # result is only the content of any Text nodes
+          text << node.to_s if node.class == HTML::Text  
+        end
+        # strip any comments, and if they have a newline at the end (ie. line with
+        # only a comment) strip that too, as well as any erb stuff
+        text.gsub(/<!--(.*?)-->[\n]?/m, "").gsub(/\<%.*?%\>/m, '').gsub(/&\w+;/, '')
+      else
+        html # already plain text
+      end 
+    end
+    
 end

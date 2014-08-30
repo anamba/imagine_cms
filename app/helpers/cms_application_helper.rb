@@ -363,7 +363,7 @@ module CmsApplicationHelper
     
     # pull all include tag content
     include_tags.each do |tag|
-      pages.concat CmsPageTag.where(:name => tag).includes(:page).where([ conditions.join(' and ') ].concat(cond_vars)).map { |cpt| cpt.page }
+      pages.concat CmsPageTag.where(:name => tag).includes(:page).references(:page).where([ conditions.join(' and ') ].concat(cond_vars)).map { |cpt| cpt.page }
     end
     
     # dump anything that has an excluded tag

@@ -69,7 +69,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       end
     end
     
-    return true
+    true
   end
   
   
@@ -77,14 +77,14 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def templates
-    @temps = CmsTemplate.find(:all, :order => 'name')
+    @temps = CmsTemplate.order(:name)
   end
   
   def edit_template
     @temp = CmsTemplate.find_by_id(params[:id]) || CmsTemplate.new
     
     if request.post?
-      @temp.assign_attributes(params[:temp])
+      @temp.assign_attributes(cms_template_params)
       
       begin
         @pg = CmsPage.new
@@ -111,14 +111,14 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def snippets
-    @snippets = CmsSnippet.find(:all, :order => 'name')
+    @snippets = CmsSnippet.order(:name)
   end
   
   def edit_snippet
     @snip = CmsSnippet.find_by_id(params[:id]) || CmsSnippet.new
     
     if request.post?
-      @snip.assign_attributes(params[:snip])
+      @snip.assign_attributes(cms_snippet_params)
       
       begin
         @pg = CmsPage.new
@@ -344,7 +344,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     if request.get?
       @pg.revert_to(params[:version]) if params[:version]
-      @pg.objects.find(:all, :conditions => [ 'cms_page_version = ?', @pg.version ]).each do |obj|
+      @pg.objects.where(:cms_page_version => @pg.version).each do |obj|
         key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
         @page_objects[key] = obj.content.html_safe
       end
@@ -525,7 +525,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def page_tags_for_lookup
-    @tags = CmsPageTag.find(:all, :order => 'name').map { |tag| tag.name }.uniq
+    @tags = CmsPageTag.order(:name).map { |tag| tag.name }.uniq
     headers['content-type'] = 'text/javascript'
     render :layout => false
   end
@@ -1365,6 +1365,14 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
                                  :name, :title, :path, :html_head, :summary, :position,
                                  :article_date, :article_end_date, :published_date, :expiration_date, :expires,
                                  :thumbnail_path, :feature_image_path, :redirect_enabled, :redirect_to)
+    end
+    
+    def cms_template_params
+      params.require(:temp).permit(:name, :content)
+    end
+    
+    def cms_snippet_params
+      params.require(:snip).permit(:name, :content)
     end
     
     def load_page_objects
