@@ -2,7 +2,7 @@ module Cms # :nodoc:
   class ContentController < ::ApplicationController # :nodoc:
     include ActionController::Caching::Actions
     include ActionController::Caching::Pages
-    self.page_cache_directory = "#{Rails.root.to_s}/public/imagine_cache"
+    self.page_cache_directory = "#{Rails.root}/public"
     
     caches_action :rss_feed
     

@@ -1,6 +1,6 @@
 class Management::CmsController < Management::ApplicationController # :nodoc:
   include ActionController::Caching::Pages
-  self.page_cache_directory = "#{Rails.root.to_s}/public/imagine_cache"
+  self.page_cache_directory = "#{Rails.root}/public"
   
   before_filter :check_permissions
   before_filter :block_basic_users, :except => [
