@@ -53,7 +53,7 @@
   <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">Template:</div></td>
     <td>
-      <%= select :pg, :cms_template_id, CmsTemplate.find(:all, :order => 'name').collect { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;' %>
+      <%= select :pg, :cms_template_id, CmsTemplate.order(:name).map { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;' %>
       
       <div id="edit_page_template_options">
         <%= render :partial => 'template_options' %>

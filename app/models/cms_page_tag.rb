@@ -1,5 +1,5 @@
 class CmsPageTag < ActiveRecord::Base
-  attr_accessible :name
+  # attr_accessible :name
   
   belongs_to :page, :class_name => 'CmsPage', :foreign_key => 'cms_page_id'
   

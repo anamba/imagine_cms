@@ -1,7 +1,7 @@
 class CmsTemplate < ActiveRecord::Base
   acts_as_versioned
   
-  attr_accessible :name, :content
+  # attr_accessible :name, :content
   attr_accessor :options
   
   has_many :pages, :class_name => 'CmsPage'

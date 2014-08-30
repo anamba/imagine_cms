@@ -1,69 +1,5 @@
 module CmsApplicationHelper
   
-  # Saves the current request to the session so that it can be replayed later
-  # (for example, after authentication). Only params of type String, Hash and
-  # Array will be saved. save_request is called in a before_filter in
-  # application.rb.
-  #
-  # Two levels of saved params are required so that params can be unsaved in
-  # the event of a 404 or other event that would make the current param set an
-  # unlikely or undesirable candidate for replaying.
-  def save_user_request
-    return if params[:action] == 'login'
-    
-    session[:old_saved_user_uri] = session[:saved_user_uri];
-    session[:old_saved_user_params] = session[:saved_user_params] || {};
-    saved_params = params.reject { |k, v| !(v.kind_of?(String) || v.kind_of?(Hash) || v.kind_of?(Array)) }
-    saved_params.each { |key, val| saved_params[key] = val.reject { |k, v| !(v.kind_of?(String) || v.kind_of?(Hash) || v.kind_of?(Array)) } if val.kind_of?(Hash) }
-    session[:saved_user_uri] = request.url
-    session[:saved_user_params] = saved_params
-  end
-  
-  # Returns a User object corresponding to the currently logged in user, or returns false
-  # and redirects to the login page if not logged in.
-  def authenticate_user
-    # if user is not logged in, record the current request and redirect
-    if !session[:user_authenticated]
-      if User.find(:all).size == 0
-        flash[:notice] = 'No users exist in the system. Please create one now.'
-        redirect_to :controller => '/management/user', :action => 'create_first'
-      else
-        flash[:notice] = 'This is an admin-only function. To continue, please log in.'
-        save_user_request
-        redirect_to :controller => '/management/user', :action => 'login'
-      end
-      
-      return false
-    end
-    
-    @user = User.find(session[:user_id]) rescue nil
-    session[:user_is_superuser] = @user.is_superuser? rescue nil
-    
-    @user
-  end
-  
-  # Takes a symbol/string or array of symbols/strings and returns true if user has all
-  # of the named permissions.
-  def user_has_permissions?(*permission_set)
-    return false if !(@user ||= authenticate_user)
-    
-    permission_set = [ permission_set ] unless permission_set.is_a?(Array)
-    
-    if session[:user_is_superuser]
-      permission_set.each { |perm| session["user_can_#{perm}".to_sym] = true }
-      return true
-    end
-    
-    has_permissions = true
-    permission_set.each do |perm|
-      session["user_can_#{perm}".to_sym] = (@user.send("can_#{perm}").to_i == 1)
-      has_permissions = has_permissions && session["user_can_#{perm}".to_sym]
-    end
-    
-    has_permissions
-  end
-  alias :user_has_permission? :user_has_permissions?
-  
   # Returns true if a Member is logged in.
   def is_logged_in?
     session[:authenticated]
@@ -104,21 +40,21 @@ module CmsApplicationHelper
   
   ### COMPAT: convert_content_path
   def convert_content_path
-    logger.debug "DEPRECATION WARNING (Imagine CMS) WARNING: convert_content_path called"
+    # logger.debug "DEPRECATION WARNING (Imagine CMS) WARNING: convert_content_path called"
     params[:content_path] = params[:content_path].to_s.split('/') rescue []
   end
   
   ### COMPAT - template_exists?
   def template_exists?(template, extension = nil)
     # ignore extension
-    logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: template_exists? called")
+    # logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: template_exists? called")
     partial = File.join(File.dirname(template), '_' + File.basename(template))
     lookup_context.find_all(template).any? || lookup_context.find_all(partial).any?
   end
   
   ### COMPAT - template_exists?
   def url_for_current
-    logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
+    # logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
     request.fullpath
   end
   
@@ -132,13 +68,6 @@ module CmsApplicationHelper
       return ret unless ret.to_s == ''
     end
     return ''
-  end
-  
-  ### COMPAT - log_error
-  def log_error(e)
-    # noop
-    logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: log_error called")
-    logger.error(e)
   end
   
   def convert_invalid_chars_in_params
@@ -291,21 +220,12 @@ module CmsApplicationHelper
     end
     
     @page_objects = HashObject.new
-    conditions = [ 'cms_page_version = ?' ]
-    cond_vars = [ @pg.version ]
+    query = @pg.objects.where(:cms_page_version => @pg.version)
+    query = query.where(:obj_type => obj_type) if obj_type
+    query = query.where(:name => name) if name
+    query.each { |obj| @page_objects["obj-#{obj.obj_type.to_s}-#{obj.name}"] = obj.content }
     
-    if obj_type
-      conditions << 'obj_type = ?'
-      cond_vars << obj_type
-    end
-    if name
-      conditions << 'name = ?'
-      cond_vars << name
-    end
-    
-    @pg.objects.find(:all, :conditions => [ conditions.join(' and ') ].concat(cond_vars)).each do |obj|
-      @page_objects["obj-#{obj.obj_type.to_s}-#{obj.name}"] = obj.content
-    end
+    @page_objects
   end
   
   def page_list_items(pg, key, options = {})
@@ -423,17 +343,17 @@ module CmsApplicationHelper
         if f.expand_folders && f.expand_folders == 'false'
           f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
           parent_page = CmsPage.find_by_path(f.src)
-          pages.concat parent_page.children.find(:all, :include => [ :tags ], :conditions => [ conditions.join(' and ') ].concat(cond_vars))
+          pages.concat parent_page.children.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars)).to_a
         else
           if f.src == '/'
-            pages.concat CmsPage.find(:all, :include => [ :tags ], :conditions => [ conditions.join(' and ') ].concat(cond_vars))
+            pages.concat CmsPage.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars))
           else
             f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
             fconditions = conditions.dup
             fconditions << 'path like ?'
             fcond_vars = cond_vars.dup
             fcond_vars << f.src+'/%'
-            pages.concat CmsPage.find(:all, :include => [ :tags ], :conditions => [ fconditions.join(' and ') ].concat(fcond_vars))
+            pages.concat CmsPage.includes(:tags).where([ fconditions.join(' and ') ].concat(fcond_vars))
           end
         end
       rescue Exception => e
@@ -443,7 +363,7 @@ module CmsApplicationHelper
     
     # pull all include tag content
     include_tags.each do |tag|
-      pages.concat CmsPageTag.find_all_by_name(tag, :include => [ :page ], :conditions => [ conditions.join(' and ') ].concat(cond_vars)).map { |cpt| cpt.page }
+      pages.concat CmsPageTag.where(:name => tag).includes(:page).where([ conditions.join(' and ') ].concat(cond_vars)).map { |cpt| cpt.page }
     end
     
     # dump anything that has an excluded tag
@@ -533,10 +453,10 @@ module CmsApplicationHelper
     end
     
     # next, page object attributes and template options (from page properties)
-    page.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
+    page.objects.where(:obj_type => 'attribute').each do |obj|
       temp.gsub!(/<#\s*#{obj.name}\s*#>/, (obj.content || '').to_s)
     end
-    page.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
+    page.objects.where(:obj_type => 'option').each do |obj|
       temp.gsub!(/<#\s*option_#{obj.name.gsub(/[^\w\d]/, '_')}\s*#>/, obj.content || '')
     end
     
@@ -608,7 +528,7 @@ module CmsApplicationHelper
     @template_options[name] = type
     
     key = name.gsub(/[^\w\d]/, '_')
-    obj = @pg.objects.find_by_name("#{type}-#{key}", :conditions => [ "obj_type = 'option'" ])
+    obj = @pg.objects.where(:name => "#{type}-#{key}", :obj_type => 'option').first
     return nil unless obj
     
     case type
@@ -937,7 +857,7 @@ EOF
     
     first_of_month = Time.utc(@year, @month, 1)
     last_of_month = first_of_month.end_of_month
-    events = @calendar.events.find(:all, :conditions => [ 'start_date >= ? and start_date <= ?', first_of_month, last_of_month ])
+    events = @calendar.events.where('start_date >= ? and start_date <= ?', first_of_month, last_of_month)
       
     @event_days = {}
     events.each do |e|

@@ -1,5 +1,9 @@
 module Cms # :nodoc:
   class ContentController < ::ApplicationController # :nodoc:
+    include ActionController::Caching::Actions
+    include ActionController::Caching::Pages
+    self.page_cache_directory = "#{Rails.root.to_s}/public/imagine_cache"
+    
     caches_action :rss_feed
     
     before_filter :convert_content_path
@@ -143,7 +147,7 @@ module Cms # :nodoc:
           params[:page] = 'index'
         end
         
-        if @pg = CmsPage.find_by_path(db_path.join('/'), :include => [ :template ])
+        if @pg = CmsPage.includes(:template).find_by_path(db_path.join('/'))
           if edit_mode
             redirect_to :controller => '/management/cms', :action => 'edit_page_content', :id => @pg and return true
           else
@@ -374,21 +378,21 @@ module Cms # :nodoc:
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
-      silence do
+      # silence do
         template_content = render_to_string(:inline => template_content,
                                             :locals => { :page => page, :safe_level => 0 })
-      end
+      # end
       
       template_content = substitute_placeholders(template_content, page)
       template_content.gsub!(/<(%.*?(exec|system)\s?\(.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
-      silence do
+      # silence do
         template_content = render_to_string(:inline => template_content,
                                             :layout => 'application',
                                             :locals => { :page => page })
-      end
+      # end
       
       template_content
     end

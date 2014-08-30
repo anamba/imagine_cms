@@ -12,31 +12,41 @@ Imagine was created in the Rails 1.0 days, to run a large number of technically 
 
 All that is now firmly in the past. By extracting Imagine functionality into a gem (a Rails Engine), we have achieved compatibility with Rails 3.2 and Ruby 1.9 and removed roadblocks to a future upgrade to Rails 4 and Ruby 2, all while remaining backwards compatible with the legacy Imagine CMS database structure.
 
-Of the three original phases of this project, two remain:
-
 * Imagine 3.0 (Rails 3.2, Ruby 1.9): [DONE] 90% restored functionality, no database changes.
-* Imagine 3.1 (Rails 3.2, Ruby 1.9/2.0): 100% restored functionality, plus a few extras. May require a few simple migrations.
-* Imagine 4.0 (Rails 4.0, Ruby 2.0): Upgrade to Rails 4; refactor & rewrite the worst parts (substitutions); drop ERB templating for something safer, like Liquid; switch to a cross-browser editor; drop Prototype for jQuery; modernize HTML, CSS, JS
+* Imagine 3.1 (Rails 3.2, Ruby 1.9/2.0): [DONE, but released as 3.0.x] 100% restored functionality, plus a few extras and fixes.
+* Imagine 4.0 (Rails 4.x, Ruby 2.1): [IN PROGRESS] Compatibility with Rails 4.0, 4.1, 4.2
+* Imagine 4.1 (Rails 4.x, Ruby 2.1): [PLANNED, Late 2014] Switch to a cross-browser editor
+* Imagine 5.0 (Rails 5.0, Ruby 2.2): [PLANNED, Early 2015] Compatibility with Rails 5.0
+
+In the future, there are plans to:
+* refactor & rewrite the worst parts (substitutions, galleries)
+* drop ERB templating for something safer
+* drop Prototype for jQuery
+* modernize the HTML, CSS, JS bits
+
+However, this will probably require forking off a separate project (imagine_cms_classic?) to avoid breaking existing sites, while also keeping up with Rails updates.
 
 (Imagine 1.x and 2.x version numbers have already been used internally, so we started at 3.0.)
 
 =Current Status
 
-Imagine 3.0 is finally ready for production use internally at Bigger Bird, but it's not quite ready for general use yet. Probably still buggy, not all functionality has been properly exercised, and there are no tests yet, I'll tackle this for 4.0 as I modernize the internals.
+Imagine 3.0 is ready for production use (v3.0-stable branch).
 
-One major feature is still missing: browser-based editing of view layouts and stylesheets. While convenient, this was probably not ever a good idea, so I'm working on a better solution. I've also added a new feature, uploaded images and files can be stored on S3 (galleries still live on the local disk).
+Imagine 4.0 is in progress on master.
 
-Unless you are already familiar with Imagine and/or interested in contributing to development, it might be best to wait until the second phase of this project (Imagine 4). Why? Well, the purpose of Imagine 3 is strictly to port legacy sites to Rails 3.2 as simply as possible. Imagine 3 will always be held back by its need to remain compatible with legacy installations dating back to 2006. The ERB templating language can be dangerous (it allows all Ruby, including shell escapes), and the editor (powered by an ancient version of Dojo) is still Firefox-only. It also uses Prototype, which has become a bit unfashionable these days.
+One major feature is still missing: browser-based editing of view layouts and stylesheets. While convenient, this was probably not ever a good idea, so I'm working on a better solution. We've also added a new feature, uploaded images and files can be stored on S3 (galleries still live on the local disk, so in a multiple app server setup, a shared filesystem is required).
 
-Imagine 4 will be a clean break from all of these "traditions," and thus will be a good time to get on board.
+Unless you are already familiar with Imagine and/or interested in contributing to development, this project is not suitable for wider use just yet. Why? Well, the purpose of the Imagine gem at this point is strictly to upgrade legacy sites to modern versions of Rails as simply as possible. Until imagine_cms_classic is forked, this project will be held back by its need to remain compatible with legacy installations dating back to 2006. The ERB templating language can be dangerous (it allows all Ruby, including shell escapes), and the editor (powered by an ancient version of Dojo) is still Firefox-only. It also uses Prototype, which has become a bit unfashionable these days.
+
+If we can make a clean break from all of these "traditions," that will be a good time to get on board.
 
 =Hosting
 
-Imagine 3 can run on most "standard" Rails hosting platforms, anything that uses Passenger, Unicorn, etc. On hosts that don't allow (or recommend) writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (this has not been tested).
+Imagine can run on most "standard" Rails hosting platforms, anything that uses Passenger, Unicorn, etc. On hosts that don't allow (or recommend) writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (this has not been tested).
 
 =Getting Help
 
-Get paid support and hosting for Imagine CMS straight from the people who made it: {Bigger Bird Creative, Inc.}[https://www.biggerbird.com] Neither is required, of course. :-) Free support is up top (Issues).
+Get paid support and hosting for Imagine CMS straight from the people who made it: {Bigger Bird Creative, Inc.}[https://www.biggerbird.com] Neither is required, of course. :-) (Free support via Issues.)
 
 =Customizing & Contributing
 
@@ -50,7 +60,7 @@ File/code changes:
 * Rename all .rhtml files to .html.erb, .rxml to .xml.builder
 * Find and replace: RAILS_ROOT => Rails.root
 * Find and replace: SITE_ROOT => Rails.root
-* Find and replace: RAILS_ENV => Rails.env (not all instances: constants only, leave environment variables)
+* Find and replace: RAILS_ENV => Rails.env (constants only! leave the environment variables)
 
 Assets:
 * Delete prototype.js, effect.js, controls.js, dragdrop.js, imagine.js, reset.css, manage.css; move everything else to assets

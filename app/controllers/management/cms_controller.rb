@@ -1,4 +1,7 @@
 class Management::CmsController < Management::ApplicationController # :nodoc:
+  include ActionController::Caching::Pages
+  self.page_cache_directory = "#{Rails.root.to_s}/public/imagine_cache"
+  
   before_filter :check_permissions
   before_filter :block_basic_users, :except => [
     :index, :edit_page_content,
@@ -30,7 +33,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def check_permissions
     if !user_has_permission?(:manage_cms)
-      render '/imagine_cms/errors/permission_denied'
+      render '/imagine_cms/errors/permission_denied', :layout => false
       return false
     end
   end
@@ -199,7 +202,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         params[:pg][:expiration_date] = date if params[:pg][:expires] == 'true'
       end
       
-      @pg.assign_attributes(params[:pg])
+      @pg.assign_attributes(cms_page_params)
       unless params[:use_article_date_range].to_i > 0
         @pg.article_end_date = nil
       end
@@ -207,9 +210,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @pg.updated_by_username ||= session[:user_username]
       @pg.published_version = 0 if @pg.respond_to?(:redirect_enabled) && @pg.redirect_enabled
       
-      save_function = @pg.new_record? ? 'save' : 'save_without_revision'
-      
-      if @pg.send(save_function)
+      if @pg.send(@pg.new_record? ? :save : :save_without_revision)
         # now try to save tags
         # begin
           existing_tags = @pg.tags.map(&:name)
@@ -262,8 +263,9 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         
       else
         # save failed, display errors
+        logger.error "Save failed: #{CmsPage.without_revision { @pg.save }} #{@pg.errors.full_messages.join('; ')}"
         render :update do |page|
-          page.replace_html 'save_errors', @pg.errors.full_messages.join('<br/>')
+          page.replace_html 'save_errors', @pg.errors.full_messages.join('<br>')
           page << "try { $('btn_next').disabled = false; } catch (e) {}"
           page << "try { $('btn_finish').disabled = false; } catch (e) {}"
           page << "try { $('btn_save').disabled = false; $('btn_save').value = 'Save'; } catch (e) {}"
@@ -568,7 +570,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       begin
         Mailer.deliver_cms_request_review(url_for(:controller => '/cms/content', :action => 'show', :content_path => []) + @pg.path, @pg.title, @version, u, @user, params[:change_description].to_s)
       rescue Exception => e
-        log_error(e)
+        logger.error(e)
       end
     end
     
@@ -796,7 +798,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           File.unlink(localfile) if localfile != jpgfile
           
         rescue Exception => e
-          log_error(e)
+          logger.error(e)
         end
       end
     end
@@ -1059,12 +1061,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             zipentry.extract(localfile)
             last_id += 1
           rescue Exception => e
-            log_error(e)
+            logger.error(e)
           end
         end
       rescue Exception => e
         logger.debug params.inspect
-        log_error(e)
+        logger.error(e)
         finish_upload_status "''" and return
       end
       
@@ -1357,27 +1359,34 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   
   protected
-  
+    
+    def cms_page_params
+      params.require(:pg).permit(:cms_template_id, :cms_template_version, :parent_id, :published_version,
+                                 :name, :title, :path, :html_head, :summary, :position,
+                                 :article_date, :article_end_date, :published_date, :expiration_date, :expires,
+                                 :thumbnail_path, :feature_image_path, :redirect_enabled, :redirect_to)
+    end
+    
     def load_page_objects
       @page_objects = HashObject.new
       @template_options = HashObject.new
       
       if @pg.new_record? && @parent
-        @parent.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
+        @parent.objects.where(:obj_type => 'attribute').each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
-        @parent.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
+        @parent.objects.where(:obj_type => 'option').each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
       else
-        @tags = @pg.tags.collect { |t| t.name }.join(', ')
-        @pg.objects.find(:all, :conditions => [ "obj_type = 'attribute'" ]).each do |obj|
+        @tags = @pg.tags.map { |t| t.name }.join(', ')
+        @pg.objects.where(:obj_type => 'attribute').each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
-        @pg.objects.find(:all, :conditions => [ "obj_type = 'option'" ]).each do |obj|
+        @pg.objects.where(:obj_type => 'option').each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
@@ -1503,7 +1512,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           # some error handling here
           session[:broken_galleries] << File.basename(g)
           
-          log_error(e)
+          logger.error(e)
         end
       end
     end

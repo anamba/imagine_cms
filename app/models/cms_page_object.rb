@@ -1,5 +1,5 @@
 class CmsPageObject < ActiveRecord::Base
-  attr_accessible :name, :obj_type
+  # attr_accessible :name, :obj_type
   
   belongs_to :page, :class_name => 'CmsPage', :foreign_key => 'cms_page_id'
   

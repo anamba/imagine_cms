@@ -1,7 +1,7 @@
 class CmsSnippet < ActiveRecord::Base
   acts_as_versioned
   
-  attr_accessible :name, :content
+  # attr_accessible :name, :content
   
   def content=(value)
     if value && value.is_a?(String)

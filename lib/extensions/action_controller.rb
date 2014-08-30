@@ -4,6 +4,64 @@ module ActionControllerExtensions
   end
   
   module InstanceMethods
+    
+    # Takes a symbol/string or array of symbols/strings and returns true if user has all
+    # of the named permissions.
+    def user_has_permissions?(*permission_set)
+      return false if !(@user ||= authenticate_user)
+      
+      permission_set = [ permission_set ] unless permission_set.is_a?(Array)
+      
+      if session[:user_is_superuser]
+        permission_set.each { |perm| session["user_can_#{perm}".to_sym] = true }
+        return true
+      end
+      
+      has_permissions = true
+      permission_set.each do |perm|
+        session["user_can_#{perm}".to_sym] = (@user.send("can_#{perm}").to_i == 1)
+        has_permissions = has_permissions && session["user_can_#{perm}".to_sym]
+      end
+      
+      has_permissions
+    end
+    alias :user_has_permission? :user_has_permissions?
+    
+    # Saves the current request to the session so that it can be replayed later
+    # (for example, after authentication). Only params of type String, Hash and
+    # Array will be saved. save_request is called in a before_filter in
+    # application.rb.
+    #
+    # Two levels of saved params are required so that params can be unsaved in
+    # the event of a 404 or other event that would make the current param set an
+    # unlikely or undesirable candidate for replaying.
+    def save_user_request
+      return if params[:action] == 'login'
+      
+      session[:old_saved_user_uri] = session[:saved_user_uri];
+      session[:old_saved_user_params] = session[:saved_user_params] || {};
+      saved_params = params.reject { |k, v| !(v.kind_of?(String) || v.kind_of?(Hash) || v.kind_of?(Array)) }
+      saved_params.each { |key, val| saved_params[key] = val.reject { |k, v| !(v.kind_of?(String) || v.kind_of?(Hash) || v.kind_of?(Array)) } if val.kind_of?(Hash) }
+      session[:saved_user_uri] = request.url
+      session[:saved_user_params] = saved_params
+    end
+    
+    # Returns a User object corresponding to the currently logged in user, or returns false
+    # and redirects to the login page if not logged in.
+    def authenticate_user
+      # if user is not logged in, record the current request and redirect
+      if !session[:user_authenticated]
+        flash[:notice] = 'This is an admin-only function. To continue, please log in.'
+        save_user_request
+        redirect_to :controller => '/management/user', :action => 'login' and return false
+      end
+      
+      @user = User.find(session[:user_id]) rescue nil
+      session[:user_is_superuser] = @user.is_superuser? rescue nil
+      
+      @user
+    end
+    
     def expire_session_data # :nodoc:
       # make sure this is not the first run (session being initialized)
       if session[:last_active]

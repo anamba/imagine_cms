@@ -2,7 +2,7 @@ class User < ActiveRecord::Base # :nodoc:
   require 'dynamic_methods'
   include DynamicMethods
   
-  attr_accessible :first_name, :last_name
+  # attr_accessible :first_name, :last_name
   attr_reader :password # :nodoc:
   
   has_and_belongs_to_many :groups, :class_name => 'UserGroup', :join_table => 'user_group_memberships'

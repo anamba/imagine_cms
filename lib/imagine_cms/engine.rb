@@ -8,6 +8,12 @@ module ImagineCms
     
     initializer "imagine_cms.assets.precompile" do |config|
       Rails.application.config.assets.precompile += %w( codepress/** dojo/** management.css imagine_controls.css reset.css )
+      # Rails.application.config.load_paths << File.dirname(__FILE__) + "/../app/helpers"
+    end
+    
+    initializer 'imagine_cms.load_helpers' do |app|
+      ActionController::Base.send :include, CmsApplicationHelper
+      # ActionView::Base.send :include, CmsApplicationHelper
     end
     
     def self.activate
@@ -24,6 +30,9 @@ module ImagineCms
     #
     # activate gems as needed
     #
+    require 'rails-observers'
+    require 'actionpack/action_caching'
+    require 'actionpack/page_caching'
     require 'prototype-rails'
     require 'aws/s3'
     require 'RMagick'
@@ -32,6 +41,7 @@ module ImagineCms
     require 'rails_rinku'
     require 'net/dns'
     require 'acts_as_tree'
+    require 'safe_yaml'
     
     #
     # rails plugins
@@ -70,9 +80,8 @@ module ImagineCms
       include PrototypeHelper  # from prototype_legacy_helper
       helper PrototypeHelper
       
-      include CmsApplicationHelper
-      helper CmsApplicationHelper
-      
+      helper_method :user_has_permission?
+      helper_method :user_has_permissions?
       helper_method :insert_object
       
       # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
