@@ -1,0 +1,6 @@
+class AddRedirectFieldsToCmsPageVersions < ActiveRecord::Migration
+  def change
+    add_column :cms_page_versions, :redirect_enabled, :boolean, :null => false, :default => false
+    add_column :cms_page_versions, :redirect_to, :text
+  end
+end
