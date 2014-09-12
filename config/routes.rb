@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   match 'manage/logout'                         => 'management/user#logout', :via => [ :get, :post ]
   match 'manage/user(/:action(/:id))'           => 'management/user', :via => [ :get, :post ]
   
-  match 'manage/cms/preview_template'           => 'cms/content#preview_template', :via => [ :get ]
+  match 'manage/cms/preview_template'           => 'cms/content#preview_template', :via => [ :post ]
   match 'manage/cms(/:action(/:id))'            => 'management/cms', :via => [ :get, :post ]
   
   # slowly convert to resourceful routes

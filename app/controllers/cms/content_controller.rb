@@ -320,9 +320,10 @@ module Cms # :nodoc:
     end
     
     def preview_template
-      @pg = CmsPage.find(1)
+      @pg = CmsPage.new
       @pg.template = CmsTemplate.new
-      @pg.template.assign_attributes(params[:temp] || params[:snip] || {})
+      @pg.template.name = (params[:temp] || params[:snip])[:name] || 'New Template'
+      @pg.template.content = (params[:temp] || params[:snip])[:content]
       @page_objects = HashObject.new
       render :inline => substitute_placeholders(@pg.template.content, @pg), :layout => 'application'
     end
