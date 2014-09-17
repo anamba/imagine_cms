@@ -18,7 +18,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     :image_details, :update_caption,
     :delete_photo, :delete_gallery,
     
-    :pages, :list_pages, :edit_page, :page_attribute, :set_page_version
+    :pages, :list_pages, :edit_page, :show_template_options, :page_attribute, :set_page_version
   ]
   
   before_filter :convert_invalid_chars_in_params
