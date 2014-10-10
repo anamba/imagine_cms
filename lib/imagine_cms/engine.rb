@@ -33,6 +33,7 @@ module ImagineCms
     require 'rails-observers'
     require 'actionpack/action_caching'
     require 'actionpack/page_caching'
+    require 'non-stupid-digest-assets'
     require 'prototype-rails'
     require 'aws/s3'
     require 'RMagick'
