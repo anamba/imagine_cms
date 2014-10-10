@@ -27,20 +27,20 @@
     <%= csrf_meta_tag %>
   </head>
   
-  <body<%= @onload.blank? ? '' : " onload=\"#{@onload}\"" %>>
+  <body<%= @onload.blank? ? '' : " onload=\"#{@onload.html_safe}\"" %>>
     <table cellpadding="0" cellspacing="0" border="0" width="100%" class="noprint">
       <tr height="35" bgcolor="#4D4D4D">
         <td style="padding: 7px 15px 0 15px; border-bottom: solid #ffffff 1px; color: white">
         <%- if is_logged_in_user? -%>
           <!-- Header Navigation -->
           <div style="float: left; padding-top: 2px;">
-            <a href="/manage"><img src="/assets/management/start.gif" width="44" height="14" alt="Start" /></a>
+            <%= link_to image_tag("management/start.gif", :size => "44x14", :alt => "Start"), '/manage' %>
           </div>
           <div style="float: left; padding-left: 20px;">
-            <%= raw @nav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.join(' | ') %>
+            <%= @nav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.safe_join(' | ') %>
           </div>
           <div style="float: right">
-            <%= link_to 'Change password', { :controller => '/management/users', :action => 'edit', :id => session[:user_id] }, :style => 'color: white'%> |
+            <%= link_to 'Change password', { :controller => '/management/users', :action => 'edit', :id => session[:user_id] }, :style => 'color: white' %> |
             <%= link_to 'Log out', { :controller => '/management/user', :action => 'logout' }, :style => 'color: white' %>
           </div>
         <%- end -%>
@@ -51,7 +51,7 @@
         <td style="padding: 7px 15px 0 15px; border-bottom: solid #ffffff 1px; color: white">
           <!-- Header Navigation -->
           <div style="float: left; padding-left: 20px;">
-            <%= @subnav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.join(' | ') %>
+            <%= @subnav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.safe_join(' | ') %>
           </div>
           <div style="float: right">
           </div>
