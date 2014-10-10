@@ -826,9 +826,10 @@ function scanForPageObjects(page_id, parent_key, version) {
     found = [];
     
     var regex = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
-    var matches = $A($('page_objects_' + parent_key).value.match(regex));
+    if (!$('page_objects_' + parent_key).value) return;
     
-    matches.each(function (match) {
+    var matches = $('page_objects_' + parent_key).value.match(regex);
+    $A(matches).each(function (match) {
         // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
         var regex2 = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
         if (regex2.test(match)) {
