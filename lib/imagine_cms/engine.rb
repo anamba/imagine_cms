@@ -35,7 +35,7 @@ module ImagineCms
     require 'actionpack/page_caching'
     require 'non-stupid-digest-assets'
     require 'prototype-rails'
-    require 'aws/s3'
+    require 'aws-sdk'
     require 'RMagick'
     require 'mini_magick'
     require 'zip'
@@ -66,10 +66,10 @@ module ImagineCms
     #
     # load extensions
     #
-    require 'extensions/array'
+    require 'extensions/array_extensions'
     
     ActiveSupport.on_load(:action_controller) do
-      require 'extensions/action_controller'
+      require 'extensions/action_controller_extensions'
       extend ActionControllerExtensions::ClassMethods
       include ActionControllerExtensions::InstanceMethods
       

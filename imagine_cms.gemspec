@@ -27,13 +27,13 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency "rails",               [ ">= 4.0.9", "< 5.0" ]
+  s.add_dependency "rails",               [ ">= 4.1.5", "< 5.0" ]
   s.add_dependency "rails-observers",     "~> 0.1"
   s.add_dependency "actionpack-action_caching", "~> 1.0"
   s.add_dependency "actionpack-page_caching", "~> 1.0"
   s.add_dependency "non-stupid-digest-assets", "~> 1.0"
   s.add_dependency "prototype-rails",     "~> 4.0.0"
-  s.add_dependency "aws-s3",              "~> 0.6.3"
+  s.add_dependency "aws-sdk",             "~> 2.0.0.pre"
   s.add_dependency "rmagick"
   s.add_dependency "mini_magick",         "~> 3.3"
   s.add_dependency "rubyzip",             "~> 1.0"

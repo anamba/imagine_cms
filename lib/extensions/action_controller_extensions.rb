@@ -65,9 +65,10 @@ module ActionControllerExtensions
     def expire_session_data # :nodoc:
       # make sure this is not the first run (session being initialized)
       if session[:last_active]
-        idle_time = Time.now - session[:last_active]
-        
         # expire session data as necessary
+        #
+        # idle_time = Time.now - session[:last_active]
+        #
         # session_data = session.instance_variable_get("@data")
         # session_data.select { |k,v| k.to_s !~ /_expiration$/ && v }.each do |k,v|
         #   idx = k.to_s + '_expiration'

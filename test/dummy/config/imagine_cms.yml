@@ -1,5 +1,6 @@
 amazon_s3:
   enabled: true
+  region: us-east-1
   
   metadata:
     'Cache-Control': 'max-age=2592000'
@@ -9,8 +10,8 @@ amazon_s3:
   media_prefix: site1/media
   
   development:
-    access_key_id: 
-    secret_access_key: 
+    access_key_id: AKIAJG6SL2GZP4C6GYFA
+    secret_access_key: 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
     image_bucket: abc-dev
     file_bucket: abc-dev
     media_bucket: abc-dev
@@ -29,8 +30,8 @@ amazon_s3:
     media_hostname: abc-test.s3.amazonaws.com
     
   production:
-    access_key_id: AKIAJG6SL2GZP4C6GYFA
-    secret_access_key: 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
+    access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
+    secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
     image_bucket: abc
     file_bucket: abc
     media_bucket: abc
