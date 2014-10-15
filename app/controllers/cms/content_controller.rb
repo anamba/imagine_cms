@@ -239,7 +239,7 @@ module Cms # :nodoc:
           conds << "(title regexp ?)"
           vars  << "[[:<:]](#{term_variant})[[:>:]]"
         end
-        @pages.concat CmsPage.find(:all, :conditions => [ conds.join(' and ') ].concat(vars))
+        @pages.concat CmsPage.where([ conds.join(' and ') ].concat(vars))
         
         conds = [ 'published_version >= 0' ]
         vars  = []
@@ -247,11 +247,11 @@ module Cms # :nodoc:
           conds << "(title regexp ? or search_index regexp ?)"
           vars  << "[[:<:]](#{term_variant})[[:>:]]" << "[[:<:]](#{term_variant})[[:>:]]"
         end
-        @pages.concat CmsPage.find(:all, :conditions => [ conds.join(' and ') ].concat(vars))
+        @pages.concat CmsPage.where([ conds.join(' and ') ].concat(vars))
         
         # fulltext doesn't work with innodb... may need to make a separate myisam
         # table just for search. (this would be better because it would sort by relevance)
-        # @pages.concat CmsPage.find(:all, :conditions => [ 'match (title, search_index) against (?)', params[:q] ])
+        # @pages.concat CmsPage.where('match (title, search_index) against (?)', params[:q])
       end
       @pages = @pages.uniq.reject { |pg| pg.search_index.blank? }.first(100)
       

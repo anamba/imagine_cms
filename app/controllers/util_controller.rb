@@ -13,7 +13,7 @@ class UtilController < ApplicationController # :nodoc:
     @css_prefix = params[:css_prefix].to_s.gsub(/[^-\w]/, '')
     @popout_direction = params[:popout_direction]
     
-    events = @calendar.events.find(:all, :conditions => [ 'start_date >= ? and start_date < ?', first_of_month, last_of_month + 1.day ])
+    events = @calendar.events.where('start_date >= ? and start_date < ?', first_of_month, last_of_month + 1.day)
     
     @event_days = {}
     events.each do |e|

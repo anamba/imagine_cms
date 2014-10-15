@@ -485,7 +485,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         end
         
         old_objs.each do |obj|
-          unless @pg.objects.find(:all, :conditions => [ 'name = ? and cms_page_version = ?', obj.name, @pg.version])
+          unless @pg.objects.where(name: obj.name, cms_page_version: @pg.version)
             obj = @pg.objects.build(:name => obj.name, :obj_type => obj.type, :content => obj.content)
           end
         end
@@ -504,7 +504,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     load_page_objects
     @pg.revert_to(params[:version]) if params[:version]
-    @pg.objects.find(:all, :conditions => [ 'cms_page_version = ?', @pg.version]).each do |obj|
+    @pg.objects.where(cms_page_version: @pg.version).each do |obj|
       key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
       @page_objects[key] = obj.content
     end
@@ -565,7 +565,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     # send email to request administrative review
     # find all users with email address set
-    User.find(:all).reject { |u| !u.active? || !u.can_manage_cms_publishing? || !u.cms_allowed_sections.blank? }.each do |u|
+    User.all.reject { |u| !u.active? || !u.can_manage_cms_publishing? || !u.cms_allowed_sections.blank? }.each do |u|
       next unless valid_email_address?(u.email_address)
       begin
         Mailer.deliver_cms_request_review(url_for(:controller => '/cms/content', :action => 'show', :content_path => []) + @pg.path, @pg.title, @version, u, @user, params[:change_description].to_s)

@@ -164,8 +164,8 @@ Pressing "Save Image" will crop the image and insert it into the page.
              x <%= text_field :image, :max_height, :size => 3, :value => @height, :onchange => "recalculateWidth();" %>
             <%= javascript_tag "$('image_max_width').onkeydown = disableEnterKey; $('image_max_height').onkeydown = disableEnterKey;" %>
             
-            <%= image_tag('/assets/management/icon_unlocked.png', :id => 'icon_unlocked', :onclick => "lockImageSize();") %>
-            <%= image_tag('/assets/management/icon_locked.png', :id => 'icon_locked', :onclick => "unlockImageSize();", :style => 'display: none;') %>
+            <%= image_tag('management/icon_unlocked.png', :id => 'icon_unlocked', :onclick => "lockImageSize();") %>
+            <%= image_tag('management/icon_locked.png', :id => 'icon_locked', :onclick => "unlockImageSize();", :style => 'display: none;') %>
             
             <%= link_to_function "Apply", "resizeCropperScaled();" %> |
             <%= link_to_function "Reset", "cropper.reset(); resize_ratio = 1.0;" %>

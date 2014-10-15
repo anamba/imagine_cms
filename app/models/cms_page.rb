@@ -87,7 +87,7 @@ class CmsPage < ActiveRecord::Base
     
     if self.published_version.to_i >= 0
       idx_version = self.published_version.to_i == 0 ? self.version : self.published_version
-      self.objects.find(:all, :conditions => [ "cms_page_version = ? and (obj_type = 'text' or obj_type = 'string')", idx_version ]).each do |obj|
+      self.objects.where(cms_page_version: idx_version, obj_type: [ 'text', 'string' ]).each do |obj|
         content << obj.content << "\n"
       end
     end
