@@ -238,7 +238,7 @@ class VersionedTest < ActiveSupport::TestCase
   end
 
   def test_find_versions
-    assert_equal 1, locked_pages(:welcome).versions.find(:all, :conditions => ['title LIKE ?', '%weblog%']).size
+    assert_equal 1, locked_pages(:welcome).versions.where(['title LIKE ?', '%weblog%']).size
   end
 
   def test_find_version
