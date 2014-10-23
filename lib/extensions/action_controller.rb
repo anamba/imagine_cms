@@ -217,7 +217,7 @@ module ActionControllerExtensions
             content << " onmouseout=\"this.className = 'page_list_segment'\""
             content << " onclick=\"$('#{key}').style.cursor = 'wait'; $('#{key}').style.opacity = 0.5; "
             # FIXME: Prototype
-            content << " new Ajax.Updater('#{key}', '#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]))}', {asynchronous:true, evalScripts:true, method:'get'});"
+            content << " new Ajax.Updater('#{key}', '#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', {asynchronous:true, evalScripts:true, method:'get'});"
             content << "; window.scrollBy(0, - 20 + document.getElementById('#{key}').getBoundingClientRect().top); return false;\""
           end
           content << ">#{seg+1}</a></td>"
