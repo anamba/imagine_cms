@@ -52,6 +52,11 @@ class CmsPage < ActiveRecord::Base
     self.tags.map { |t| t.name.downcase.gsub(/[^\w]+/, '-') }.join(' ')
   end
   
+  include Rails.application.routes.url_helpers
+  def expire_cache
+    Management::CmsController.expire_page url_for(:controller => '/cms/content', :action => 'show', :content_path => (path.blank? ? nil : path.split('/')), :only_path => true)
+  end
+  
   def self.index_all
     where('search_index is null').each(&:update_index!)
     true
