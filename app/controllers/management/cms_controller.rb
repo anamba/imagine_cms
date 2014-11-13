@@ -218,7 +218,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           params[:tags].split(',').map(&:strip).reject(&:blank?).each do |t|
             if existing_tags.include?(t)
               # still in use, don't delete
-              tags_to_delete.reject! { |tag| tag.name == t }
+              tags_to_delete = tags_to_delete.reject { |tag| tag.name == t }
             else
               # doesn't exist, create
               @pg.tags.create(:name => t)
@@ -241,7 +241,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
               obj ||= @pg.objects.build(:name => $2, :obj_type => $1)
               obj.content = val
               obj.save
-              objects_to_delete.reject! { |obj| obj.name == $2 }
+              objects_to_delete = objects_to_delete.reject { |obj| obj.name == $2 }
             end
           end
           
