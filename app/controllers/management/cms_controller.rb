@@ -5,7 +5,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   before_filter :check_permissions
   before_filter :block_basic_users, :except => [
     :index, :edit_page_content,
-    :include_codepress, :disable_caching, :garbage_collect,
+    :disable_caching, :garbage_collect,
     :select_page, :list_pages_select, :request_review,
     :toolbar_preview, :toolbar_edit,
     

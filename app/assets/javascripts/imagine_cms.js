@@ -6,4 +6,6 @@
 //= require jquery_no_conflict
 //= require builder
 //= require cropper
+//= require codemirror
+//= require codemirror/modes/html
 //= require imagine

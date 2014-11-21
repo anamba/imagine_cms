@@ -7,7 +7,8 @@ module ImagineCms
     middleware.use ::ActionDispatch::Static, "#{root}/public"
     
     initializer "imagine_cms.assets.precompile" do |config|
-      Rails.application.config.assets.precompile += %w( codepress/** dojo/** management.css imagine_controls.css reset.css )
+      Rails.application.config.assets.precompile += %w( dojo/** management.css imagine_controls.css reset.css )
+      Rails.application.config.assets.precompile += ["codemirror*", "codemirror/**/*"]
       # Rails.application.config.load_paths << File.dirname(__FILE__) + "/../app/helpers"
     end
     
@@ -33,16 +34,19 @@ module ImagineCms
     require 'rails-observers'
     require 'actionpack/action_caching'
     require 'actionpack/page_caching'
-    require 'non-stupid-digest-assets'
-    require 'prototype-rails'
     require 'aws-sdk'
-    require 'RMagick'
-    require 'mini_magick'
     require 'zip'
     require 'rails_rinku'
-    require 'net/dns'
-    require 'acts_as_tree'
     require 'safe_yaml'
+    require 'acts_as_tree'
+    require 'net/dns'
+    require 'codemirror-rails'
+    
+    # on the way out, but still needed for now
+    require 'prototype-rails'
+    require 'RMagick'
+    require 'mini_magick'
+    require 'non-stupid-digest-assets'
     
     #
     # rails plugins
