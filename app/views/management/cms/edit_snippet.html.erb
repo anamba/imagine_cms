@@ -2,46 +2,24 @@
 
 <h2>Edit Snippet</h2>
 
-<%= form_tag({}, { :onsubmit => "snip_content.toggleEditor();" }) do %>
-<table width="100%" height="100%">
-  <col width="100" />
-  <tr>
-    <td>Name:</td>
-    <td><%= text_field :snip, :name %></td>
-  </tr>
-  <tr>
-    <td valign="top"><div style="margin-top: 2px">Content:</div></td>
-    <td>
-      <%= text_area :snip, :content, :class => 'codepress html autocomplete-off', :style => 'width: 100%; height: 600px;' %>
-    </td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>
-      <%= submit_tag 'Save Snippet', :class => 'form_button' %>
-      <button onclick="$('preview_frame').scrollIntoView(); snip_content.toggleEditor(); $('preview_content').value = $('snip_content_cp').value; $('preview_form').submit(); snip_content.toggleEditor(); return false;" class="form_button">Preview</button>
-      <%= link_to 'Cancel', :action => 'snippets' %>
-    </td>
-  </tr>
-</table>
-<br/>
-
-<%= render :partial => 'template_reference' %>
-<br/>
-
-<table width="100%">
-  <col width="100" />
-  <tr>
-    <td valign="top"><div style="margin-top: 2px">Preview:</div></td>
-    <td>
-      <iframe id="preview_frame" name="preview_frame" style="width: 100%; height: 600px; border: 1px solid gray;"></iframe>
-      <%= submit_tag 'Save Snippet', :class => 'form_button' %>
-    </td>
-  </tr>
-</table>
+<%= form_tag do %>
+  <%= text_field :snip, :name, :placeholder => 'Snippet Name', :size => '50' %>
+  <div class="codemirror-html-container">
+    <%= text_area :snip, :content, :class => 'codemirror-html autocomplete-off' %>
+  </div>
+  <%= submit_tag 'Save Snippet', :class => 'form_button' %>
+  <button onclick="jQuery('#preview_frame').show(); jQuery('#preview_frame')[0].scrollIntoView(); jQuery('#preview_content').val(jQuery('#snip_content').val()); jQuery('#preview_form').submit(); return false;" class="form_button">Preview</button>
+  <%= link_to 'Cancel', :action => 'sniplates' %>
+  <br/>
+  
+  <br/>
+  <%= render :partial => 'template_reference' %>
+  <br/>
+  
+  <iframe id="preview_frame" name="preview_frame"></iframe>
 <% end %>
 
-
-<form id="preview_form" action="<%= url_for :controller => '/cms/content', :action => 'preview_template' %>" target="preview_frame">
-  <textarea id="preview_content" name="temp[content]" style="display: none;"></textarea>
-</form>
+<%= form_tag({ :controller => '/cms/content', :action => 'preview_template' }, :id => 'preview_form', :target => 'preview_frame') do %>
+  <%= text_area_tag 'temp[content]', '', :id => 'preview_content', :style => 'display: none;' %>
+  <%= hidden_field_tag 'mode', 'preview' %>
+<% end %>
