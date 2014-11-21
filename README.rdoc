@@ -15,7 +15,8 @@ All that is now firmly in the past. By extracting Imagine functionality into a g
 * Imagine 3.0 (Rails 3.2, Ruby 1.9): [DONE] 90% restored functionality, no database changes.
 * Imagine 3.1 (Rails 3.2, Ruby 1.9/2.0): [DONE, but released as 3.0.x] 100% restored functionality, plus a few extras and fixes.
 * Imagine 4.0 (Rails 4.0, Ruby 2.1): [DONE] Compatibility with Rails 4.0
-* Imagine 4.1 (Rails 4.1, Ruby 2.1): [IN PROGRESS]
+* Imagine 4.1 (Rails 4.1, Ruby 2.1): [DONE]
+* Imagine 4.2 (Rails 4.2, Ruby 2.1): [in progress on master]
 * Imagine 5.0 (Rails 5.0, Ruby 2.2): [PLANNED, Mid 2015] Compatibility with Rails 5.0, switch to a cross-browser editor
 
 In the future, there are plans to:
