@@ -20,4 +20,12 @@ namespace :imagine_cms do
     
   end
   
+  desc "Copy dojo editor files to public"
+  task :install_dojo => :environment do
+    sourcedir = File.expand_path('../../../app/assets/javascripts/dojo', __FILE__)
+    targetdir = File.expand_path(File.join(Rails.root, 'public', 'assets'))
+    FileUtils.mkdir_p targetdir
+    FileUtils.cp_r sourcedir, targetdir
+  end
+  
 end

@@ -4,12 +4,12 @@
   
   if is_logged_in_user?
     if user_has_permission?(:manage_cms)
-      @nav_sections << [ 'Pages', { :controller => '/management/cms', :action => 'pages' } ]
-      @nav_sections << [ 'Templates', { :controller => '/management/cms', :action => 'templates' } ]
-      @nav_sections << [ 'Snippets', { :controller => '/management/cms', :action => 'snippets' } ]
+      @nav_sections << [ 'Pages', { controller: '/management/cms', action: 'pages' } ]
+      @nav_sections << [ 'Templates', { controller: '/management/cms', action: 'templates' } ]
+      @nav_sections << [ 'Snippets', { controller: '/management/cms', action: 'snippets' } ]
     end
     if user_has_permission?(:manage_users)
-      @nav_sections << [ 'Users', { :controller => '/management/users', :action => 'index' } ]
+      @nav_sections << [ 'Users', { controller: '/management/users', action: 'index' } ]
     end
   end
 -%>
@@ -20,8 +20,8 @@
     <%- if is_logged_in_user? -%>
       <script src="/assets/dojo/dojo.js" type="text/javascript"></script>
     <%- end -%>
-    <%= stylesheet_link_tag "application", :media => "all" %>
-    <%= stylesheet_link_tag "management", :media => "all" %>
+    <%= stylesheet_link_tag "application", media: "all" %>
+    <%= stylesheet_link_tag "management", media: "all" %>
     <%= javascript_include_tag "application" %>
     <%= csrf_meta_tag %>
   </head>
@@ -33,14 +33,14 @@
         <%- if is_logged_in_user? -%>
           <!-- Header Navigation -->
           <div style="float: left; padding-top: 2px;">
-            <%= link_to image_tag("management/start.gif", :size => "44x14", :alt => "Start"), '/manage' %>
+            <%= link_to image_tag("management/start.gif", size: "44x14", alt: "Start"), '/manage' %>
           </div>
           <div style="float: left; padding-left: 20px;">
-            <%= @nav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.safe_join(' | ') %>
+            <%= @nav_sections.map { |nav| link_to(nav[0], nav[1], style: 'color: white') }.safe_join(' | ') %>
           </div>
           <div style="float: right">
-            <%= link_to 'Change password', { :controller => '/management/users', :action => 'edit', :id => session[:user_id] }, :style => 'color: white' %> |
-            <%= link_to 'Log out', { :controller => '/management/user', :action => 'logout' }, :style => 'color: white' %>
+            <%= link_to 'Change password', { controller: '/management/users', action: 'edit', id: session[:user_id] }, style: 'color: white' %> |
+            <%= link_to 'Log out', { controller: '/management/user', action: 'logout' }, style: 'color: white' %>
           </div>
         <%- end -%>
         </td>
@@ -50,7 +50,7 @@
         <td style="padding: 7px 15px 0 15px; border-bottom: solid #ffffff 1px; color: white">
           <!-- Header Navigation -->
           <div style="float: left; padding-left: 20px;">
-            <%= @subnav_sections.map { |nav| link_to(nav[0], nav[1], :style => 'color: white') }.safe_join(' | ') %>
+            <%= @subnav_sections.map { |nav| link_to(nav[0], nav[1], style: 'color: white') }.safe_join(' | ') %>
           </div>
           <div style="float: right">
           </div>
@@ -60,12 +60,7 @@
     </table>
     
     <div id="management-content" style="padding: 15px 10px 1px 15px">
-      <!-- Main Content -->
       <%= yield %>
     </div>
-    
-    <footer>
-      
-    </footer>
   </body>
 </html>

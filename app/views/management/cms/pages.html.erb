@@ -20,18 +20,12 @@ EOF
 
 <%= flash_message %>
 
-<div id="columnBrowserToolbar" style="background-color: #d0d0d0; padding: 4px; margin-bottom: 5px;  ">
-  <a id="new_link" href="#"><img src="/assets/management/btn_top_new.gif" style="margin-right: 2px;" /></a>
-  <a id="edit_content_link" href="#" target="_blank"><img src="/assets/management/btn_top_edit.gif" style="margin-right: 2px;" /></a>
-  <form id="edit_content_form" action="#" onsubmit="this.action = $('edit_content_link').href;" target="_blank" style="display: none">
-    <button>dummy</button>
-  </form>
-  <a id="edit_link" href="#"><img src="/assets/management/btn_top_properties.gif" style="margin-right: 2px;" /></a>
-  <a id="view_link" href="#" target="_blank"><img src="/assets/management/btn_top_preview.gif" style="margin-right: 2px;" /></a>
-  <a id="delete_link" href="#" onclick="if (confirm('Are you sure you want to delete the selected page?')) { $('delete_form').submit(); } return false;"><img src="/assets/management/btn_top_delete.gif" style="margin: 0" /></a>
-  <%= form_tag('', :id => "delete_form", :style => "display: none") do %>
-    <button>dummy</button>
-  <% end %>
+<div id="columnBrowserToolbar" style="background-color: #d0d0d0; padding: 4px; margin-bottom: 5px;">
+  <%= link_to image_tag('management/btn_top_new.gif', style: 'margin-right: 2px;'), '#', id: 'new_link' %>
+  <%= link_to image_tag('management/btn_top_edit.gif', style: 'margin-right: 2px;'), '#', id: 'edit_content_link', target: '_blank', method: :post %>
+  <%= link_to image_tag('management/btn_top_properties.gif', style: 'margin-right: 2px;'), '#', id: 'edit_link' %>
+  <%= link_to image_tag('management/btn_top_preview.gif', style: 'margin-right: 2px;'), '#', id: 'view_link', target: '_blank' %>
+  <%= link_to image_tag('management/btn_top_delete.gif', style: 'margin: 0;'), '#', id: 'delete_link', target: '_blank', method: :post, data: { confirm: 'Are you sure you want to delete the selected page?' } %>
   <div class="clearer"></div>
 </div>
 
@@ -83,7 +77,7 @@ EOF
     $('new_link').onclick = function () { editProperties('<%=raw url_for(:action => 'edit_page', :mode => 'ajax_new', :parent_id => list_page, :authenticity_token => form_authenticity_token.to_s) %>', 'Create New Page under /<%= list_page.path %>'); return false; };
     $('edit_link').onclick = function () { editProperties('<%=raw url_for :action => 'edit_page', :id => list_page, :mode => 'ajax_edit', :authenticity_token => form_authenticity_token.to_s %>', 'Page Properties: <%= list_page.name %>'); return false; };
     $('edit_content_link').href = '<%=raw url_for :action => 'edit_page_content', :id => list_page, :authenticity_token => form_authenticity_token.to_s %>';
-    $('delete_form').action = '<%=raw url_for :action => 'delete_page', :id => list_page.id %>';
+    $('delete_link').href = '<%=raw url_for :action => 'delete_page', :id => list_page.id %>';
 </script>
 
 <%= render :partial => '/imagine_cms/dialogs' %>

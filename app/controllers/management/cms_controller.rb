@@ -604,7 +604,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
                            :focusOnLoad => focusOnLoad.to_s, :style => 'border: 2px dashed gray; padding: 5px',
                            :minHeight => '100px' }.update(html_options))
       content << content_tag(:div, ''.html_safe, :id => "page_object_config_#{key}")
-      content << javascript_tag("addLoadEvent(function () { scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version}); });")
+      content << javascript_tag("jQuery(document).ready(function () { scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version}); });")
       content << observe_field("page_objects_#{key}", :function => "scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});", :frequency => 2)
       content
     when :page_list

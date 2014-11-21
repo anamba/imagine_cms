@@ -43,7 +43,7 @@ module Cms # :nodoc:
       end
       
       if template_found
-        render :template => @content_path
+        render template: @content_path
       elsif show_from_db
         return
       else
@@ -63,7 +63,7 @@ module Cms # :nodoc:
     def rendering_error(exception = nil)
       logger.error "500 from #{request.referer} (exception: #{exception})"
       @exception = exception.message
-      render :template => 'imagine_cms/errors/500', :status => 500
+      render template: 'imagine_cms/errors/500', status: 500, formats: [ :html ]
     end
     
     def show_from_db
