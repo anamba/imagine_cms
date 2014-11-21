@@ -14,3 +14,6 @@
 //= require codemirror/modes/htmlmixed
 //
 //= require imagine_cms/core
+//= require imagine_cms/legacy/rollovers
+//= require imagine_cms/legacy/slideshow
+//= require imagine_cms/legacy/textfieldhints
