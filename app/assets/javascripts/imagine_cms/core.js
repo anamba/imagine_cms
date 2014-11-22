@@ -8,7 +8,11 @@ jQuery(document).ready(function () {
 });
 
 
-/* legacy prototype stuff only beyond this point */
+
+
+/*
+ * legacy prototype stuff only beyond this point
+ */
 
 // Fixes gallery reordering (Scriptaculous Sortable)
 Position.includeScrollOffsets = true;
@@ -118,13 +122,33 @@ function cbSelectItem(el, currentLevel, urlForNextLevel) {
  * cms support                  *
  ********************************/
 
+function disableEnterKey(e) {
+    // get event if not passed
+    if (!e) var e = window.event;
+    
+    var numCharCode;
+    
+    // get character code of key pressed
+    if (e.keyCode) {
+        numCharCode = e.keyCode;
+    } else if (e.which) {
+        numCharCode = e.which;
+    }
+    
+    if (numCharCode == 13) {
+        e.cancelBubble = true;
+        if (e.stopPropagation) e.stopPropagation();
+        return false;
+    }
+}
+
 // support for autocompletes
 var attrlist = [];
 var taglist = [];
 
 var dialogStack = [];
 function showDojoDialog(id, titleText) {
-    if (!is.ie) changeOverflowAutoToHidden();
+    // if (!is.ie) changeOverflowAutoToHidden();
     
     dlg = dojo.widget.byId(id);
     if (!dlg) dlg = dojo.widget.createWidget(id);

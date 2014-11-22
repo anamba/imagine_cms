@@ -175,8 +175,7 @@
         <tr>
           <td>Add an attribute: &nbsp;</td>
           <td>
-            <%= text_field_tag :custom_attribute_name, '', :class => 'form', :style => 'margin-bottom: 4px;' %>
-            <%= javascript_tag "addTextFieldHint('custom_attribute_name', '[ attribute name ]'); setupTextFieldHints(); "%>
+            <%= text_field_tag :custom_attribute_name, '', :class => 'form', :style => 'margin-bottom: 4px;', :placeholder => '[ attribute name ]' %>
             <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
             <%= javascript_tag "$('custom_attribute_name').onkeydown = disableEnterKey; new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });" %>
             

@@ -23,28 +23,6 @@ function addUnloadEvent(func) {
 }
 
 
-// this doesn't seem to work... argh
-function disableEnterKey(e) {
-    // get event if not passed
-    if (!e) var e = window.event;
-    
-    var numCharCode;
-    
-    // get character code of key pressed
-    if (e.keyCode) {
-        numCharCode = e.keyCode;
-    } else if (e.which) {
-        numCharCode = e.which;
-    }
-    
-    if (numCharCode == 13) {
-        e.cancelBubble = true;
-        if (e.stopPropagation) e.stopPropagation();
-        return false;
-    }
-}
-
-
 /********************************
  * dialog/popup functions       *
  ********************************/
