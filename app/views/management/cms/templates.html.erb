@@ -1,6 +1,6 @@
 <h2>CMS &raquo; Templates</h2>
 
-<p><%= button_to 'Create New Template', :action => 'edit_template' %></p>
+<p><%= button_to 'Create New Template', { action: 'edit_template' }, method: :get %></p>
 
 <%= flash_message %>
 
@@ -8,5 +8,5 @@
   <tr>
     <th>Name</th>
   </tr>
-  <%= render :partial => 'temp', :collection => @temps %>
+  <%= render partial: 'temp', collection: @temps %>
 </table>
