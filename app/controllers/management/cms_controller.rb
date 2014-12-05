@@ -212,53 +212,43 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       if @pg.send(@pg.new_record? ? :save : :save_without_revision)
         # now try to save tags
-        # begin
-          existing_tags = @pg.tags.map(&:name)
-          tags_to_delete = @pg.tags.all
-          params[:tags].split(',').map(&:strip).reject(&:blank?).each do |t|
-            if existing_tags.include?(t)
-              # still in use, don't delete
-              tags_to_delete = tags_to_delete.reject { |tag| tag.name == t }
-            else
-              # doesn't exist, create
-              @pg.tags.create(:name => t)
-            end
+        existing_tags = @pg.tags.map(&:name)
+        tags_to_delete = @pg.tags.all
+        params[:tags].split(',').map(&:strip).reject(&:blank?).each do |t|
+          if existing_tags.include?(t)
+            # still in use, don't delete
+            tags_to_delete = tags_to_delete.reject { |tag| tag.name == t }
+          else
+            # doesn't exist, create
+            @pg.tags.create(:name => t)
           end
-          tags_to_delete.each { |t| t.destroy }
-        # rescue Exception => e
-        #   logger.debug e
-        # end
+        end
+        tags_to_delete.each { |t| t.destroy }
         
         # now try to save page objects (just attributes in this case)
-        # begin
-          objects_to_delete = @pg.objects.where("obj_type = 'attribute' or obj_type = 'option'").all
-          
-          (params[:page_objects] || {}).each do |key,val|
-            next if val.blank?
-            
-            if key =~ /^obj-(\w+?)-(.+?)$/
-              obj = @pg.objects.where(:name => $2, :obj_type => $1).first
-              obj ||= @pg.objects.build(:name => $2, :obj_type => $1)
-              obj.content = val
-              obj.save
-              objects_to_delete = objects_to_delete.reject { |obj| obj.name == $2 }
-            end
-          end
-          
-          objects_to_delete.each { |t| t.destroy }
-        # rescue Exception => e
-        #   logger.debug e
-        # end
+        objects_to_delete = @pg.objects.where("obj_type = 'attribute' or obj_type = 'option'").all
         
-        render :update do |page|
-          case params[:return_to]
-          when 'preview'
-            page.redirect_to "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
-          else
-            flash[:notice] = 'Page saved.'
-            session[:cms_pages_path] = @pg.path
-            page.redirect_to :action => 'pages'
+        (params[:page_objects] || {}).each do |key,val|
+          next if val.blank?
+          
+          if key =~ /^obj-(\w+?)-(.+?)$/
+            obj = @pg.objects.where(:name => $2, :obj_type => $1).first
+            obj ||= @pg.objects.build(:name => $2, :obj_type => $1)
+            obj.content = val
+            obj.save
+            objects_to_delete = objects_to_delete.reject { |obj| obj.name == $2 }
           end
+        end
+        
+        objects_to_delete.each { |t| t.destroy }
+        
+        case params[:return_to]
+        when 'preview'
+          redirect_to "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
+        else
+          flash[:notice] = 'Page saved.'
+          session[:cms_pages_path] = @pg.path
+          redirect_to :action => 'pages'
         end
         
       else
