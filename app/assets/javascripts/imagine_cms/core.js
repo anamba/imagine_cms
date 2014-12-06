@@ -189,7 +189,7 @@ function hideDojoDialog(id) {
     dialogStack.pop();
     
     dojo.widget.byId(id).hide();
-    if (!is.ie) changeOverflowHiddenToAuto();
+    // if (!is.ie) changeOverflowHiddenToAuto();
     
     if (dialogStack.length > 0) {
         dojo.widget.byId(dialogStack[dialogStack.length-1]).show();
