@@ -22,6 +22,24 @@ Position.includeScrollOffsets = true;
  * date picker functions        *
  ********************************/
 
+function getElementPosition(sourceObj) {
+    if (sourceObj.style.left && sourceObj.style.top) {
+        // for the W3C-compliant crowd
+        return [parseInt(sourceObj.style.left), parseInt(sourceObj.style.top)];
+    } else {
+        // for the other awful browsers...
+        x = sourceObj.offsetLeft;
+        y = sourceObj.offsetTop;
+        temp = sourceObj;
+        while (temp = temp.offsetParent) {
+            x += temp.offsetLeft;
+            y += temp.offsetTop;
+        }
+        
+        return [x, y];
+    }
+}
+
 function showDatePicker(object, method_prefix) {
     // anchor picker to the icon
     var coords = getElementPosition($('date_picker_' + object + '_' + method_prefix + 'icon'));
