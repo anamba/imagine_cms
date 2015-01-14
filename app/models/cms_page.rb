@@ -97,7 +97,11 @@ class CmsPage < ActiveRecord::Base
   
   def update_index!
     update_index
-    self.class.without_revision { save }
+    begin
+      self.class.without_revision { save }
+    rescue NoMethodError => e
+      # sometime the cache sweeper fails, but that's okay here
+    end
   end
   
   def set_parent_id!(new_id)
