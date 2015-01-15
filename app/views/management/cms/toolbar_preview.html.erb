@@ -70,7 +70,7 @@
                                :complete => "$('set_page_version_loading').hide();" + (@pg ? "$('pg_published_version_container').style.borderColor = ($('pg_published_version').value == '0' || $('pg_published_version').value == '#{@pg.versions.last.version}') ? '#EBEBEB' : 'red';" : '')) do -%>
               <div id="pg_published_version_container" style="border-color: <%= @pg && (@pg.published_version == 0 || @pg.published_version == @pg.versions.last.version) ? '#EBEBEB' : 'red' %>; border-style: solid; border-width: 2px;">
               <select name="pg[published_version]" id="pg_published_version" style="font-size: 8pt; width: 210px;" onchange="this.form.onsubmit();">
-                <%- [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }).each do |label, version| %>
+                <%- [ @pg.path == '' ? nil : [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].compact.concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }).each do |label, version| %>
                 <option value="<%= version %>"<%= (@pg && @pg.published_version == version.to_i) ? ' selected="selected"' : '' %>><%= label %></option>
                 <%- end -%>
               </select>

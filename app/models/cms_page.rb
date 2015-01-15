@@ -37,6 +37,12 @@ class CmsPage < ActiveRecord::Base
     
     self.published_version ||= -1
     self.published_date ||= self.created_on || Time.now
+    
+    if path == '' && published_version == -1
+      self.published_version = 0  # home page should never be set to offline
+    end
+    
+    true
   end
   
   def resave_children
