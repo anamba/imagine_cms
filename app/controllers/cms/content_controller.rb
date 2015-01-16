@@ -62,7 +62,7 @@ module Cms # :nodoc:
     
     def rendering_error(exception = nil)
       logger.error "500 from #{request.referer} (exception: #{exception})"
-      logger.error exception.annoted_source_code
+      logger.error exception.annoted_source_code if exception.class.name == 'ActionView::Template::Error'
       
       @exception = exception.message
       render template: 'imagine_cms/errors/500', status: 500, formats: [ :html ]
