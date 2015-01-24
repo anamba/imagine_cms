@@ -3,7 +3,7 @@ class CmsTemplate < ActiveRecord::Base
   
   attr_accessor :options
   
-  has_many :pages, :class_name => 'CmsPage'
+  has_many :pages, class_name: 'CmsPage'
   
   after_find :deserialize_yaml
   before_save :serialize_yaml

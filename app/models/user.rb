@@ -5,14 +5,14 @@ class User < ActiveRecord::Base # :nodoc:
   # attr_accessible :first_name, :last_name
   attr_reader :password # :nodoc:
   
-  has_and_belongs_to_many :groups, :class_name => 'UserGroup', :join_table => 'user_group_memberships'
+  has_and_belongs_to_many :groups, class_name: 'UserGroup', join_table: 'user_group_memberships'
   
-  validates_presence_of [ :username, :password, :first_name, :last_name ], :message => 'is required'
-  validates_length_of :password, :minimum => 4
-  validates_uniqueness_of :username, :message => 'already in use'
+  validates_presence_of [ :username, :password, :first_name, :last_name ], message: 'is required'
+  validates_length_of :password, minimum: 4
+  validates_uniqueness_of :username, message: 'already in use'
   validates_confirmation_of :password
   
-  before_validation :fake_password_confirmation, :on => :update
+  before_validation :fake_password_confirmation, on: :update
   
   def name ; [ first_name, last_name ].compact.join(' ') ; end
   

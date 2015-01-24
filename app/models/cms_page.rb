@@ -3,16 +3,16 @@ class CmsPage < ActiveRecord::Base
   include ActsAsTree
   
   acts_as_versioned
-  acts_as_tree :order => 'path'
+  acts_as_tree order: 'path'
   
-  belongs_to :template, :class_name => 'CmsTemplate', :foreign_key => 'cms_template_id'
-  has_many :objects, :class_name => 'CmsPageObject', :dependent => :destroy
-  has_many :tags, :class_name => 'CmsPageTag', :dependent => :destroy
-  has_many :versions, :class_name => 'CmsPageVersion', :dependent => :destroy
-  has_many :sub_pages, -> { where('published_version >= 0').order(:position, :title, :name) }, :class_name => 'CmsPage', :foreign_key => :parent_id
+  belongs_to :template, class_name: 'CmsTemplate', foreign_key: 'cms_template_id'
+  has_many :objects, class_name: 'CmsPageObject', dependent: :destroy
+  has_many :tags, class_name: 'CmsPageTag', dependent: :destroy
+  has_many :versions, class_name: 'CmsPageVersion', dependent: :destroy
+  has_many :sub_pages, -> { where('published_version >= 0').order(:position, :title, :name) }, class_name: 'CmsPage', foreign_key: :parent_id
   
-  validates_format_of :name, :with => /\A[-\w\d%]+\Z/
-  validates_uniqueness_of :path, :message => 'conflicts with an existing page'
+  validates_format_of :name, with: /\A[-\w\d%]+\Z/
+  validates_uniqueness_of :path, message: 'conflicts with an existing page'
   
   before_validation :compute_and_store_path, :set_versions
   
@@ -48,7 +48,7 @@ class CmsPage < ActiveRecord::Base
   def resave_children
     if path_changed?
       # get all pages under this one (even the offline ones)
-      CmsPage.where(:parent_id => id).each do |subpg|
+      CmsPage.where(parent_id: id).each do |subpg|
         subpg.save_without_revision if subpg.valid?
       end
     end
