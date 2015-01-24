@@ -11,6 +11,9 @@
 //= require codemirror/modes/xml
 //= require codemirror/modes/javascript
 //= require codemirror/modes/css
+//= require codemirror/modes/ruby
 //= require codemirror/modes/htmlmixed
+// require codemirror/modes/htmlembedded
+//= require codemirror/modes-custom/imagine_cms
 //
 //= require imagine_cms/core

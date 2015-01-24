@@ -1,7 +1,7 @@
 jQuery(document).ready(function () {
   jQuery('textarea.codemirror-html').each(function () {
     var cm = CodeMirror.fromTextArea(this, {
-      mode: 'htmlmixed',
+      mode: 'application/x-erb-imagine',
       lineNumbers: true
     });
   })
