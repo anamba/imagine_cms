@@ -126,18 +126,21 @@
       <%- if @pg.new_record? -%>
         A thumbnail cannot be added until you save this page.
       <%- else -%>
-      <div id="thumbnail_preview" style="width: 385px; overflow: auto;">
-        <%- if @pg.thumbnail_path.blank? -%>
-          <!-- no thumbnail image selected -->
-        <%- else -%>
-          <%= image_tag(@pg.thumbnail_path, :onclick => "jQuery('#pg_thumbnail_path').show();") %>
+        <div id="thumbnail_preview" style="width: 385px; overflow: auto;">
+          <%- if @pg.thumbnail_path.blank? -%>
+            <!-- no thumbnail image selected -->
+          <%- else -%>
+            <%= image_tag(@pg.thumbnail_path, onclick: "jQuery('#pg_thumbnail_path').toggle();") %>
+          <%- end -%>
+        </div>
+        <%= button_to_function "Select Thumbnail...",
+                               "selectThumbnail('#{url_for action: 'upload_thumb', id: @pg}');",
+                               class: 'form_button' %>
+        <%- if @pg.thumbnail_path.present? -%>
+          <%= button_to_function "Remove", "jQuery('#thumbnail_preview img').remove(); jQuery('#pg_thumbnail_path').val(''); jQuery(this).remove();", class: 'form_button' %>
         <%- end -%>
-      </div>
-      <%= button_to_function "Select Thumbnail...",
-                             "selectThumbnail('#{url_for :action => 'upload_thumb', :id => @pg}');",
-                             :class => 'form_button' %>
+        <%= text_field :pg, :thumbnail_path, class: 'form', style: 'width: 100%; display: none;' %>
       <%- end -%>
-      <%= text_field :pg, :thumbnail_path, :class => 'form', :style => 'width: 100%; display: none;' %>
     </td>
   </tr>
   <%- if @pg.respond_to?(:feature_image_path) -%>
@@ -147,18 +150,21 @@
       <%- if @pg.new_record? -%>
         A feature image cannot be added until you save this page.
       <%- else -%>
-      <div id="feature_image_preview" style="width: 385px; overflow: auto;">
-        <%- if @pg.feature_image_path.blank? -%>
-          <!-- no feature image selected -->
-        <%- else -%>
-          <%= image_tag(@pg.feature_image_path, :onclick => "jQuery('#pg_feature_image_path').show();") %>
+        <div id="feature_image_preview" style="width: 385px; overflow: auto;">
+          <%- if @pg.feature_image_path.blank? -%>
+            <!-- no feature image selected -->
+          <%- else -%>
+            <%= image_tag(@pg.feature_image_path, onclick: "jQuery('#pg_feature_image_path').toggle();") %>
+          <%- end -%>
+        </div>
+        <%= button_to_function "Select Feature Image...",
+                               "selectThumbnail('#{url_for action: 'upload_feature_image', id: @pg}');",
+                               class: 'form_button' %>
+        <%- if @pg.feature_image_path.present? -%>
+          <%= button_to_function "Remove", "jQuery('#feature_image_preview img').remove(); jQuery('#pg_feature_image_path').val(''); jQuery(this).remove();", class: 'form_button' %>
         <%- end -%>
-      </div>
-      <%= button_to_function "Select Feature Image...",
-                             "selectThumbnail('#{url_for :action => 'upload_feature_image', :id => @pg}');",
-                             :class => 'form_button' %>
+        <%= text_field :pg, :feature_image_path, class: 'form', style: 'width: 100%; display: none;' %>
       <%- end -%>
-      <%= text_field :pg, :feature_image_path, :class => 'form', :style => 'width: 100%; display: none;' %>
     </td>
   </tr>
   <%- end -%>
