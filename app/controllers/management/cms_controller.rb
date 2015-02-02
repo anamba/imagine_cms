@@ -333,6 +333,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @page_objects = HashObject.new(params[:page_objects] || {})
     
     if request.get?
+      @pg.version = params[:version] if params[:version] && params[:version].to_i != @pg.version
       @pg.objects.where(:cms_page_version => @pg.version).each do |obj|
         key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
         @page_objects[key] = obj.content.html_safe
