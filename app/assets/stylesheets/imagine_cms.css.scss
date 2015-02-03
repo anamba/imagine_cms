@@ -1,16 +1,16 @@
-.slideshow { padding: 10px 10px 5px; background-color: #d8d6cd; }
-.slideshow-images { width: 100%; height: 340px; margin: 15px auto; }
-.slideshow-image { width: 450px; height: 340px; position: absolute; }
-.slideshow-thumbs { margin-top: 20px; }
-.slideshow-thumb { float: left; border: 5px solid #fff; margin: 0 5px 5px 0; cursor: pointer; }
-.slideshow-nav { width: 243px; margin: 0 auto; }
-.slideshow-nav-button { cursor: pointer; color: white; }
-.slideshow-caption {
+.imagine_cms-gallery { padding: 10px 10px 5px; background-color: #d8d6cd; }
+.imagine_cms-gallery-images { width: 100%; height: 340px; margin: 15px auto; }
+.imagine_cms-gallery-image { width: 450px; height: 340px; position: absolute; }
+.imagine_cms-gallery-thumbs { margin-top: 20px; }
+.imagine_cms-gallery-thumb { float: left; border: 5px solid #fff; margin: 0 5px 5px 0; cursor: pointer; }
+.imagine_cms-gallery-nav { width: 243px; margin: 0 auto; }
+.imagine_cms-gallery-nav-button { cursor: pointer; color: white; }
+.imagine_cms-gallery-caption {
   width: 100%; height: 80px; margin: 0 auto 40px; overflow: auto;
   font-size: 14px; line-height: 18px; padding: 0; text-align: center; color: #fff;
 }
-.slideshow-close { position: absolute; top: -20px; right: -20px; }
-.slideshow cite { font-size: 140%; text-transform: uppercase; font-style: normal; font-weight: bold; color: #F17130; }
+.imagine_cms-gallery-close { position: absolute; top: -20px; right: -20px; }
+.imagine_cms-gallery cite { font-size: 140%; text-transform: uppercase; font-style: normal; font-weight: bold; color: #F17130; }
 
 .imgCrop_wrap {
 	/* width: 500px;   @done_in_js */
