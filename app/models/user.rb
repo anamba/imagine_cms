@@ -44,7 +44,7 @@ class User < ActiveRecord::Base # :nodoc:
   def fake_password_confirmation # :nodoc:
     # if password is blank, user is not trying to change it.
     # just appease the validator by setting something valid
-    if ((@password ||= "") == "")
+    if @password.blank?
       @password = "imapassword" 
       @password_confirmation = "imapassword" 
     end

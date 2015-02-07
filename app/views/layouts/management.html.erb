@@ -12,6 +12,10 @@
       @nav_sections << [ 'Users', { controller: '/management/users', action: 'index' } ]
     end
   end
+  
+  if defined?(ImagineCmsAdditionalNavSections)
+    @nav_sections += ImagineCmsAdditionalNavSections.is_a?(Proc) ? ImagineCmsAdditionalNavSections.call(self) : ImagineCmsAdditionalNavSections
+  end
 -%>
 <!DOCTYPE html>
 <html>
