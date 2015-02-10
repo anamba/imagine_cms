@@ -9,8 +9,7 @@
 <div id="save_errors" class="error"></div>
 
 <%= form_remote_tag :url => { :action => 'edit_page', :id => @pg },
-                    :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';",
-                    :html => { :onsubmit => 'teardownTextFieldHints();' } do %>
+                    :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';" do %>
 <table id="dlg-page-properties">
   <col width="120"><col width="*"><col width="5">
 <%- if (@pg.id || 2) > 1 -%>
