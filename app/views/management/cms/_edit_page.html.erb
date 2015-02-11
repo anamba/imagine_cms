@@ -180,11 +180,13 @@
         <tr>
           <td>Add an attribute: &nbsp;</td>
           <td>
-            <%= text_field_tag :custom_attribute_name, '', :class => 'form', :style => 'margin-bottom: 4px;', :placeholder => '[ attribute name ]' %>
-            <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
-            <%= javascript_tag "$('custom_attribute_name').onkeydown = disableEnterKey; new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });" %>
-            
-            <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '/manage/cms/page_attribute?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", :class => 'form_button', :style => 'margin-bottom: 5px;' %>
+            <div style="position: relative;">
+              <%= text_field_tag :custom_attribute_name, '', :class => 'form', :style => 'margin-bottom: 4px;', :placeholder => '[ attribute name ]' %>
+              <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
+              <%= javascript_tag "$('custom_attribute_name').onkeydown = disableEnterKey; new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });" %>
+              
+              <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '/manage/cms/page_attribute?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", :class => 'form_button', :style => 'margin-bottom: 5px;' %>
+            </div>
           </td>
         </tr>
       </table>
