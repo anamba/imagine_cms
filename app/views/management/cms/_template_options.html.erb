@@ -3,16 +3,16 @@
   <%- @template_options.each do |name, type| -%>
     <%- key = name.gsub(/[^\w\d]/, '_') -%>
     <table width="100%">
-      <col width="45%" /><col width="55%" />
+      <col width="55%" /><col width="45%" />
       <tr>
         <td><%= name %></td>
         <td>
           <%=
             case type
             when :checkbox
-              check_box :page_objects, "obj-option-checkbox-#{key}"
-            when :string, :text
-              text_field :page_objects, "obj-option-string-#{key}", :style => 'width: 100%;'
+              check_box :page_objects, "obj-option-#{type}-#{key}"
+            else
+              text_field :page_objects, "obj-option-#{type}-#{key}", :style => 'width: 96%;'
             end
           %>
         </td>
