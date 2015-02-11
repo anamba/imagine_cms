@@ -265,7 +265,7 @@ module CmsApplicationHelper
     require_tags = instance_tags_require.map { |t| t.strip }.reject { |t| t.blank? }
     
     if include_tags.empty?
-      include_tags = (options[:include_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.blank? }
+      include_tags = substitute_placeholders(options[:include_tags] || '', pg).split(',').map { |t| t.strip }.reject { |t| t.blank? }
       include_tags.each do |t|
         i = @page_objects["#{key}-sources-tag-count"]
         @page_objects["#{key}-sources-tag#{i}"] = t
@@ -274,7 +274,7 @@ module CmsApplicationHelper
       end
     end
     if exclude_tags.empty?
-      exclude_tags = (options[:exclude_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.blank? }
+      exclude_tags = substitute_placeholders(options[:exclude_tags] || '', pg).split(',').map { |t| t.strip }.reject { |t| t.blank? }
       exclude_tags.each do |t|
         i = @page_objects["#{key}-sources-tag-count"]
         @page_objects["#{key}-sources-tag#{i}"] = t
@@ -283,7 +283,7 @@ module CmsApplicationHelper
       end
     end
     if require_tags.empty?
-      require_tags = (options[:require_tags] || '').split(',').map { |t| t.strip }.reject { |t| t.blank? }
+      require_tags = substitute_placeholders(options[:require_tags] || '', pg).split(',').map { |t| t.strip }.reject { |t| t.blank? }
       require_tags.each do |t|
         i = @page_objects["#{key}-sources-tag-count"]
         @page_objects["#{key}-sources-tag#{i}"] = t
@@ -301,7 +301,7 @@ module CmsApplicationHelper
     folders = folders.reject { |f| f.src.blank? }
     
     if folders.empty?
-      folders = (options[:folders] || '').split(',').map do |f|
+      folders = substitute_placeholders(options[:folders] || '', pg).split(',').map do |f|
         bits = f.strip.split(':')
         
         obj = HashObject.new
