@@ -125,14 +125,25 @@
       </div>
       
       <div style="float: right">
-        <%- system_attrs = @pg.attributes.map { |c| c.first }.
-                                          reject { |c| [ 'cms_template_id',
-                                                         'cms_template_version',
-                                                         'position' ].include?(c) }.sort -%>
+        <%-
+          system_attrs = {
+            'article_date_month'  => 'Article Date - Month',
+            'article_date_mon'    => 'Article Date - Month Abbr',
+            'article_date_day'    => 'Article Date - Day',
+            'article_date_year'   => 'Article Date - Year',
+            'article_date_yr'     => 'Article Date - Year Abbr',
+            'tags'                => 'Tags',
+            'tags_as_css_classes' => 'Tags as CSS Classes',
+          }
+          @pg.attributes.each do |attr, value|
+            next if [ 'cms_template_id', 'cms_template_version' ].include?(attr)
+            system_attrs[attr] ||= attr.titleize
+          end
+        -%>
         <select class="form" style="width: 150px;" onchange="insertAtCaret($('page_objects_<%= key %>-template'), '<# ' + this.value + ' #>'); this.value = '';">
           <option value="">-- Insert Attribute --</option>
-          <%- system_attrs.each do |attr| -%>
-            <option value="<%=h attr %>"><%=h attr.titleize %></option>
+          <%- system_attrs.sort.each do |attr, label| -%>
+            <option value="<%= attr %>"><%= label %></option>
           <%- end -%>
         </select>
       </div>
