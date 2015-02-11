@@ -602,15 +602,15 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       content << observe_field("page_objects_#{key}", :function => "scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});", :frequency => 2)
       content
     when :page_list
+      # set defaults unless values are present in template
       @page_objects["#{key}-min-item-count"] ||= 3 unless options[:item_min_count]
       @page_objects["#{key}-max-item-count"] ||= 5 unless options[:item_count]
-      @page_objects["#{key}-item-offset"] ||= 0 unless options[:item_offset]
       @page_objects["#{key}-sort-first-field"] ||= options[:primary_sort_key]
       @page_objects["#{key}-sort-first-direction"] ||= options[:primary_sort_direction]
       @page_objects["#{key}-sort-second-field"] ||= options[:secondary_sort_key]
       @page_objects["#{key}-sort-second-direction"] ||= options[:secondary_sort_direction]
       
-      render_to_string(:partial => 'page_list', :locals => { :name => name, :key => key }).html_safe
+      render_to_string(partial: 'page_list', locals: { name: name, key: key, options: options }).html_safe
     when :snippet
       @snippet = CmsSnippet.find_by_name(name)
       if @snippet
