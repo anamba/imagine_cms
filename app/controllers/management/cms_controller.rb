@@ -244,11 +244,15 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         
         case params[:return_to]
         when 'preview'
-          redirect_to "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
+          render :update do |page|
+            page.redirect_to "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{@pg.published_version > 0 ? @pg.published_version : @pg.version}"
+          end
         else
           flash[:notice] = 'Page saved.'
           session[:cms_pages_path] = @pg.path
-          redirect_to :action => 'pages'
+          render :update do |page|
+            page.redirect_to :action => 'pages'
+          end
         end
         
       else
