@@ -2,10 +2,9 @@
   Page List: <%= name %><br/>
   <button class="form_button" onclick="showDojoDialog('page_list_<%= key %>'); return false;">Configure</button>
 </div>
-
 <div dojoType="ModalFloatingPane" id="page_list_<%= key %>" title="Page List: <%= name %>"
      hasShadow="true" resizable="true" followScroll="false" displayCloseAction="true" appendToBody="false"
-     style="width: 600px; height: 580px; display: none">
+     style="width: 625px; height: 580px; display: none">
   <div class="ccs-page-list-form">
     <fieldset>
       <legend>Sources</legend>
@@ -57,7 +56,7 @@
           </td>
         </tr>
         <tr class="page_list_<%= key %>_list_option">
-          <td>Number:</td>
+          <td valign="top"><div style="margin-top: 2px;">Number:</div></td>
           <td>
             Display <%= text_field(:page_objects, "#{key}-max-item-count", :class => 'form', :style => 'margin: 0; width: 20px') %> items,
             but skip the first <%= text_field(:page_objects, "#{key}-item-offset", :class => 'form', :style => 'margin: 0; width: 20px;') %>
@@ -173,3 +172,9 @@
     <center><button class="form_button" onclick="hideDojoDialog('page_list_<%= key %>'); return false;">Close</button></center>
   </div>
 </div>
+<script type="text/javascript">
+  // reattach to a safe place in the DOM (away from styled regions)
+  jQuery(document).ready(function () {
+    jQuery('#page_list_<%= key %>').appendTo(jQuery('#dialog-temp'));
+  });
+</script>
