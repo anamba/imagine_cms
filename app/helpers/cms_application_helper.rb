@@ -471,7 +471,7 @@ module CmsApplicationHelper
     page.objects.where(obj_type: 'option').each { |obj| temp = substitute_placeholder(temp, page, "option_#{obj.name.gsub(/[^\w\d]/, '_')}", obj.content) }
     
     # path is kind of a special case, we like to see it with a leading /
-    temp = substitute_placeholder(temp, page, 'path', '/'+page.path)
+    temp = substitute_placeholder(temp, page, 'path', "/#{page.path}")
     
     # substitute tags in a helpful way
     temp = substitute_placeholder(temp, page, 'tags', page.tags.map { |t| t.name }.join(', '))
