@@ -621,7 +621,7 @@ module CmsApplicationHelper
     ret << '</div>'
     
     ret << "<div id=\"#{object_name}_#{method_name}_loading\" class=\"form-loading\" style=\"display: none;\">"
-    ret << "<img src=\"/assets/interface/form_loading.gif\" width=\"16\" height=\"16\" border=\"0\" style=\"margin: 0 1px 1px 0;\" />"
+    ret << image_tag("interface/form_loading.gif", size: '16x16', border: 0, style: "margin: 0 1px 1px 0;")
     ret << "</div>"
     
     if errors.size > 0 && options[:display_messages]
