@@ -437,22 +437,18 @@ module CmsApplicationHelper
   end
   
   def substitute_placeholder(html, page, key, value)
-    temp = html.dup
     val = value
     
-    temp.gsub(/<#\s*#{key.to_s}(\.([\w]+)(\(.*?\))?)*\s*#>/) do |match|
-      if $1.blank?  # no expression attached
-        value.to_s
-      else  # expression found, scan through chain and apply
-        $1.scan(/\.([\w]+)(\(.*?\))?/).each do |func, args|
-          case func
-          when 'gsub', 'downcase', 'upcase'
-            val = eval(%["#{val}".#{func}#{args}])
-          end
+    html.gsub(/<#\s*#{key}(\..*?)*\s*#>/) do |match|
+      logger.debug "Substituting: #{key} => #{value}"
+      $1.to_s.scan(/\.([\w]+)(\(.*?\))?/).each do |func, args|
+        case func
+        when 'gsub', 'downcase', 'upcase'
+          val = eval(%["#{val}".#{func}#{args}])
         end
-        
-        val
       end
+      
+      val
     end
   end
   
@@ -471,8 +467,8 @@ module CmsApplicationHelper
     extra_attributes.each { |k,v| temp = substitute_placeholder(temp, page, k, v) }
     
     # next, page object attributes and template options (from page properties)
-    page.objects.where(:obj_type => 'attribute').each { |obj| substitute_placeholder(temp, page, obj.name, obj.content) }
-    page.objects.where(:obj_type => 'option').each { |obj| substitute_placeholder(temp, page, "option_#{obj.name.gsub(/[^\w\d]/, '_')}", obj.content) }
+    page.objects.where(obj_type: 'attribute').each { |obj| temp = substitute_placeholder(temp, page, obj.name, obj.content) }
+    page.objects.where(obj_type: 'option').each { |obj| temp = substitute_placeholder(temp, page, "option_#{obj.name.gsub(/[^\w\d]/, '_')}", obj.content) }
     
     # path is kind of a special case, we like to see it with a leading /
     temp = substitute_placeholder(temp, page, 'path', '/'+page.path)
