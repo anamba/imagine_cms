@@ -436,6 +436,26 @@ module CmsApplicationHelper
     pages
   end
   
+  def substitute_placeholder(html, page, key, value)
+    temp = html.dup
+    val = value
+    
+    temp.gsub(/<#\s*#{key.to_s}(\.([\w]+)(\(.*?\))?)*\s*#>/) do |match|
+      if $1.blank?  # no expression attached
+        value.to_s
+      else  # expression found, scan through chain and apply
+        $1.scan(/\.([\w]+)(\(.*?\))?/).each do |func, args|
+          case func
+          when 'gsub', 'downcase', 'upcase'
+            val = eval(%["#{val}".#{func}#{args}])
+          end
+        end
+        
+        val
+      end
+    end
+  end
+  
   def substitute_placeholders(html, page, extra_attributes = {})
     return html unless page
     
@@ -448,28 +468,22 @@ module CmsApplicationHelper
     end
     
     # first, extras passed in args
-    extra_attributes.each do |k,v|
-      temp.gsub!(/<#\s*#{k.to_s}\s*#>/, v.to_s)
-    end
+    extra_attributes.each { |k,v| temp = substitute_placeholder(temp, page, k, v) }
     
     # next, page object attributes and template options (from page properties)
-    page.objects.where(:obj_type => 'attribute').each do |obj|
-      temp.gsub!(/<#\s*#{obj.name}\s*#>/, (obj.content || '').to_s)
-    end
-    page.objects.where(:obj_type => 'option').each do |obj|
-      temp.gsub!(/<#\s*option_#{obj.name.gsub(/[^\w\d]/, '_')}\s*#>/, obj.content || '')
-    end
+    page.objects.where(:obj_type => 'attribute').each { |obj| substitute_placeholder(temp, page, obj.name, obj.content) }
+    page.objects.where(:obj_type => 'option').each { |obj| substitute_placeholder(temp, page, "option_#{obj.name.gsub(/[^\w\d]/, '_')}", obj.content) }
     
     # path is kind of a special case, we like to see it with a leading /
-    temp.gsub!(/<#\s*path\s*#>/, '/' + (page.path || ''))
+    temp = substitute_placeholder(temp, page, 'path', '/'+page.path)
     
     # substitute tags in a helpful way
-    temp.gsub!(/<#\s*tags\s*#>/, page.tags.map { |t| t.name }.join(', '))
-    temp.gsub!(/<#\s*tags_as_css_classes\s*#>/, page.tags_as_css_classes)
+    temp = substitute_placeholder(temp, page, 'tags', page.tags.map { |t| t.name }.join(', '))
+    temp = substitute_placeholder(temp, page, 'tags_as_css_classes', page.tags_as_css_classes)
     
     # use full date/time format for created_on and updated_on
-    temp.gsub!(/<#\s*created_on\s*#>/, "#{page.created_on.strftime('%a')} #{date_to_str(page.created_on)} #{time_to_str(page.created_on)}") if page.created_on
-    temp.gsub!(/<#\s*updated_on\s*#>/, "#{page.updated_on.strftime('%a')} #{date_to_str(page.updated_on)} #{time_to_str(page.updated_on)}") if page.updated_on
+    temp = substitute_placeholder(temp, page, 'created_on', "#{page.created_on.strftime('%a')} #{date_to_str(page.created_on)} #{time_to_str(page.created_on)}") if page.created_on
+    temp = substitute_placeholder(temp, page, 'updated_on', "#{page.updated_on.strftime('%a')} #{date_to_str(page.updated_on)} #{time_to_str(page.updated_on)}") if page.updated_on
     
     # handle any custom substitutions
     temp = substitute_placeholders_custom(temp, page)
@@ -494,10 +508,15 @@ module CmsApplicationHelper
         # val = '<!-- attribute not found -->'
         val = ''
       end
-      temp.gsub!(/<#\s*#{attr}\s*#>/, val.to_s)
+      temp = substitute_placeholder(temp, page, attr, val)
     end
-    # temp.gsub!(/<#\s*(.*?)\s*#>/, "<!-- attribute not found -->")
+    
+    # unknown attributes will be simply deleted (unless we enable some kind of substitution debugging in the future)
+    # if SomeKindOfDebuggingEnabled
+    #   temp.gsub!(/<#\s*(.*?)\s*#>/, "<!-- attribute not found -->")
+    # else
     temp.gsub!(/<#\s*(.*?)\s*#>/, '')
+    # end
     
     # unmangle mangled stuff
     temp.gsub!(/(insert_object\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|

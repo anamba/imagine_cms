@@ -16,7 +16,7 @@ CodeMirror.defineMode("imagine_cms", function(config, parserConfig) {
   //config settings
   var scriptStartRegex = parserConfig.scriptStartRegex || /^<%/,
       scriptEndRegex = parserConfig.scriptEndRegex || /^%>/;
-  var attributeRegex = /^<#[\w\d\s]+#>/;
+  var attributeRegex = /^<#.*?#>/;
 
   //inner modes
   var scriptingMode, htmlMixedMode;
