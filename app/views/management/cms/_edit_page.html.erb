@@ -198,7 +198,7 @@
           </td>
         </tr>
       </table>
-      <div id="custom_attributes" style="background-color: white; height: 80px; overflow: auto; border: 1px solid #aaaaaa">
+      <div id="custom_attributes" style="background-color: white; min-height: 40px; overflow: auto; border: 1px solid #aaaaaa">
         <%- @page_objects.each do |key,val| -%>
           <%- key =~ /^obj-(\w+?)-(.+?)$/ -%>
           <%= render :partial => 'page_attribute', :locals => { :name => $2 } if $1 == 'attribute' %>
