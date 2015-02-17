@@ -86,16 +86,16 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     if request.post?
       @temp.assign_attributes(cms_template_params)
       
-      begin
+      # begin
         @pg = CmsPage.new
         @page_objects = HashObject.new
         render_to_string :inline => @temp.content
-      rescue Exception => e
-        message = e.message
-        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
-        logger.debug e
-        return
-      end
+      # rescue Exception => e
+      #   message = e.message
+      #   flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
+      #   logger.debug e
+      #   return
+      # end
       
       # this must come after the render_to_string so that we capture template
       # options embedded in snippets
@@ -176,7 +176,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @pg.template ||= @parent.template
     end
     
-    @attrs = CmsPageObject.where(:obj_type => 'attribute').uniq.pluck(:name).sort
+    @attrs = CmsPageObject.where(obj_type: 'attribute').uniq.pluck(:name).sort
+    @taglist = CmsPageTag.uniq.pluck(:name).sort
     
     if params[:mode] == 'ajax_new' || params[:mode] == 'ajax_edit'
       @pg.published_version = -1 if params[:mode] == 'ajax_new'

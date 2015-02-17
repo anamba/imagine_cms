@@ -1,9 +1,17 @@
 <script type="text/javascript">
   attrlist = new Array(<%= @attrs.size %>)
-  
   <%- @attrs.each_with_index do |attr, i| -%>
-  attrlist[<%= i %>]="<%=h attr %>"
+  attrlist[<%= i %>]="<%=j attr %>";
   <%- end -%>
+  
+  taglist = new Array(<%= @taglist.size %>)
+  <%- @taglist.each_with_index do |tag, i| -%>
+  taglist[<%= i %>]="<%=j tag %>";
+  <%- end -%>
+  
+  jQuery(document).ready(function () {
+    jQuery('#tags').tagit({ availableTags: taglist, allowSpaces: true, caseSensitive: false, removeConfirmation: true, autocomplete: { delay: 0, minLength: 0 } });
+  });
 </script>
 
 <div id="save_errors" class="error"></div>
@@ -85,7 +93,7 @@
     </td>
   </tr>
   <tr>
-    <td>Tags:</td>
+    <td valign="middle">Tags:</td>
     <td><%= text_field_tag :tags, @tags, :class => 'form', :style => 'width: 100%' %></td>
   </tr>
   <tr class="page-field">

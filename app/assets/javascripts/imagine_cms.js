@@ -4,6 +4,7 @@
 //= require dragdrop
 //= require controls
 //= require jquery_no_conflict
+//= require jquery-ui
 //= require builder
 //= require cropper
 //
@@ -15,5 +16,7 @@
 //= require codemirror/modes/htmlmixed
 // require codemirror/modes/htmlembedded
 //= require codemirror/modes-custom/imagine_cms
+//
+//= require tag-it
 //
 //= require imagine_cms/core
