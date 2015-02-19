@@ -1,4 +1,4 @@
-<div id="page_list_container_<%= key %>" style="border: 1px solid gray; padding: 8px; background-color: #dddddd; width: 170px; text-align: center;">
+<div id="page_list_container_<%= key %>" class="page_list_dialog" style="border: 1px solid gray; padding: 8px; background-color: #dddddd; width: 170px; text-align: center;">
   Page List: <%= name %><br/>
   <button class="form_button" onclick="showDojoDialog('page_list_<%= key %>'); return false;">Configure</button>
 </div>
@@ -182,7 +182,7 @@
   
   // reattach to a safe place in the DOM (away from styled regions)
   jQuery(document).ready(function () {
-    jQuery('#page_list_<%= key %>').appendTo(jQuery('#dialog-temp'));
+    jQuery('#page_list_<%= key %>').appendTo(jQuery('#page_content_form'));
     jQuery('#page_objects_<%= key %>-style-display-as_list').click(function () {
       jQuery('.page_list_<%= key %>_list_option').show();
       jQuery('.page_list_<%= key %>_calendar_option').hide();
