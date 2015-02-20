@@ -971,7 +971,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       new_captions << original_captions[img.to_i] || ''
     end
     
-    File.open(File.join(gallery_dir, 'captions.yml'), 'w') { |f| YAML.dump(new_captions, f) }
+    yaml = YAML.dump(new_captions)
+    File.open(File.join(gallery_dir, 'captions.yml'), 'w') { |f| f << yaml }
     session[:gallery_images_sorted] = nil
     
     redirect_to :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id]
@@ -1000,10 +1001,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, params[:gallery_id])
       captions = YAML.load_file(File.join(gallery_dir, 'captions.yml')).to_a
-      image_id = params[:image].split('.')[0].to_i
+      image_id = params[:image].split('.').first.to_i
       captions[image_id] = params[:caption]
       
-      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| YAML.dump(captions, f) }
+      yaml = YAML.dump(captions)
+      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| f << yaml }
     end
     
     redirect_to action: 'gallery_management', id: params[:id], gallery_id: params[:gallery_id]
@@ -1137,7 +1139,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         image_id += 1
       end
       
-      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| f.write(YAML.dump(new_captions)) }
+      yaml = YAML.dump(new_captions)
+      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| f << yaml }
     end
     
     redirect_to :action => 'gallery_management', :id => params[:id], :gallery_id => params[:gallery_id]

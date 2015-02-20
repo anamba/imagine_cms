@@ -219,7 +219,7 @@ module PrototypeHelper
       (options[:html][:onsubmit] ? options[:html][:onsubmit] + "; " : "") +
       "#{remote_function(options)}; return false;"
 
-    form_tag(options[:html].delete(:action) || url_for(options[:url]), options[:html], &block)
+    form_tag(options[:html].delete(:action) || url_for(options[:url]), options[:html], &block).gsub('&amp;amp;', '&amp;').html_safe
   end
 
   # Creates a form that will submit using XMLHttpRequest in the background
