@@ -1,6 +1,6 @@
 <%-
   thumb = "assets/content/#{path}/#{gallery_id}/management/#{image}.jpg"
 -%>
-<%= link_to_remote image_tag("/#{thumb}?#{File.mtime(File.join(Rails.root, 'public', thumb)).to_i}", :size => '90x90'),
-                   :url => { :action => 'image_details', :id => id, :path => path, :gallery_id => gallery_id, :image => image.to_s + '.jpg' },
-                   :update => 'gallery_window' %>
+<%= link_to_remote image_tag("/#{thumb}?#{File.mtime(File.join(Rails.root, 'public', thumb)).to_i}", size: '90x90'),
+                   url: { action: 'image_details', id: id, gallery_id: gallery_id, image: "#{image}.jpg" },
+                   update: 'gallery_window' %>

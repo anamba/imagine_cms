@@ -2,7 +2,7 @@
   timeout ||= 0
   captions = []
   settings = HashObject.new({})
-  path = File.join(Rails.root, 'public', 'images', 'content', @pg.path, name)
+  path = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, name)
   
   begin
     captions = YAML.load(File.open(File.join(path, 'captions.yml')).read)

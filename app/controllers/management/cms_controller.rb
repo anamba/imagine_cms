@@ -978,34 +978,35 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   
   def image_details
-    gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', params[:path].to_s, params[:gallery_id])
+    @pg = CmsPage.find_by_id(params[:id])
     
     # create blank captions.yml if it doesn't already exist
-    create_captions_file(params[:id])
+    create_captions_file(@pg.id)
     
+    gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, params[:gallery_id])
     captions = YAML.load(File.open(File.join(gallery_dir, 'captions.yml')).read)
-    image_id = params[:image].split('.')[0].to_i
+    image_id = params[:image].split('.').first.to_i
     @caption = captions[image_id]
     
-    render :partial => 'image_details'
+    render partial: 'image_details'
   end
   
   def update_caption
     if request.post?
-      gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', params[:path].to_s, params[:gallery_id])
-      
-      image_id = params[:image].split('.')[0].to_i
+      @pg = CmsPage.find_by_id(params[:id])
       
       # create blank captions.yml if it doesn't already exist
-      create_captions_file(params[:id])
+      create_captions_file(@pg.id)
       
+      gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, params[:gallery_id])
       captions = YAML.load_file(File.join(gallery_dir, 'captions.yml')).to_a
+      image_id = params[:image].split('.')[0].to_i
       captions[image_id] = params[:caption]
       
-      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| f << captions.to_yaml }
+      File.open(File.join(gallery_dir, 'captions.yml'), "w") { |f| YAML.dump(captions, f) }
     end
     
-    redirect_to :action => 'gallery_management', :id => params[:id], :gallery_id => params[:gallery_id]
+    redirect_to action: 'gallery_management', id: params[:id], gallery_id: params[:gallery_id]
   end
   
   def add_to_gallery
@@ -1099,9 +1100,15 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def delete_photo
     if request.post?
-      gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', params[:path].to_s, params[:gallery_id])
+      @pg = CmsPage.find_by_id(params[:id])
       
-      image_id = params[:image].split('.')[0].to_i
+      # create blank captions.yml if it doesn't already exist
+      create_captions_file(@pg.id)
+      
+      gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, params[:gallery_id])
+      captions = YAML.load(File.open(File.join(gallery_dir, 'captions.yml')).read).to_a
+      
+      image_id = params[:image].split('.').first.to_i
       
       begin ; File.delete(File.join(gallery_dir, image_id.to_s + '.jpg')) ; rescue ; end
       begin ; File.delete(File.join(gallery_dir, image_id.to_s + '-thumb.jpg')) ; rescue ; end
@@ -1109,15 +1116,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       all_images = Dir.glob(File.join(gallery_dir, '*.{jpg,jpeg,png,gif}'))
       images = []
-      all_images.each { |img| images << img if !File.basename(img).include?('thumb') and File.basename(img).split('.')[0].to_i > image_id }
+      all_images.each { |img| images << img if !File.basename(img).include?('thumb') && File.basename(img).split('.').first.to_i > image_id }
       
       image_names = []
-      images.each_with_index { |img, index| image_names << File.basename(img).split('.')[0].to_i }
+      images.each_with_index { |img, index| image_names << File.basename(img).split('.').first.to_i }
       image_names.sort!
-      
-      # create blank captions.yml if it doesn't already exist
-      create_captions_file(params[:id])
-      captions = YAML.load(File.open(File.join(gallery_dir, 'captions.yml')).read).to_a
       
       new_captions = []
       for i in 0...image_id do
@@ -1409,16 +1412,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     
     def create_captions_file(pg_id, options = {})
-      gallery_id = (!options[:gallery_id] ? params[:gallery_id] : options[:gallery_id])
+      @pg ||= CmsPage.find_by_id(pg_id)
+      gallery_id = options[:gallery_id] || params[:gallery_id]
+      captions_file =  File.join(Rails.root, 'public', 'assets', 'content', @pg.path, gallery_id, 'captions.yml')
+      return if File.exists?(captions_file)
       
-      @pg = CmsPage.find_by_id(pg_id)
-      galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-      gallery_dir = File.join(galleries_dir, gallery_id)
-      captions_location = File.join(gallery_dir, 'captions.yml')
-      
-      return if File.exists?(captions_location)
-      
-      File.open(captions_location, 'w') { |f| YAML.dump([0], f) }
+      File.open(captions_file, 'w') { |f| YAML.dump([0], f) }
     end
     
     # prerequisites: @pg (CmsPage)
