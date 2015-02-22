@@ -1,23 +1,29 @@
 <%-
   page = search_result
-  
   title = page.title
+  summary = nil
   
-  summary = 'error'
   begin
-    summary = truncate(page.search_index, :length => 300)
-    summary = excerpt(page.search_index, @terms.first, 150) || truncate(page.search_index, :length => 300)
+    @terms.each do |term|
+      [ term, term.singularize, term.pluralize ].uniq.each do |term_variant|
+        summary ||= excerpt(page.search_index, term_variant, radius: 150)
+      end
+    end
   rescue Exception => e
     logger.error "Error creating search index excerpt: #{e}"
   end
   
+  summary ||= truncate(page.search_index, length: 300)
+  
   @terms.each do |term|
-    title = highlight(title, term)
-    summary = highlight(summary, term)
+    [ term, term.singularize, term.pluralize ].uniq.each do |term_variant|
+      title = highlight(title, term_variant)
+      summary = highlight(summary, term_variant)
+    end
   end
 -%>
 
-<p>
-  <a href="/<%= page.path %>"><%= title %></a><br/>
-  <%= summary %>
-</p>
+<div class="search-result">
+  <div class="search-result-title"><a href="/<%= page.path %>"><%= title %></a></div>
+  <div class="search-result-summary"><%= summary %></div>
+</div>

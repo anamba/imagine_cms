@@ -440,7 +440,6 @@ module CmsApplicationHelper
     val = value
     
     html.gsub(/<#\s*#{key}(\..*?)*\s*#>/) do |match|
-      logger.debug "Substituting: #{key} => #{value}"
       $1.to_s.scan(/\.([\w]+)(\(.*?\))?/).each do |func, args|
         case func
         when 'gsub', 'downcase', 'upcase'

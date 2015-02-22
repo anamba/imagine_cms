@@ -6,10 +6,15 @@ class CmsPage < ActiveRecord::Base
   acts_as_tree order: 'path'
   
   belongs_to :template, class_name: 'CmsTemplate', foreign_key: 'cms_template_id'
-  has_many :objects, class_name: 'CmsPageObject', dependent: :destroy
+  
   has_many :tags, class_name: 'CmsPageTag', dependent: :destroy
   has_many :versions, class_name: 'CmsPageVersion', dependent: :destroy
   has_many :sub_pages, -> { where('published_version >= 0').order(:position, :title, :name) }, class_name: 'CmsPage', foreign_key: :parent_id
+  
+  has_many :objects, class_name: 'CmsPageObject', dependent: :destroy
+  has_many :custom_attributes, -> { where(obj_type: 'attribute') }, class_name: 'CmsPageObject'
+  has_many :options, -> { where(obj_type: 'option') }, class_name: 'CmsPageObject'
+  has_many :custom_attributes_and_options, -> { where(obj_type: ['attribute', 'option']) }, class_name: 'CmsPageObject'
   
   validates_format_of :name, with: /\A[-\w\d%]+\Z/
   validates_uniqueness_of :path, message: 'conflicts with an existing page'
@@ -94,7 +99,10 @@ class CmsPage < ActiveRecord::Base
     if self.published_version.to_i >= 0
       idx_version = self.published_version.to_i == 0 ? self.version : self.published_version
       self.objects.where(cms_page_version: idx_version, obj_type: [ 'text', 'string' ]).each do |obj|
-        content << obj.content << "\n"
+        content << obj.content << "\n" if obj.content.to_s =~ /[^\d\.]/
+      end
+      self.custom_attributes_and_options.each do |obj|
+        content << obj.content << "\n" if obj.content.to_s =~ /[^\d\.]/
       end
     end
     
@@ -131,15 +139,15 @@ class CmsPage < ActiveRecord::Base
       if html.index("<")
         text = ""
         tokenizer = HTML::Tokenizer.new(html)
-      
+        
         while token = tokenizer.next
           node = HTML::Node.parse(nil, 0, 0, token, false)
           # result is only the content of any Text nodes
-          text << node.to_s if node.class == HTML::Text  
+          text << ' ' + node.to_s if node.class == HTML::Text  
         end
         # strip any comments, and if they have a newline at the end (ie. line with
         # only a comment) strip that too, as well as any erb stuff
-        text.gsub(/<!--(.*?)-->[\n]?/m, "").gsub(/\<%.*?%\>/m, '').gsub(/&\w+;/, '')
+        text.gsub(/<!--(.*?)-->[\n]?/m, "").gsub(/\<%.*?%\>/m, '').gsub(/&\w+;/, '').strip
       else
         html # already plain text
       end 

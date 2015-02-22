@@ -221,41 +221,35 @@ module Cms # :nodoc:
     helper_method :disable_caching
     
     def search
-      @terms = []
       @pages = []
+      @terms = []
+      @terms = params[:q].split(/[^\w\-]+/).reject { |t| t.length < 3 } if params[:q]
       
-      if params[:q]
-        @terms = params[:q].split(/[^\w\-]+/).reject { |t| t.length < 3 }
-      end
-      
-      CmsPage.index_all
       unless @terms.empty?
-        term_variants = []
+        CmsPage.index_all
+        
+        base_query = CmsPage.includes(:tags).references(:cms_page_tags).where('published_version >= 0').limit(100)
+        
+        query = base_query.dup
         @terms.each do |term|
-          term_variants << [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\|\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
+          term_variants = [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\|\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
+          query = query.where("(title regexp ?)", "[[:<:]](#{term_variants})[[:>:]]")
         end
+        @pages.concat query.all
         
-        conds = [ 'published_version >= 0' ]
-        vars  = []
-        term_variants.each do |term_variant|
-          conds << "(title regexp ?)"
-          vars  << "[[:<:]](#{term_variant})[[:>:]]"
+        query = base_query.dup.where('search_index is not null')
+        @terms.each do |term|
+          term_variants = [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\|\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
+          query = query.where("cms_page_tags.name regexp :regex or search_index regexp :regex",
+                              regex: "[[:<:]](#{term_variants})[[:>:]]")
         end
-        @pages.concat CmsPage.where([ conds.join(' and ') ].concat(vars))
-        
-        conds = [ 'published_version >= 0' ]
-        vars  = []
-        term_variants.each do |term_variant|
-          conds << "(title regexp ? or search_index regexp ?)"
-          vars  << "[[:<:]](#{term_variant})[[:>:]]" << "[[:<:]](#{term_variant})[[:>:]]"
-        end
-        @pages.concat CmsPage.where([ conds.join(' and ') ].concat(vars))
+        query.each { |pg| @pages << pg unless @pages.include?(pg) }
         
         # fulltext doesn't work with innodb... may need to make a separate myisam
         # table just for search. (this would be better because it would sort by relevance)
         # @pages.concat CmsPage.where('match (title, search_index) against (?)', params[:q])
       end
-      @pages = @pages.uniq.reject { |pg| pg.search_index.blank? }.first(100)
+      @pages = @pages.first(100)
       
       @pg = CmsPage.new
       @pg.template = CmsTemplate.find_by_name('Search') || CmsTemplate.new

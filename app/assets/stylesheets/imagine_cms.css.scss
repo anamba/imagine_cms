@@ -1,3 +1,9 @@
+.search-result {
+  margin-bottom: 20px;
+  .search-result-title { font-size: 1.1em; }
+  .search-result-summary { font-size: 0.9em; }
+}
+
 .imagine_cms-gallery { padding: 10px 10px 5px; background-color: #d8d6cd; }
 .imagine_cms-gallery-images { width: 100%; height: 340px; margin: 15px auto; }
 .imagine_cms-gallery-image { width: 450px; height: 340px; position: absolute; }
