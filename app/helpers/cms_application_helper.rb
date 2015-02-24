@@ -637,12 +637,15 @@ module CmsApplicationHelper
   #
   # NOTE: @error and @notice are deprecated, use flash.now[:error] and flash.now[:notice] instead.
   def flash_message
+    link = ''.html_safe
+    link << ' '.html_safe + link_to(flash[:link][0], flash[:link][1]) if flash[:link].present? && flash[:link].is_a?(Array)
+    
     output = ''.html_safe
     if (flash[:error] || @error || '') != ''
-      output << content_tag('div', flash[:error] || @error, :class => 'alert alert-error error')
+      output << content_tag('div', h(flash[:error] || @error) + link, :class => 'alert alert-error error')
     end
     if (flash[:notice] || @notice || '') != ''
-      output << content_tag('div', flash[:notice] || @notice, :class => 'alert alert-info notice')
+      output << content_tag('div', h(flash[:notice] || @notice) + link, :class => 'alert alert-info notice')
     end
     output
   end
