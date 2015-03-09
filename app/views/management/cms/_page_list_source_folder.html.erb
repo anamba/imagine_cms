@@ -4,9 +4,9 @@
 -%>
 <div style="border: 1px solid #f0f0f0;">
   <table width="100%">
-    <col width="70" /><col width="*" /><col width="80" />
+    <col width="100" /><col width="*" /><col width="80" />
     <tr>
-      <td valign="top">Folder <%= i.to_i + 1 %>:</td>
+      <td valign="top">Page/Folder <%= i.to_i + 1 %>:</td>
       <td>
         <%= text_field(:page_objects, "#{key}-sources-folder#{i}", :class => 'form', :style => 'margin: 0; padding: 2px; border: 1px solid gray; width: 98%;') %><br/>
         <%= check_box(:page_objects, "#{key}-sources-folder#{i}-expand-folders", { :class => 'form', :style => '' }, 'true', 'false') %>

@@ -339,7 +339,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     if request.get?
       @pg.version = params[:version] if params[:version] && params[:version].to_i != @pg.version
-      @pg.objects.where(:cms_page_version => @pg.version).each do |obj|
+      @pg.objects.where(cms_page_version: @pg.version).each do |obj|
         key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
         @page_objects[key] = obj.content.html_safe
       end
@@ -357,10 +357,10 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @page_title = @pg.title
       
       @cms_head ||= ''
-      @cms_head << "<script type=\"text/javascript\" src=\"#{url_for(:action => 'page_tags_for_lookup')}\"></script>"
+      @cms_head << "<script type=\"text/javascript\" src=\"#{url_for(action: 'page_tags_for_lookup')}\"></script>"
       
       @template_content = substitute_placeholders(@pg.template.content, @pg)
-      render :layout => 'application'
+      render layout: 'application'
     
     elsif request.post?
       CmsPage.transaction do

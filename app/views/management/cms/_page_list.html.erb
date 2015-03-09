@@ -28,7 +28,7 @@
       
       <table>
         <tr>
-          <td><%= button_to_function('Add Folder', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms/page_list_add_folder?key=#{key}&i=' + $('page_objects_#{key}-sources-folder-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-folder-count').value++;", :class => 'form_button') %></td>
+          <td><%= button_to_function('Add Page/Folder', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms/page_list_add_folder?key=#{key}&i=' + $('page_objects_#{key}-sources-folder-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-folder-count').value++;", :class => 'form_button') %></td>
           <td><%= button_to_function('Add Tag', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms/page_list_add_tag?key=#{key}&i=' + $('page_objects_#{key}-sources-tag-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-tag-count').value++;", :class => 'form_button') %></td>
           <td>
             <%= check_box :page_objects, "#{key}-include-expired", { class: 'form', style: '' }, 'true', 'false' %>
@@ -182,7 +182,7 @@
   
   // reattach to a safe place in the DOM (away from styled regions)
   jQuery(document).ready(function () {
-    jQuery('#page_list_<%= key %>').appendTo(jQuery('#page_content_form'));
+    jQuery('#page_list_<%= key %>').appendTo(jQuery('#page_content_form')[0]);
     jQuery('#page_objects_<%= key %>-style-display-as_list').click(function () {
       jQuery('.page_list_<%= key %>_list_option').show();
       jQuery('.page_list_<%= key %>_calendar_option').hide();

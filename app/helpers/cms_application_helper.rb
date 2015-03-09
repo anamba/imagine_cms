@@ -295,8 +295,8 @@ module CmsApplicationHelper
     # pull all folder content
     folders = []
     for i in 0...@page_objects["#{key}-sources-folder-count"].to_i
-      folders << HashObject.new(:src => @page_objects["#{key}-sources-folder#{i}"].strip,
-                                :expand_folders => @page_objects["#{key}-sources-folder#{i}-expand-folders"])
+      folders << HashObject.new(src: @page_objects["#{key}-sources-folder#{i}"].strip,
+                                expand_folders: @page_objects["#{key}-sources-folder#{i}-expand-folders"])
     end
     folders = folders.reject { |f| f.src.blank? }
     
@@ -340,11 +340,7 @@ module CmsApplicationHelper
     
     folders.each do |f|
       begin
-        if f.expand_folders && f.expand_folders == 'false'
-          f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
-          parent_page = CmsPage.find_by_path(f.src)
-          pages.concat parent_page.children.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars)).to_a
-        else
+        if f.expand_folders && f.expand_folders == 'true'  # expand folders (i.e. specified path is prefix)
           if f.src == '/'
             pages.concat CmsPage.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars))
           else
@@ -354,6 +350,14 @@ module CmsApplicationHelper
             fcond_vars = cond_vars.dup
             fcond_vars << f.src+'/%'
             pages.concat CmsPage.includes(:tags).where([ fconditions.join(' and ') ].concat(fcond_vars))
+          end
+        else
+          f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
+          parent_page = CmsPage.find_by_path(f.src)
+          if parent_page.children.size > 0
+            pages.concat parent_page.children.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars)).to_a
+          else
+            pages << parent_page  # user specified a single page, not a folder
           end
         end
       rescue Exception => e
@@ -651,13 +655,12 @@ module CmsApplicationHelper
   #
   # NOTE: @error and @notice are deprecated, use flash.now[:error] and flash.now[:notice] instead.
   def flash_message
+    link = ''.html_safe
+    link << ' '.html_safe + link_to(flash[:link][0], flash[:link][1]) if flash[:link].present? && flash[:link].is_a?(Array)
+    
     output = ''.html_safe
-    if (flash[:error] || @error || '') != ''
-      output << content_tag('div', flash[:error] || @error, :class => 'alert alert-error error')
-    end
-    if (flash[:notice] || @notice || '') != ''
-      output << content_tag('div', flash[:notice] || @notice, :class => 'alert alert-info notice')
-    end
+    output << content_tag('div', h(flash[:error]) + link, class: 'alert alert-error error') if flash[:error].present?
+    output << content_tag('div', h(flash[:notice]) + link, class: 'alert alert-info notice') if flash[:notice].present?
     output
   end
   
