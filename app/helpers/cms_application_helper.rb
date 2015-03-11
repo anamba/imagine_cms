@@ -230,6 +230,7 @@ module CmsApplicationHelper
   
   def page_list_items(pg, key, options = {})
     pages = []
+    single_pages = []
     instance_tags_include = []
     instance_tags_exclude = []
     instance_tags_require = []
@@ -357,7 +358,7 @@ module CmsApplicationHelper
           if parent_page.children.size > 0
             pages.concat parent_page.children.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars)).to_a
           else
-            pages << parent_page  # user specified a single page, not a folder
+            single_pages << parent_page  # user specified a single page, not a folder
           end
         end
       rescue Exception => e
@@ -383,6 +384,9 @@ module CmsApplicationHelper
     if pg && (options[:exclude_current] === true || @page_objects["#{key}-exclude-current"] == 'true')
       pages.reject! { |page| page == pg }
     end
+    
+    # since the user selected these pages individually, they expect them to be included, no matter what the tags are
+    pages += single_pages
     
     # set some reasonable defaults in case the sort keys are nil
     pages.each { |pg| pg.article_date ||= Time.now; pg.position ||= 0; pg.title ||= '' }
