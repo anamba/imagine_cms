@@ -20,12 +20,12 @@ EOF
 
 <%= flash_message %>
 
-<div id="columnBrowserToolbar" style="background-color: #d0d0d0; padding: 4px; margin-bottom: 5px;">
-  <%= link_to image_tag('management/btn_top_new.gif', style: 'margin-right: 2px;'), '#', id: 'new_link' %>
-  <%= link_to image_tag('management/btn_top_edit.gif', style: 'margin-right: 2px;'), '#', id: 'edit_content_link', target: '_blank' %>
-  <%= link_to image_tag('management/btn_top_properties.gif', style: 'margin-right: 2px;'), '#', id: 'edit_link' %>
-  <%= link_to image_tag('management/btn_top_preview.gif', style: 'margin-right: 2px;'), '#', id: 'view_link', target: '_blank' %>
-  <%= link_to image_tag('management/btn_top_delete.gif', style: 'margin: 0;'), '#', id: 'delete_link', target: '_blank', method: :post, data: { confirm: 'Are you sure you want to delete the selected page?' } %>
+<div id="columnBrowserToolbar" style="background-color: #ddd; padding: 5px 4px 0; margin: 0 0 5px;">
+  <%= link_to image_tag('management/btn-top-new.png', style: 'margin-right: 2px;'), '#', id: 'new_link' %>
+  <%= link_to image_tag('management/btn-top-edit.png', style: 'margin-right: 2px;'), '#', id: 'edit_content_link', target: '_blank' %>
+  <%= link_to image_tag('management/btn-top-properties.png', style: 'margin-right: 2px;'), '#', id: 'edit_link' %>
+  <%= link_to image_tag('management/btn-top-preview.png', style: 'margin-right: 2px;'), '#', id: 'view_link', target: '_blank' %>
+  <%= link_to image_tag('management/btn-top-delete.png', style: 'margin: 0;'), '#', id: 'delete_link', target: '_blank', method: :post, data: { confirm: 'Are you sure you want to delete the selected page?' } %>
   <div class="clearer"></div>
 </div>
 
@@ -33,8 +33,8 @@ EOF
   <div id="columnBrowser" style="width: <%= cbColWidthFull * (@page_levels.size) %>px;">
     <%- @page_levels.each_with_index do |name, i| -%>
       <%-
-        if !name.blank?
-          @path << '/' if !@path.blank?
+        if name.present?
+          @path << '/' if @path.present?
           @path << name
         end
         @parent = @page
@@ -45,23 +45,17 @@ EOF
         break_flag = false
         
         if !@page
-          if @parent && @parent.children.first
-            @page = @parent.children.first
-          elsif @parent
-            @page = @parent
-          else
-            @page = CmsPage.find(:first)
-          end
+          @page = @parent.children.first || @parent || CmsPage.first
           break_flag = true
         end
       -%>
       <div id="columnBrowserLevel<%= i %>" style="width: <%= cbColWidth %>px; height: <%= cbColHeight %>px; overflow: auto; float: left; border-width: <%= cbBorderWidth %>px <%= cbBorderWidth %>px <%= cbBorderWidth %>px <%= i == 0 ? "#{cbBorderWidth}px" : '0' %>; border-style: solid; border-color: gray;">
         <%- if i == 0 -%>
-          <%= render :partial => 'list_page', :locals => { :list_page => CmsPage.find(1) } %>
+          <%= render partial: 'list_page', locals: { list_page: CmsPage.first } %>
         <%- else -%>
-          <%= render :partial => 'list_pages' %>
+          <%= render partial: 'list_pages' %>
         <%- end -%>
-        <%= javascript_tag "$('cb_item_#{@parent.id}').className = 'cb_item cb_item_selected';" if @parent %>
+        <%= javascript_tag "jQuery('#cb_item_#{@parent.id}').addClass('cb_item_selected');" if @parent %>
       </div>
       <%- break if break_flag -%>
     <%- end -%>
@@ -74,10 +68,10 @@ EOF
     cbNumColumns = <%= @page_levels.size - 1 %>;
     $('columnBrowserLevel' + cbNumColumns).scrollIntoView();
     $('view_link').href = '<%= list_page.path.blank? ? '' : '/' + list_page.path %>/version/<%= list_page.published_version > 0 ? list_page.published_version : list_page.version %>';
-    $('new_link').onclick = function () { editProperties('<%=raw url_for(:action => 'edit_page', :mode => 'ajax_new', :parent_id => list_page, :authenticity_token => form_authenticity_token.to_s) %>', 'Create New Page under /<%= list_page.path %>'); return false; };
-    $('edit_link').onclick = function () { editProperties('<%=raw url_for :action => 'edit_page', :id => list_page, :mode => 'ajax_edit', :authenticity_token => form_authenticity_token.to_s %>', 'Page Properties: <%= list_page.name %>'); return false; };
-    $('edit_content_link').href = '<%=raw url_for :action => 'edit_page_content', :id => list_page, :authenticity_token => form_authenticity_token.to_s %>';
-    $('delete_link').href = '<%=raw url_for :action => 'delete_page', :id => list_page.id %>';
+    $('new_link').onclick = function () { editProperties('<%=raw url_for(action: 'edit_page', mode: 'ajax_new', parent_id: list_page, authenticity_token: form_authenticity_token.to_s) %>', 'Create New Page under /<%= list_page.path %>'); return false; };
+    $('edit_link').onclick = function () { editProperties('<%=raw url_for action: 'edit_page', id: list_page, mode: 'ajax_edit', authenticity_token: form_authenticity_token.to_s %>', 'Page Properties: <%= list_page.name %>'); return false; };
+    $('edit_content_link').href = '<%=raw url_for action: 'edit_page_content', id: list_page, authenticity_token: form_authenticity_token.to_s %>';
+    $('delete_link').href = '<%=raw url_for action: 'delete_page', id: list_page.id %>';
 </script>
 
-<%= render :partial => '/imagine_cms/dialogs' %>
+<%= render '/imagine_cms/dialogs' %>
