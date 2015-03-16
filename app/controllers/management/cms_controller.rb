@@ -436,7 +436,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           key =~ /^obj-(\w+?)-(.+?)$/
           obj = @pg.objects.build(:name => $2, :obj_type => $1)
           
-          # do a little bit of "censorship" to fix up Word pastes
+          # do a little bit of "censorship" to fix up Word pastes and strange things from the editor
           if val.is_a?(String)
             # all meta and link tags
             val.gsub!(/(<\/?)(meta|link)(.*?)>/m, '')
@@ -454,9 +454,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             # not even sure what these are supposed to be
             val.gsub!(/<xml>(.*?)<\/xml>/m, '')
             
-            # pirate styles not welcome
-            val.gsub!(/<style>(.*?)<\/style>/m, '')
-            
             # images pointing to the local drive??
             val.gsub!(/<img src="file:(.*?)>/, '')
             
@@ -473,6 +470,15 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             
             # but it's easier just remove all tags with colons in them
             val.gsub!(/(<\/?)[\w\d]+:[\w\d]+(.*?)>/, '')
+            
+            
+            ### other non-ms word specific stuff ###
+            
+            # pirate styles not welcome
+            val.gsub!(/<style>(.*?)<\/style>/m, '')
+            
+            # fix strange <br>s from the editor
+            val.gsub!(/<br>(<\/h\d>|<\/p>)/, '\1')
           end
           
           obj.content = val
