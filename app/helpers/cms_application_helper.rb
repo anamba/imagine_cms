@@ -388,6 +388,9 @@ module CmsApplicationHelper
     # since the user selected these pages individually, they expect them to be included, no matter what the tags are
     pages += single_pages
     
+    # but make sure all pages are unique
+    pages.uniq!
+    
     # set some reasonable defaults in case the sort keys are nil
     pages.each { |pg| pg.article_date ||= Time.now; pg.position ||= 0; pg.title ||= '' }
     pri_sort_key = first_non_empty(@page_objects["#{key}-sort-first-field"], options[:primary_sort_key], 'article_date')

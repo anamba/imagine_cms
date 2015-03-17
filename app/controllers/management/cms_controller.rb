@@ -475,7 +475,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             ### other non-ms word specific stuff ###
             
             # pirate styles not welcome
-            val.gsub!(/<style>(.*?)<\/style>/m, '')
+            val.gsub!(/<style(?:.*?)>(.*?)<\/style>/m, '')
             
             # fix strange <br>s from the editor
             val.gsub!(/<br>(<\/h\d>|<\/p>)/, '\1')
