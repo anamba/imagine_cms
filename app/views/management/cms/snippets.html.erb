@@ -1,6 +1,6 @@
 <h2>CMS &raquo; Snippets</h2>
 
-<p><%= button_to 'Create New Snippet', :action => 'edit_snippet' %></p>
+<p><%= button_to 'Create New Snippet', { :action => 'edit_snippet' }, :method => :get %></p>
 
 <%= flash_message %>
 
