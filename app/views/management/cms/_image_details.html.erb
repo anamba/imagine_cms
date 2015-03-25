@@ -1,6 +1,7 @@
+<%- img = "content/#{@pg.path}/#{params[:gallery_id]}/#{params[:image]}" -%>
 <table>
   <tr valign="top">
-    <td><%= image_tag "content/#{@pg.path}/#{params[:gallery_id]}/#{params[:image]}" %></td>
+    <td><%= image_tag "#{img}?#{File.mtime(File.join(Rails.root, 'public', 'assets', img)).to_i}" %></td>
     <td style="padding-left: 10px;">
       <div id="caption_container" style="margin-bottom: 20px;">
         <strong>Caption</strong><br/>
