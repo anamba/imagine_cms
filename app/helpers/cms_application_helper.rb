@@ -340,6 +340,7 @@ module CmsApplicationHelper
     end
     
     folders.each do |f|
+      logger.debug "Expanding folder #{f.src} (expand_folders: #{f.expand_folders})"
       begin
         if f.expand_folders && f.expand_folders == 'true'  # expand folders (i.e. specified path is prefix)
           if f.src == '/'
@@ -356,8 +357,10 @@ module CmsApplicationHelper
           f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
           parent_page = CmsPage.find_by_path(f.src)
           if parent_page.children.size > 0
+            logger.debug " > Adding children of #{f.src}"
             pages.concat parent_page.children.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars)).to_a
           else
+            logger.debug " > Adding single page #{f.src}"
             single_pages << parent_page  # user specified a single page, not a folder
           end
         end
@@ -385,8 +388,8 @@ module CmsApplicationHelper
       pages.reject! { |page| page == pg }
     end
     
-    # since the user selected these pages individually, they expect them to be included, no matter what the tags are
-    pages += single_pages
+    # since the user selected these pages individually, they expect them to be included (and prioritized!), no matter what the tags are
+    pages = single_pages + pages
     
     # but make sure all pages are unique
     pages.uniq!
@@ -427,6 +430,7 @@ module CmsApplicationHelper
     end
     
     offset = first_non_empty(@page_objects["#{key}-item-offset"], options[:item_offset], 0).to_i
+    logger.debug "Page List Offset: #{offset} / #{pages.size} #{pages.map(&:id)}"
     pages = pages[offset, pages.size] || []
     
     # randomize if requested
