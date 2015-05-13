@@ -1,6 +1,6 @@
 config_file = File.join(Rails.root, 'config', 'imagine_cms.yml')
 
-if File.exists?(config_file)
+if File.exist?(config_file)
   ImagineCmsConfig = YAML.load(File.read(config_file))
   
   if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']

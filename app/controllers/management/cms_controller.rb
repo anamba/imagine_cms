@@ -656,7 +656,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @pg = CmsPage.find_by_id(params[:id])
     target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     
-    if File.exists?(target_dir)
+    if File.exist?(target_dir)
       redirect_to :action => 'select_gallery', :id => @pg, :gallery_id => params[:gallery_id]
     else
       render :partial => 'upload_image'
@@ -765,7 +765,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     count = 1
     localdir = File.join(target_dir, 'gallery_1')
-    while File.exists?(localdir) && count < 100
+    while File.exist?(localdir) && count < 100
       count += 1
       localdir = File.join(target_dir, "gallery_#{count}")
     end
@@ -822,7 +822,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       thumbfile = File.join(Rails.root, 'public', @dirname, File.basename(img, File.extname(img))) + '-thumb.jpg'
       @thumbs << File.join(@dirname, File.basename(img, File.extname(img))) + '-thumb.jpg'
       
-      next if File.exists?(thumbfile)
+      next if File.exist?(thumbfile)
       
       im = MiniMagick::Image.from_file(File.join(Rails.root, 'public', img))
       im.resize "80x80" # hardcoded!
@@ -1424,7 +1424,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @pg ||= CmsPage.find_by_id(pg_id)
       gallery_id = options[:gallery_id] || params[:gallery_id]
       captions_file =  File.join(Rails.root, 'public', 'assets', 'content', @pg.path, gallery_id, 'captions.yml')
-      return if File.exists?(captions_file)
+      return if File.exist?(captions_file)
       
       File.open(captions_file, 'w') { |f| YAML.dump([0], f) }
     end
@@ -1437,7 +1437,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       ret = {}
       
-      if File.exists?(settings_location)
+      if File.exist?(settings_location)
         File.open(settings_location, 'r') { |f| ret = YAML.load(f.read) }
       else
         File.open(settings_location, 'w') { |f| YAML.dump({}, f) }
@@ -1476,7 +1476,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       raise "Source file required" if src_file.blank?
       
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
-      if !File.exists?(dest) || force == 1
+      if !File.exist?(dest) || force == 1
         logger.debug "Reading source file #{src_file}"
         im = Magick::Image::read(src_file)[0]
         im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'app', 'assets', 'images', 'management', overlay))[0]
@@ -1503,7 +1503,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       Dir.glob("#{galleries_dir}/gallery_*").each do |g|
         begin
           management_dir = File.join(g, 'management')
-          FileUtils.mkdir_p(management_dir) unless File.exists?(management_dir)
+          FileUtils.mkdir_p(management_dir) unless File.exist?(management_dir)
           
           images = Dir.glob("#{g}/*.{jpg,jpeg,png,gif}")
           preview_images = []
@@ -1511,7 +1511,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           
           # gallery preview image
           preview_image_location = File.join(management_dir, 'preview.jpg')
-          unless File.exists?(preview_image_location)
+          unless File.exist?(preview_image_location)
             preview_image = preview_images.first
             create_preview_image(preview_image, preview_image_location, options[:force], 'gallery_preview_overlay.png', 130)
           end
