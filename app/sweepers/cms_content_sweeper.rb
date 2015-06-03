@@ -32,7 +32,7 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
         # end
         
         # quicker method: remove entire directory trees when possible
-        dangerous_names = [ 'assets', 'images', 'javascripts', 'stylesheets' ]
+        dangerous_names = [ 'assets', 'images', 'javascripts', 'media', 'stylesheets' ]
         CmsPage.find_by_path('').sub_pages.each do |page|
           if dangerous_names.include?(page.path)
             # expire pages the old way
