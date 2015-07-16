@@ -33,25 +33,27 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
         
         # quicker method: remove entire directory trees when possible
         dangerous_names = [ 'assets', 'images', 'javascripts', 'media', 'stylesheets' ]
-        CmsPage.find_by_path('').sub_pages.each do |page|
+        home_page = CmsPage.find_by_path('')
+        CmsPage.where(parent_id: home_page.id).each do |page|
           if dangerous_names.include?(page.path)
             # expire pages the old way
+            Rails.logger.info "Expire tree #{path} using safe method"
             sub_page_paths(page).each do |path|
               expire_page controller: 'cms/content', action: 'show', content_path: path.split('/')
             end
           else
-            # remove entire directory tree, after sanity check
-            path = File.realpath File.expand_path(File.join(Management::CmsController.page_cache_directory, page.path)) rescue nil
-            
-            if path  # could be nil if it doesn't exist (i.e. realpath threw an Errno::ENOENT
-              raise "Cache directory name #{path} failed sanity check" unless path =~ /^#{public_dir}/
-              raise "Cache directory name #{path} failed sanity check 2" unless File.directory?(path)
-              Rails.logger.info "Expire tree #{path} using rm -rf"
-              FileUtils.rm_rf(path)
-            end
-            
-            # also clear this page
+            # first clear this page
             expire_page controller: 'cms/content', action: 'show', content_path: page.path.split('/')
+            
+            # then attempt to remove entire directory tree, after sanity check
+            path = File.expand_path(File.join(Management::CmsController.page_cache_directory, page.path))
+            path = File.realpath path rescue nil
+            
+            if path && File.directory?(path) # could be nil if realpath threw an Errno::ENOENT
+              raise "Cache directory name #{path} failed sanity check" unless path =~ /^#{public_dir}/
+              Rails.logger.info "Expire tree #{path} using rm -rf"
+              FileUtils.rm_rf(path, secure: true)
+            end
           end
         end
         
@@ -68,7 +70,7 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
     
     def sub_page_paths(page)
       paths = [ page.path ]
-      page.sub_pages.each do |pg|
+      CmsPage.where(parent_id: page.id).each do |pg|
         paths << pg.path
         paths.concat sub_page_paths(pg)
       end
