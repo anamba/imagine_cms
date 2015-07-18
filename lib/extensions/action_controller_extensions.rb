@@ -211,7 +211,7 @@ module ActionControllerExtensions
       
       num_segments = (pages.size.to_f / limit).ceil
       Rails.logger.info "Number of page list segments: #{num_segments}"
-      if first_non_empty(@page_objects["#{key}-use-pagination"], options[:use_pagination], 0).to_i == 1 && num_segments > 1
+      if first_non_empty(options[:use_pagination], @page_objects["#{key}-use-pagination"], 0).to_i == 1 && num_segments > 1
         content << '<div class="imagine_cms-paginator">'
         content << 'Page:&nbsp;'
         num_segments.times do |seg|
