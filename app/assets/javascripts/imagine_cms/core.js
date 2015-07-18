@@ -347,62 +347,59 @@ function closePageBrowser() {
 
 var cmsPageObjects = {};
 function scanForPageObjects(page_id, parent_key, version) {
-    if (!jQuery('#page_objects_' + parent_key).val()) return;
-    
-    var found = {};
-    
-    var regex = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
-    var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
+  if (jQuery('#page_objects_' + parent_key).val().length == 0) return;
+  
+  var found = {};
+  
+  var regex = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
+  var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
+  if (matches) {
     jQuery.each(matches, function (index) {
-        var match = this;
-        // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
-        var regex2 = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
-        if (regex2.test(match)) {
-            key = match.replace(regex2, "$1");
-            val = match.replace(regex2, "$2");
-            found[key] = val;
-        }
+      var match = this;
+      // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
+      var regex2 = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
+      if (regex2.test(match)) {
+        key = match.replace(regex2, "$1");
+        val = match.replace(regex2, "$2");
+        if (val == 'page_list') found[key] = val;
+      }
     });
-    
-    var regex = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
-    var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
+  }
+  
+  var regex = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
+  var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
+  if (matches) {
     jQuery.each(matches, function (index) {
-        var match = this;
-        // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
-        var regex2 = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
-        if (regex2.test(match)) {
-            key = match.replace(regex2, "$1");
-            val = 'page_list'
-            found[key] = val;
-        }
+      var match = this;
+      // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
+      var regex2 = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
+      if (regex2.test(match)) {
+        key = match.replace(regex2, "$1");
+        val = 'page_list'
+        found[key] = val;
+      }
     });
-    
-    // remove the cruft
-    jQuery.each(cmsPageObjects, function(key, val) {
-        if (cmsPageObjects[key] != found[key]) {
-            obj_key = val + '_container_obj-' + val + '-' + key.replace(/[^\w]/g, '_');
-            while (jQuery('#' + obj_key).length > 0) {
-                console.log("Removing " + obj_key);
-                jQuery('#' + obj_key).remove();
-            }
-            cmsPageObjects[key] = null;
-        }
-    });
-    
-    // bring in the new
-    jQuery.each(found, function (key, val) {
-        if (!cmsPageObjects[key]) {
-            console.log("Adding " + key + ": " + val);
-            cmsPageObjects[key] = val;
-            jQuery.get('/manage/cms/insert_page_object_config/' + page_id + '?version= ' + version +
-                       '&name=' + key + '&type=' + val + '&parent_key=' + parent_key);
-        }
-    });
-    
-    console.log("cmsPageObjects:");
-    console.log(cmsPageObjects);
-    console.log("found:");
-    console.log(found);
+  }
+  
+  // remove the cruft
+  jQuery.each(cmsPageObjects, function(key, val) {
+    if (cmsPageObjects[key] != found[key]) {
+      obj_key = val + '_container_obj-' + val + '-' + key.replace(/[^\w]/g, '_');
+      while (jQuery('#' + obj_key).length > 0) {
+        jQuery('#' + obj_key).remove();
+      }
+      cmsPageObjects[key] = null;
+    }
+  });
+  
+  // bring in the new
+  jQuery.each(found, function (key, val) {
+    if (!cmsPageObjects[key]) {
+      cmsPageObjects[key] = val;
+      jQuery.get('/manage/cms/insert_page_object_config/' + page_id + '?version= ' + version +
+                 '&name=' + key + '&type=' + val + '&parent_key=' + parent_key);
+    }
+  });
 }
 
 
