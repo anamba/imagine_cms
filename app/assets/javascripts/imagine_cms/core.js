@@ -345,48 +345,64 @@ function closePageBrowser() {
 }
 
 
-var cmsPageObjects = [];
+var cmsPageObjects = {};
 function scanForPageObjects(page_id, parent_key, version) {
-    found = [];
+    if (!jQuery('#page_objects_' + parent_key).val()) return;
+    
+    var found = {};
     
     var regex = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
-    if (!$('page_objects_' + parent_key).value) return;
-    
-    var matches = $('page_objects_' + parent_key).value.match(regex);
-    $A(matches).each(function (match) {
+    var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
+    jQuery.each(matches, function (index) {
+        var match = this;
         // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
         var regex2 = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
         if (regex2.test(match)) {
-            name = match.replace(regex2, "$1");
-            type = match.replace(regex2, "$2");
-            opts = match.replace(regex2, "$3");
-            found[name] = type;
+            key = match.replace(regex2, "$1");
+            val = match.replace(regex2, "$2");
+            found[key] = val;
+        }
+    });
+    
+    var regex = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
+    var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
+    jQuery.each(matches, function (index) {
+        var match = this;
+        // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
+        var regex2 = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
+        if (regex2.test(match)) {
+            key = match.replace(regex2, "$1");
+            val = 'page_list'
+            found[key] = val;
         }
     });
     
     // remove the cruft
-    $H(cmsPageObjects).each(function(pair) {
-        if (cmsPageObjects[pair.key] != found[pair.key]) {
-            type = cmsPageObjects[pair.key];
-            obj_key = type + '_container_obj-' + pair.value + '-' + pair.key.replace(/[^\w]/g, '_');
-            if ($(obj_key)) {
-                $(obj_key).parentNode.removeChild($(obj_key));
+    jQuery.each(cmsPageObjects, function(key, val) {
+        if (cmsPageObjects[key] != found[key]) {
+            obj_key = val + '_container_obj-' + val + '-' + key.replace(/[^\w]/g, '_');
+            while (jQuery('#' + obj_key).length > 0) {
+                console.log("Removing " + obj_key);
+                jQuery('#' + obj_key).remove();
             }
-            cmsPageObjects[pair.key] = null;
+            cmsPageObjects[key] = null;
         }
     });
     
     // bring in the new
-    $H(found).each(function (obj) {
-        name = obj.key
-        type = obj.value
-        if (!cmsPageObjects[name]) {
-            cmsPageObjects[name] = type;
-            new Ajax.Request('/manage/cms/insert_page_object_config/' + page_id + '?version= ' + version +
-                             '&name=' + name + '&type=' + type + '&parent_key=' + parent_key,
-                             { method:'get', asynchronous: true, evalScripts: true });
+    jQuery.each(found, function (key, val) {
+        if (!cmsPageObjects[key]) {
+            console.log("Adding " + key + ": " + val);
+            cmsPageObjects[key] = val;
+            jQuery.get('/manage/cms/insert_page_object_config/' + page_id + '?version= ' + version +
+                       '&name=' + key + '&type=' + val + '&parent_key=' + parent_key);
         }
     });
+    
+    console.log("cmsPageObjects:");
+    console.log(cmsPageObjects);
+    console.log("found:");
+    console.log(found);
 }
 
 

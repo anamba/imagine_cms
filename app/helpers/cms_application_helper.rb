@@ -424,9 +424,7 @@ module CmsApplicationHelper
     end
     
     offset = first_non_empty(@page_objects["#{key}-item-offset"], options[:item_offset], 0).to_i
-    limit = first_non_empty(@page_objects["#{key}-max-item-count"], options[:item_count], pages.size).to_i
-    @page_objects["#{key}-max-item-count"] = limit
-    @page_objects["#{key}-use-pagination"] ||= options[:use_pagination]
+    @page_objects["#{key}-item-offset"] = offset
     
     logger.debug "Page List Offset: #{offset} / #{pages.size} #{pages.map(&:id)}"
     pages = pages[offset, pages.size] || []
@@ -453,6 +451,12 @@ module CmsApplicationHelper
       end
     end
     
+    # make options specified in templates/snippets accessible to page list segments and rss feeds
+    @page_objects["#{key}-max-item-count"] = first_non_empty(@page_objects["#{key}-max-item-count"], options[:item_count], pages.size).to_i
+    @page_objects["#{key}-template"] = options[:template] if @page_objects["#{key}-template"].blank?
+    @page_objects["#{key}-use-pagination"] = options[:use_pagination] if @page_objects["#{key}-use-pagination"].blank?
+    
+    # also make return value accessible to page list segments and rss feeds (so we don't have to do this all again)
     @page_list_pages ||= {}
     @page_list_pages[key] = pages
     
@@ -480,7 +484,7 @@ module CmsApplicationHelper
     temp = html.dup
     
     # mangle anything inside of an insert_object so that it won't be caught (yet)
-    temp.gsub!(/(insert_object\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
+    temp.gsub!(/((?:insert_object|page_list|pagelist|snippet)\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
       one, two, three = $1, $2, $3
       one + two.gsub(/<#/, '<!#') + three
     end
@@ -537,7 +541,7 @@ module CmsApplicationHelper
     # end
     
     # unmangle mangled stuff
-    temp.gsub!(/(insert_object\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
+    temp.gsub!(/((?:insert_object|page_list|pagelist|snippet)\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
       one, two, three = $1, $2, $3
       one + two.gsub(/<!#/, '<#') + three
     end

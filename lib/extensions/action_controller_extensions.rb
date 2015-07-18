@@ -144,10 +144,6 @@ module ActionControllerExtensions
           
           options[:wrapper_div] = true
           
-          # make options specified in snippets and templates accessible to
-          # page list segments and rss feeds
-          @page_objects["#{key}-template"] = options[:template] if @page_objects["#{key}-template"].blank?
-          
           render_page_list_segment(name, pages, options, html_options)
         end
       when :snippet
@@ -168,6 +164,16 @@ module ActionControllerExtensions
         render_to_string(:partial => 'photo_gallery', :locals => { :name => name, :images => images, :thumbs => thumbs }).html_safe
       end
     end
+    
+    # shortcuts
+    def page_list(name, options = {}, html_options = {})
+      insert_object(name, :page_list, options, html_options)
+    end
+    alias :pagelist :page_list
+    def snippet(name, options = {}, html_options = {})
+      insert_object(name, :snippet, options, html_options)
+    end
+    
     
     def render_page_list_segment(name, pages, options = {}, html_options = {})
       extend ActionView::Helpers::TagHelper
@@ -204,6 +210,7 @@ module ActionControllerExtensions
                                                                          :page_list_name => name) : nil))
       
       num_segments = (pages.size.to_f / limit).ceil
+      Rails.logger.info "Number of page list segments: #{num_segments}"
       if first_non_empty(@page_objects["#{key}-use-pagination"], options[:use_pagination], 0).to_i == 1 && num_segments > 1
         content << '<div class="imagine_cms-paginator">'
         content << 'Page:&nbsp;'

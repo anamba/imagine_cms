@@ -10,14 +10,13 @@
           <tr>
             <td valign="top">
 <pre>
-&lt;%= insert_object('Content', :text) %&gt;
-&lt;%= insert_object('Top Nav', :snippet) %&gt;
-&lt;%= insert_object('My Page List', :page_list,
+&lt;%= snippet('Top Nav') %&gt;
+&lt;%= page_list('My Page List', :page_list,
                   template: 'html', header: 'html', footer: 'html',
                   folders: 'f1,f2', include_tags: 't1,t2',
                   exclude_tags: 't3,t4', require_tags: 't5,t6',
                   primary_sort_key: 'article_date', primary_sort_direction: 'asc',
-                  item_count: 5, item_offset: 1,
+                  item_count: 5, item_offset: 1, use_pagination: 1,
                   empty_message: 'Coming soon!') %&gt;
 </pre>
             </td>

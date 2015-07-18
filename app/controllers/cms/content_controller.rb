@@ -273,24 +273,12 @@ module Cms # :nodoc:
       render :nothing => true and return unless @pg && params[:page_list_name]
       key = "obj-page_list-#{params[:page_list_name].gsub(/[^\w]/, '_')}"
       
-      load_page_objects or return true
+      load_page_objects or return false
       
-      # options ||= {}
-      # today = Time.mktime(Time.now.year, Time.now.month, Time.now.day)
-      # case @page_objects["#{key}-date-range"]
-      #   when 'all'
-      #   when 'past'
-      #     options[:end_date] = today
-      #   when 'future'
-      #     options[:start_date] = today
-      #   when 'custom'
-      #     options[:start_date] = @page_objects["#{key}-date-range-custom-start"]
-      #     options[:end_date] = @page_objects["#{key}-date-range-custom-end"]
-      # end
+      # populate @page_list_pages
+      render_cms_page_to_string(@pg)
       
-      str = render_cms_page_to_string(@pg)
-      
-      @pages = @page_list_pages[key].first(20)  # why first 20?
+      @pages = @page_list_pages[key].first(20)  # why only first 20?
       @page_contents = {}
       
       unless @pages.empty?
