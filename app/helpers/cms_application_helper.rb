@@ -404,9 +404,9 @@ module CmsApplicationHelper
       index = 0
       result = 0
       while result == 0 && index < keys_with_dir.size
-        key = keys_with_dir[index][0]
-        aval = a.send(key)
-        bval = b.send(key)
+        sort_key = keys_with_dir[index][0]
+        aval = a.send(sort_key)
+        bval = b.send(sort_key)
         
         if !aval
           result = 1
@@ -424,6 +424,10 @@ module CmsApplicationHelper
     end
     
     offset = first_non_empty(@page_objects["#{key}-item-offset"], options[:item_offset], 0).to_i
+    limit = first_non_empty(@page_objects["#{key}-max-item-count"], options[:item_count], pages.size).to_i
+    @page_objects["#{key}-max-item-count"] = limit
+    @page_objects["#{key}-use-pagination"] ||= options[:use_pagination]
+    
     logger.debug "Page List Offset: #{offset} / #{pages.size} #{pages.map(&:id)}"
     pages = pages[offset, pages.size] || []
     
@@ -434,6 +438,9 @@ module CmsApplicationHelper
     # randomize if requested
     randomize = first_non_empty(@page_objects["#{key}-use-randomization"], options[:use_randomization], 'false').to_s == 'true'
     random_pool_size = first_non_empty(@page_objects["#{key}-random-pool-size"], options[:random_pool_size], '').to_i
+    @page_objects["#{key}-use-randomization"] = randomize
+    @page_objects["#{key}-random-pool-size"] = random_pool_size
+    
     if randomize
       if random_pool_size > 0
         pages = pages.first(random_pool_size)
@@ -445,6 +452,9 @@ module CmsApplicationHelper
         pages[r], pages[i] = pages[i], pages[r]
       end
     end
+    
+    @page_list_pages ||= {}
+    @page_list_pages[key] = pages
     
     pages
   end

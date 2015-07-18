@@ -4,6 +4,16 @@
   .search-result-summary { font-size: 0.9em; }
 }
 
+.imagine_cms-paginator { padding-top: 4px; text-align: right; }
+a.imagine_cms-paginator-link {
+  display: inline-block; margin-left: 3px; padding: 2px 8px; text-align: center;
+  color: #333; background-color: white; border: solid 1px #333;
+  text-decoration: none;
+}
+a.imagine_cms-paginator-link-selected {
+  color: white; background-color: #333; // font-weight: bold;
+}
+
 .imagine_cms-gallery { padding: 10px 10px 5px; background-color: #d8d6cd; }
 .imagine_cms-gallery-images { width: 100%; height: 340px; margin: 15px auto; }
 .imagine_cms-gallery-image { width: 450px; height: 340px; position: absolute; }

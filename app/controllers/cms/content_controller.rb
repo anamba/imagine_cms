@@ -138,9 +138,9 @@ module Cms # :nodoc:
             params[:offset] = db_path.pop
             db_path.pop
             
-            # don't cache to disk, but do allow browsers and proxies to cache briefly
+            # don't cache to disk on server, but do allow browsers and proxies to cache briefly
             @allow_caching = false
-            expires_in 5.minutes, :public => true
+            expires_in 1.minutes, public: true if Rails.env.production?
           end
         end
         
@@ -191,8 +191,7 @@ module Cms # :nodoc:
             if @page_list_segment
               name = params[:page_list_name]
               key = "obj-page_list-#{name.gsub(/[^\w]/, '_')}"
-              pages = page_list_items(@pg, key).compact.uniq
-              render :inline => render_page_list_segment(name, pages) and return true
+              render :inline => render_page_list_segment(name, @page_list_pages[key]) and return true
             end
             # end of page list segment code
             
@@ -276,22 +275,22 @@ module Cms # :nodoc:
       
       load_page_objects or return true
       
-      options ||= {}
-      today = Time.mktime(Time.now.year, Time.now.month, Time.now.day)
-      case @page_objects["#{key}-date-range"]
-        when 'all'
-        when 'past'
-          options[:end_date] = today
-        when 'future'
-          options[:start_date] = today
-        when 'custom'
-          options[:start_date] = @page_objects["#{key}-date-range-custom-start"]
-          options[:end_date] = @page_objects["#{key}-date-range-custom-end"]
-      end
+      # options ||= {}
+      # today = Time.mktime(Time.now.year, Time.now.month, Time.now.day)
+      # case @page_objects["#{key}-date-range"]
+      #   when 'all'
+      #   when 'past'
+      #     options[:end_date] = today
+      #   when 'future'
+      #     options[:start_date] = today
+      #   when 'custom'
+      #     options[:start_date] = @page_objects["#{key}-date-range-custom-start"]
+      #     options[:end_date] = @page_objects["#{key}-date-range-custom-end"]
+      # end
       
       str = render_cms_page_to_string(@pg)
       
-      @pages = page_list_items(@pg, key, options).first(20)
+      @pages = @page_list_pages[key].first(20)  # why first 20?
       @page_contents = {}
       
       unless @pages.empty?

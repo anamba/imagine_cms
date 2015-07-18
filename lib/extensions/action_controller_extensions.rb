@@ -204,27 +204,48 @@ module ActionControllerExtensions
                                                                          :page_list_name => name) : nil))
       
       num_segments = (pages.size.to_f / limit).ceil
-      if @page_objects["#{key}-use-pagination"].to_i == 1 && num_segments > 1
-        content << '<table style="margin-top: 4px;" align="right" cellpadding="0" cellspacing="0" border="0"><tr valign="bottom">'
-        content << '<td>Page:&nbsp;</td>'
+      if first_non_empty(@page_objects["#{key}-use-pagination"], options[:use_pagination], 0).to_i == 1 && num_segments > 1
+        content << '<div class="imagine_cms-paginator">'
+        content << 'Page:&nbsp;'
         num_segments.times do |seg|
           start = seg * limit
-          content << "<td><a href=\"#\""
+          content << "<a id=\"#{key}-segment-#{seg}\" href=\"#\""
           if offset >= start && offset < (start + limit)
-            content << " class=\"page_list_segment page_list_segment_selected\""
+            content << " class=\"imagine_cms-paginator-link imagine_cms-paginator-link-selected\""
           else
-            content << " class=\"page_list_segment\""
-            content << " onmouseover=\"this.className = 'page_list_segment page_list_segment_selected'\""
-            content << " onmouseout=\"this.className = 'page_list_segment'\""
-            content << " onclick=\"$('#{key}').style.cursor = 'wait'; $('#{key}').style.opacity = 0.5; "
-            # FIXME: Prototype
-            content << " new Ajax.Updater('#{key}', '#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', {asynchronous:true, evalScripts:true, method:'get'});"
-            content << "; window.scrollBy(0, - 20 + document.getElementById('#{key}').getBoundingClientRect().top); return false;\""
+            content << " class=\"imagine_cms-paginator-link\""
           end
-          content << ">#{seg+1}</a></td>"
+          content << ">#{seg+1}</a>"
         end
-        content << '</tr></table>'
-        content << "<script type=\"text/javascript\">$('#{key}').style.opacity = 1; $('#{key}').style.cursor = 'default';</script>"
+        content << '</div>'
+        content << <<-EOT
+<script type="text/javascript">
+  jQuery('##{key}').css({ opacity: '1', cursor: 'default' });
+  jQuery('.imagine_cms-paginator-link').not('.imagine_cms-paginator-link-selected').mouseover(function () {
+    jQuery(this).addClass('imagine_cms-paginator-link-selected');
+  }).mouseout(function () {
+    jQuery(this).removeClass('imagine_cms-paginator-link-selected');
+  });
+  
+EOT
+        num_segments.times do |seg|
+          start = seg * limit
+          content << <<-EOT
+  jQuery('##{key}-segment-#{seg}').click(function () {
+    jQuery('##{key}').css({ cursor: 'wait', opacity: '0.5' });
+    jQuery('html,body').animate({ scrollTop: jQuery('##{key}').position().top }, 0.2);
+    jQuery.get('#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', function (data) {
+      console.log(data);
+      jQuery('##{key}').html(data);
+      jQuery('##{key}').css({ cursor: 'default', opacity: '1' });
+    });
+    return false;
+  })
+EOT
+        end
+        content << <<-EOT
+</script>
+EOT
       end
       
       if options[:wrapper_div]
