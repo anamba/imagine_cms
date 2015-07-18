@@ -4,9 +4,9 @@
   .search-result-summary { font-size: 0.9em; }
 }
 
-.imagine_cms-paginator { padding-top: 4px; text-align: right; }
+.imagine_cms-paginator { clear: both; padding-top: 4px; text-align: right; }
 a.imagine_cms-paginator-link {
-  display: inline-block; margin-left: 3px; padding: 2px 8px; text-align: center;
+  display: inline-block; margin-left: 3px; min-width: 1.2em; padding: 2px 4px; text-align: center;
   color: #333; background-color: white; border: solid 1px #333;
   text-decoration: none;
 }

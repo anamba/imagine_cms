@@ -233,7 +233,7 @@ EOT
           content << <<-EOT
   jQuery('##{key}-segment-#{seg}').click(function () {
     jQuery('##{key}').css({ cursor: 'wait', opacity: '0.5' });
-    jQuery('html,body').animate({ scrollTop: jQuery('##{key}').position().top }, 0.2);
+    jQuery('html,body').animate({ scrollTop: jQuery('##{key}').position().top }, 200);
     jQuery.get('#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', function (data) {
       jQuery('##{key}').html(data);
       jQuery('##{key}').css({ cursor: 'default', opacity: '1' });
