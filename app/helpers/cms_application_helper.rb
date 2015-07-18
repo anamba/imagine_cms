@@ -454,7 +454,7 @@ module CmsApplicationHelper
     # make options specified in templates/snippets accessible to page list segments and rss feeds
     @page_objects["#{key}-max-item-count"] = first_non_empty(@page_objects["#{key}-max-item-count"], options[:item_count], pages.size).to_i
     @page_objects["#{key}-template"] = options[:template] if @page_objects["#{key}-template"].blank?
-    @page_objects["#{key}-use-pagination"] = options[:use_pagination] if @page_objects["#{key}-use-pagination"].blank?
+    @page_objects["#{key}-use-pagination"] = options[:use_pagination] unless options[:use_pagination].blank?
     
     # also make return value accessible to page list segments and rss feeds (so we don't have to do this all again)
     @page_list_pages ||= {}
