@@ -631,6 +631,25 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   end
   helper_method :insert_object
   
+  # shortcuts
+  def text_editor(name, options = {}, html_options = {})
+    insert_object(name, :text, options, html_options)
+  end
+  alias :texteditor, :text_editor
+  helper_method :text_editor, :texteditor
+  
+  def page_list(name, options = {}, html_options = {})
+    insert_object(name, :page_list, options, html_options)
+  end
+  alias :pagelist :page_list
+  helper_method :page_list, :pagelist
+  
+  def snippet(name, options = {}, html_options = {})
+    insert_object(name, :snippet, options, html_options)
+  end
+  helper_method :snippet
+  
+  
   def disable_caching ; end
   helper_method :disable_caching
   

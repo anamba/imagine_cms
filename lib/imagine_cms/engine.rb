@@ -87,7 +87,7 @@ module ImagineCms
       
       helper_method :user_has_permission?
       helper_method :user_has_permissions?
-      helper_method :insert_object, :page_list, :pagelist, :snippet
+      helper_method :insert_object, :text_editor, :texteditor, :page_list, :pagelist, :snippet
       
       # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
       before_filter :expire_session_data

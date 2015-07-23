@@ -166,6 +166,10 @@ module ActionControllerExtensions
     end
     
     # shortcuts
+    def text_editor(name, options = {}, html_options = {})
+      insert_object(name, :text, options, html_options)
+    end
+    alias :texteditor, :text_editor
     def page_list(name, options = {}, html_options = {})
       insert_object(name, :page_list, options, html_options)
     end
