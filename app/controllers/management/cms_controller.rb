@@ -635,7 +635,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def text_editor(name, options = {}, html_options = {})
     insert_object(name, :text, options, html_options)
   end
-  alias :texteditor, :text_editor
+  alias :texteditor :text_editor
   helper_method :text_editor, :texteditor
   
   def page_list(name, options = {}, html_options = {})
