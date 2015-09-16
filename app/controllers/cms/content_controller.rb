@@ -278,7 +278,7 @@ module Cms # :nodoc:
       # populate @page_list_pages
       render_cms_page_to_string(@pg)
       
-      @pages = @page_list_pages[key].first(20)  # why only first 20?
+      @pages = @page_list_pages[key].first(20) rescue []  # why only first 20?
       @page_contents = {}
       
       unless @pages.empty?
