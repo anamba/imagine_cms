@@ -284,7 +284,9 @@ module ActionControllerCachingExtensions
     
     def expire_page(path)
       return unless perform_caching
-      path = page_cache_path(path)
+      
+      path = Pathname.new(page_cache_path(path)).relative_path_from(Pathname.new(Rails.root))
+      Dir.chdir Rails.root
       
       instrument_page_cache :expire_page, path do
         Dir.glob(path, File::FNM_CASEFOLD).each { |f| File.delete(f) }
