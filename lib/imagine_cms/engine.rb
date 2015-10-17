@@ -13,7 +13,10 @@ module ImagineCms
     
     initializer 'imagine_cms.load_helpers' do |app|
       ActionController::Base.send :include, CmsApplicationHelper
-      # ActionView::Base.send :include, CmsApplicationHelper
+    end
+    
+    initializer 'imagine_cms.caching_extensions' do |app|
+      ActionController::Base.send :extend, ActionControllerCachingExtensions::ClassMethods
     end
     
     def self.activate
