@@ -46,13 +46,13 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
             expire_page controller: 'cms/content', action: 'show', content_path: page.path.split('/')
             
             # then attempt to remove entire directory tree, after sanity check
-            path = File.expand_path(File.join(Management::CmsController.page_cache_directory, page.path))
-            path = File.realpath path rescue nil
-            
-            if path && File.directory?(path) # could be nil if realpath threw an Errno::ENOENT
-              raise "Cache directory name #{path} failed sanity check" unless path =~ /^#{public_dir}/
-              Rails.logger.info "Expire tree #{path} using rm -rf"
-              FileUtils.rm_rf(path, secure: true)
+            Dir.glob(File.join(Management::CmsController.page_cache_directory, page.path), File::FNM_CASEFOLD).each do |path|
+              path = File.realpath(File.expand_path(path)) rescue nil
+              if path && File.directory?(path) # could be nil if realpath threw an Errno::ENOENT
+                raise "Cache directory name #{path} failed sanity check" unless path =~ /^#{public_dir}/
+                Rails.logger.info "Expire tree #{path} using rm -rf"
+                FileUtils.rm_rf(path, secure: true)
+              end
             end
           end
         end

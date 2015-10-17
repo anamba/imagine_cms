@@ -275,4 +275,23 @@ EOT
     end
     
   end
+  
+end
+
+module ActionControllerCachingExtensions
+  
+  module ClassMethods
+    
+    def expire_page(path)
+      return unless perform_caching
+      path = page_cache_path(path)
+      
+      instrument_page_cache :expire_page, path do
+        Dir.glob(path, File::FNM_CASEFOLD).each { |f| File.delete(f) }
+        Dir.glob(path + '.gz', File::FNM_CASEFOLD).each { |f| File.delete(f) }
+      end
+    end
+    
+  end
+  
 end
