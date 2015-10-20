@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.add_dependency "actionpack-page_caching", "~> 1.0"
   s.add_dependency "non-stupid-digest-assets", "~> 1.0"
   s.add_dependency "prototype-rails",     "~> 4.0.0"
-  s.add_dependency "aws-sdk",             "~> 2.0.0.pre"
+  s.add_dependency "aws-sdk",             "~> 2.0.0"
   s.add_dependency "rmagick",             [ ">= 1.15.0", "< 3.0" ]
   s.add_dependency "mini_magick",         "~> 3.3"
   s.add_dependency "rubyzip",             "~> 1.0"
