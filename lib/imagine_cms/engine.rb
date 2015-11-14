@@ -51,6 +51,11 @@ module ImagineCms
       ActionView::Base.send(:include, UploadProgress::UploadProgressHelper)
     end
     
+    initializer 'imagine_cms.auto_link_email_addresses' do |app|
+      require 'auto_link_email_addresses'
+    end
+    
+    
     def self.activate
       Dir.glob(File.join(Rails.root, "app/overrides/*.rb")) do |c|
         Rails.application.config.cache_classes ? require(c) : load(c)
@@ -81,12 +86,6 @@ module ImagineCms
     require 'RMagick'
     require 'mini_magick'
     require 'non-stupid-digest-assets'
-    
-    #
-    # rails plugins
-    # 
-    
-    require 'auto_link_email_addresses'
     
     #
     # load provided classes
