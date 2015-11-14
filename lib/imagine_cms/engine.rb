@@ -55,6 +55,10 @@ module ImagineCms
       require 'auto_link_email_addresses'
     end
     
+    initializer 'imagine_cms.array_extensions' do |app|
+      require 'extensions/array_extensions'
+    end
+    
     
     def self.activate
       Dir.glob(File.join(Rails.root, "app/overrides/*.rb")) do |c|
@@ -92,11 +96,6 @@ module ImagineCms
     #
     require 'hash_object'
     require 'hash_wrapper'
-    
-    #
-    # load extensions
-    #
-    require 'extensions/array_extensions'
   end
   
 end
