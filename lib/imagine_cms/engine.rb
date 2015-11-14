@@ -59,6 +59,11 @@ module ImagineCms
       require 'extensions/array_extensions'
     end
     
+    initializer 'imagine_cms.hash_classes' do |app|
+      require 'hash_object'
+      require 'hash_wrapper'
+    end
+    
     
     def self.activate
       Dir.glob(File.join(Rails.root, "app/overrides/*.rb")) do |c|
@@ -90,12 +95,6 @@ module ImagineCms
     require 'RMagick'
     require 'mini_magick'
     require 'non-stupid-digest-assets'
-    
-    #
-    # load provided classes
-    #
-    require 'hash_object'
-    require 'hash_wrapper'
   end
   
 end
