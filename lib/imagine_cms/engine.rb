@@ -16,9 +16,39 @@ module ImagineCms
       ActionController::Base.send :include, CmsApplicationHelper
     end
     
-    initializer 'imagine_cms.caching_extensions' do |app|
+    initializer 'imagine_cms.action_controller_extensions' do |app|
+      require 'extensions/action_controller_extensions'
+      ActionController::Base.send :extend, ActionControllerExtensions::ClassMethods
+      ActionController::Base.send :include, ActionControllerExtensions::InstanceMethods
+      
       require 'extensions/action_controller_caching_extensions'
       ActionController::Base.send :extend, ActionControllerCachingExtensions::ClassMethods
+      
+      ActionController::Base.send :helper_method, :user_has_permission?
+      ActionController::Base.send :helper_method, :user_has_permissions?
+      ActionController::Base.send :helper_method, :insert_object, :text_editor, :texteditor, :page_list, :pagelist, :snippet
+      
+      # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
+      ActionController::Base.send :before_filter, :expire_session_data
+    end
+    
+    initializer 'imagine_cms.prototype_legacy_helper' do |app|
+      require 'prototype_legacy_helper/lib/prototype_legacy_helper'
+      ActionController::Base.send :include, PrototypeHelper
+      ActionController::Base.send :helper, PrototypeHelper
+    end
+    
+    initializer 'imagine_cms.acts_as_versioned' do |app|
+      require 'acts_as_versioned/lib/acts_as_versioned'
+    end
+    
+    initializer 'imagine_cms.upload_progress' do |app|
+      require 'upload_progress/lib/multipart_progress'
+      require 'upload_progress/lib/progress'
+      require 'upload_progress/lib/upload_progress'
+      require 'upload_progress/lib/upload_progress_helper'
+      ActionController::Base.send(:include, UploadProgress)
+      ActionView::Base.send(:include, UploadProgress::UploadProgressHelper)
     end
     
     def self.activate
@@ -55,13 +85,6 @@ module ImagineCms
     #
     # rails plugins
     # 
-    require 'acts_as_versioned/lib/acts_as_versioned'
-    require 'prototype_legacy_helper/lib/prototype_legacy_helper'
-    
-    require 'upload_progress/lib/multipart_progress'
-    require 'upload_progress/lib/progress'
-    require 'upload_progress/lib/upload_progress'
-    require 'upload_progress/lib/upload_progress_helper'
     
     require 'auto_link_email_addresses'
     
@@ -75,27 +98,6 @@ module ImagineCms
     # load extensions
     #
     require 'extensions/array_extensions'
-    
-    ActiveSupport.on_load(:action_controller) do
-      require 'extensions/action_controller_extensions'
-      extend ActionControllerExtensions::ClassMethods
-      include ActionControllerExtensions::InstanceMethods
-      
-      include UploadProgress
-      helper UploadProgress::UploadProgressHelper
-      
-      # include + helper: allow use both in controllers and views
-      
-      include PrototypeHelper  # from prototype_legacy_helper
-      helper PrototypeHelper
-      
-      helper_method :user_has_permission?
-      helper_method :user_has_permissions?
-      helper_method :insert_object, :text_editor, :texteditor, :page_list, :pagelist, :snippet
-      
-      # before_filter :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
-      before_filter :expire_session_data
-    end
   end
   
 end
