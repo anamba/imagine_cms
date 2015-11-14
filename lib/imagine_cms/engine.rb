@@ -17,6 +17,7 @@ module ImagineCms
     end
     
     initializer 'imagine_cms.caching_extensions' do |app|
+      require 'extensions/action_controller_caching_extensions'
       ActionController::Base.send :extend, ActionControllerCachingExtensions::ClassMethods
     end
     
