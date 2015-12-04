@@ -214,7 +214,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         # now try to save tags
         # begin
           existing_tags = @pg.tags.map(&:name)
-          tags_to_delete = @pg.tags.all
+          tags_to_delete = @pg.tags.to_a
           params[:tags].split(',').map(&:strip).reject(&:blank?).each do |t|
             if existing_tags.include?(t)
               # still in use, don't delete
