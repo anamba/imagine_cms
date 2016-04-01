@@ -384,10 +384,6 @@ module CmsApplicationHelper
       pages.reject! { |page| page.tags.reject { |t| t.name != tag } == [] }
     end
     
-    if pg && (options[:exclude_current] === true || @page_objects["#{key}-exclude-current"] == 'true')
-      pages.reject! { |page| page == pg }
-    end
-    
     # set some reasonable defaults in case the sort keys are nil
     pages.each { |pg| pg.article_date ||= Time.now; pg.position ||= 0; pg.title ||= '' }
     pri_sort_key = first_non_empty(@page_objects["#{key}-sort-first-field"], options[:primary_sort_key], 'article_date')
@@ -426,12 +422,18 @@ module CmsApplicationHelper
     offset = first_non_empty(@page_objects["#{key}-item-offset"], options[:item_offset], 0).to_i
     @page_objects["#{key}-item-offset"] = offset
     
+    # exclude current page if box is checked (even for single_pages)
+    if pg && (options[:exclude_current] === true || @page_objects["#{key}-exclude-current"] == 'true')
+      pages.reject! { |page| page == pg }
+      single_pages.reject! { |page| page == pg }
+    end
+    
     logger.debug "Page List Offset: #{offset} / #{pages.size} #{pages.map(&:id)}"
     pages = pages[offset, pages.size] || []
     
     # since the user selected these pages individually, they expect them to be included (and prioritized!), no matter what
     # (but make sure they are unique)
-    pages = (single_pages + pages).uniq
+    pages = (single_pages + pages).uniq unless single_pages.empty?
     
     # randomize if requested
     randomize = first_non_empty(@page_objects["#{key}-use-randomization"], options[:use_randomization], 'false').to_s == 'true'
