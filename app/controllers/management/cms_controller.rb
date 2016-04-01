@@ -1463,8 +1463,9 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       end
       
       # set a few defaults
-      ret[:slide_duration] ||= 0
-      ret[:show_thumbs] ||= true
+      ret['slide_duration'] ||= 0
+      ret['autoplay'] ||= true
+      ret['show_thumbs'] ||= true
       
       return HashObject.new(ret)
     end

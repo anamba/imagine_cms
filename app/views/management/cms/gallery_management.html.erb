@@ -57,15 +57,15 @@
       <tr>
         <td width="100">Slideshow Autoplay?</td>
         <td>
-          <%= radio_button :gallery, :autoplay, true, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_autoplay_true">Yes</label><br/>
-          <%= radio_button :gallery, :autoplay, false, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_autoplay_false">No</label>
+          <%= radio_button :gallery, :autoplay, 'true', :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_autoplay_true">Yes</label><br/>
+          <%= radio_button :gallery, :autoplay, 'false', :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_autoplay_false">No</label>
         </td>
       </tr>
       <tr>
         <td>Show Thumbnails?</td>
-        <td>
-          <%= radio_button :gallery, :show_thumbs, true, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_show_thumbs_true">Yes</label><br/>
-          <%= radio_button :gallery, :show_thumbs, false, :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_show_thumbs_false">No</label>
+        <td><%= @gallery.show_thumbs %>
+          <%= radio_button :gallery, :show_thumbs, 'true', :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_show_thumbs_true">Yes</label><br/>
+          <%= radio_button :gallery, :show_thumbs, 'false', :onclick => "$('btn_save_settings').disabled = false;" %> <label for="gallery_show_thumbs_false">No</label>
         </td>
       </tr>
       <tr>

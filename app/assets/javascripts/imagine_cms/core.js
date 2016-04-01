@@ -296,8 +296,8 @@ function changeGalleryImage(galleryName, index) {
         $(galleryName + '_caption').style.display = 'none';
     }
 
-    prevIndex = index == 0 ? gallerySize[galleryName] - 1 : index-1;
-    nextIndex = index == gallerySize[galleryName] - 1 ? 0 : index+1;
+    var prevIndex = index == 0 ? gallerySize[galleryName] - 1 : index-1;
+    var nextIndex = index == gallerySize[galleryName] - 1 ? 0 : index+1;
     $(galleryName + '_prev_button').onclick = function () { changeGalleryImage(galleryName, prevIndex) };
     $(galleryName + '_next_button').onclick = function () { changeGalleryImage(galleryName, nextIndex) };
 }
