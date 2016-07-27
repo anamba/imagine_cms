@@ -93,7 +93,7 @@ module Cms # :nodoc:
             else
               flash[:notice] = "Please log in now in order to switch to Preview Mode on the page you were just viewing."
               session[:saved_user_uri] = '/' + db_path.join('/')
-              redirect_to :controller => '/management/user', :action => 'login' and return true
+              redirect_to controller: '/management/user', action: 'login' and return true
             end
           end
         end
@@ -151,7 +151,7 @@ module Cms # :nodoc:
         
         if @pg = CmsPage.includes(:template).find_by_path(db_path.join('/'))
           if edit_mode
-            redirect_to :controller => '/management/cms', :action => 'edit_page_content', :id => @pg and return true
+            redirect_to controller: '/management/cms', action: 'edit_page_content', id: @pg and return true
           else
             # return if page is offline and viewer is not an admin
             if @pg.published_version < 0
@@ -191,11 +191,11 @@ module Cms # :nodoc:
             if @page_list_segment
               name = params[:page_list_name]
               key = "obj-page_list-#{name.gsub(/[^\w]/, '_')}"
-              render :inline => render_page_list_segment(name, @page_list_pages[key]) and return true
+              render inline: render_page_list_segment(name, @page_list_pages[key]) and return true
             end
             # end of page list segment code
             
-            render :inline => template_content
+            render inline: template_content
             
             if UseCmsPageCaching && @allow_caching && perform_caching && request.format == Mime::HTML
               cache_page
@@ -250,27 +250,30 @@ module Cms # :nodoc:
       end
       @pages = @pages.first(100)
       
+      logger.debug "Search returned #{@pages.size} matching pages for terms #{@terms}"
+      
       @pg = CmsPage.new
       @pg.template = CmsTemplate.find_by_name('Search') || CmsTemplate.new
       @page_title = 'Search Results'
       
       load_page_objects or return
-      @page_objects['obj-text-search_results'] = render_to_string(:partial => 'search')
       
-      render :inline => render_cms_page_to_string(@pg)
+      @page_objects['obj-text-search_results'] = render_to_string(partial: 'search')
+      
+      render inline: render_cms_page_to_string(@pg)
     end
     
     def rss_feed
       min_time = Time.rfc2822(request.env["HTTP_IF_MODIFIED_SINCE"]) rescue nil
       if min_time && (Time.now - min_time) < 5.minutes
-        render :text => '', :status => '304 Not Modified' and return
+        render text: '', status: '304 Not Modified' and return
       end
       
       @@cms_page_table_exists ||= CmsPage.table_exists?
       return not_found unless @@cms_page_table_exists
       
       @pg = CmsPage.find_by_id(params[:page_id])
-      render :nothing => true and return unless @pg && params[:page_list_name]
+      render nothing: true and return unless @pg && params[:page_list_name]
       key = "obj-page_list-#{params[:page_list_name].gsub(/[^\w]/, '_')}"
       
       load_page_objects or return false
@@ -287,7 +290,7 @@ module Cms # :nodoc:
         
         if min_time && @most_recent_pub_date.published_date && @most_recent_pub_date.published_date <= min_time
           # use cached version
-          render :text => '', :status => '304 Not Modified' and return
+          render text: '', status: '304 Not Modified' and return
         end
         
         @pages.each_with_index do |page, index|
