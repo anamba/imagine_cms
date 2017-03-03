@@ -1,5 +1,5 @@
 class Management::UsersController < Management::ApplicationController
-  before_filter :check_permissions, :except => [ :edit ]
+  before_filter :check_permissions, :except => [ :edit, :update ]
   
   def check_permissions
     render :action => 'permission_denied' if !user_has_permission?(:manage_users)
@@ -42,7 +42,7 @@ class Management::UsersController < Management::ApplicationController
     return update if request.post?
     
     user = authenticate_user
-    unless user.is_superuser || user.can_manage_users || user.id.to_s == params[:id]
+    unless user.is_superuser? || user.can_manage_users? || user.id.to_s == params[:id]
       render :layout => true, :text => "Sorry, you don't have permission to access this section." and return false
     end
     
@@ -51,13 +51,13 @@ class Management::UsersController < Management::ApplicationController
   
   def update
     user = authenticate_user
-    unless user.is_superuser || user.can_manage_users || user.id.to_s == params[:id]
+    unless user.is_superuser? || user.can_manage_users? || user.id.to_s == params[:id]
       render :layout => true, :text => "Sorry, you don't have permission to access this section." and return false
     end
     
     @user = User.find(params[:id])
     
-    if user.is_superuser || user.can_manage_users
+    if user.is_superuser? || user.can_manage_users?
       params[:user].each { |k,v| @user.send("#{k}=", v) }
     elsif user.id.to_s == params[:id]
       @user.first_name = params[:user][:first_name]
@@ -68,12 +68,13 @@ class Management::UsersController < Management::ApplicationController
     end
     
     if @user.save
-      flash[:notice] = 'User updated successfully. Please note that the user must log out and log back in for permission changes to take effect.'
       user = authenticate_user
-      if user.is_superuser || user.can_manage_users
+      if user.is_superuser? || user.can_manage_users?
+        flash[:notice] = 'User updated successfully. Please note that the user must log out and log back in for permission changes to take effect.'
         redirect_to :action => 'index'
       else
-        redirect_to :controller => '/manage/default', :action => 'index'
+        flash[:notice] = 'User updated successfully.'
+        redirect_to :controller => '/management/default', :action => 'index'
       end
     else
       flash.now[:error] = @user.errors.full_messages.join('; ')
