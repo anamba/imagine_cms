@@ -1,18 +1,14 @@
 class AddSettingsTable < ActiveRecord::Migration
   
-  def up
-    create_table "settings" do |t|
-      t.column "name",              :string, :null => false
-      t.column "value",             :text
+  def change
+    create_table :settings do |t|
+      t.string :name, null: false
+      t.text :value
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
-    add_index "settings", ["name"], :name => "UN_settings_name", :unique => true
-  end
-  
-  def down
-    drop_table "settings"
+    add_index "settings", ["name"], name: "UN_settings_name", unique: true
   end
   
 end

@@ -1,17 +1,13 @@
 class AddTasksTable < ActiveRecord::Migration
   
-  def up
-    create_table "tasks" do |t|
-      t.column "name",              :string, :null => false
+  def change
+    create_table :tasks do |t|
+      t.string :name, null: false
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
-    add_index "tasks", ["name"], :name => "UN_tasks_name", :unique => true
-  end
-  
-  def down
-    drop_table "tasks"
+    add_index "tasks", ["name"], name: "UN_tasks_name", unique: true
   end
   
 end

@@ -1,43 +1,43 @@
 class AddUsersTables < ActiveRecord::Migration
   
-  def self.up
-    create_table "users" do |t|
-      t.column "username",          :string
-      t.column "password_hash",     :string, :limit => 100
+  def up
+    create_table :users do |t|
+      t.string :username
+      t.string :password_hash, limit: 100
       
-      t.column "first_name",        :string, :limit => 100
-      t.column "last_name",         :string, :limit => 100
+      t.string :first_name, limit: 100
+      t.string :last_name, limit: 100
       
-      t.column "dynamic_fields",    :text
+      t.text :dynamic_fields
       
-      t.column "active",            :integer, :default => 1, :null => false
-      t.column "is_superuser",      :integer, :default => 0, :null => false
+      t.boolean :active, null: false, default: true
+      t.boolean :is_superuser, null: false, default: true
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
-    add_index "users", ["username"], :name => "UN_users_username", :unique => true
+    add_index "users", ["username"], name: "UN_users_username", unique: true
     
-    create_table "user_groups" do |t|
-      t.column "name",              :string
+    create_table :user_groups do |t|
+      t.string :name
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
-    add_index "user_groups", ["name"], :name => "UN_user_groups_name", :unique => true
+    add_index "user_groups", ["name"], name: "UN_user_groups_name", unique: true
     
-    create_table "user_group_memberships", :id => false do |t|
-      t.column "user_id",           :integer, :null => false
-      t.column "user_group_id",     :integer, :null => false
-      t.column "created_on",        :timestamp
+    create_table :user_group_memberships, id: false do |t|
+      t.integer :user_id, null: false
+      t.integer :user_group_id, null: false
+      t.datetime :created_on
     end
     execute 'alter table user_group_memberships add constraint PK_user_group_memberships primary key (user_id, user_group_id)'
   end
   
-  def self.down
-    drop_table "user_group_memberships"
-    drop_table "user_groups"
-    drop_table "users"
+  def down
+    drop_table :user_group_memberships
+    drop_table :user_groups
+    drop_table :users
   end
   
 end
