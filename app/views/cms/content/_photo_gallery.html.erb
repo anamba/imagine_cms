@@ -30,7 +30,7 @@
       <table width="100%" id="<%= name %>_image_<%= index %>" class="<%= name %>_image imagine_cms-gallery-image" border="0" cellpadding="0" cellspacing="2" style="<%= index > 0 ? 'display: none;' : '' %>">
         <tr>
           <td align="center" style="vertical-align:middle;">
-            <%= image_tag '/' + image, :style => "border: 7px solid white" %>
+            <%= image_tag "/#{image}?#{File.mtime(File.join(Rails.root, 'public', image)).to_i}", style: "border: 7px solid white" %>
           </td>
         </tr>
       </table>
@@ -70,7 +70,7 @@
   <div class="imagine_cms-gallery-thumbs">
     <%- thumbs.each_with_index do |thumb, index| -%>
       <div id="<%= name %>_thumb_<%= index %>" class="<%= name %>_thumb imagine_cms-gallery-thumb<%= index == 0 ? ' current' : '' %>" onmouseover="$(this).addClassName('current');" onmouseout="$(this).removeClassName('current');" onclick="changeGalleryImage('<%= name %>', <%= index %>);">
-        <%= image_tag '/' + thumb, :width => 39, :height => 39, :style => "float: left;" %>
+        <%= image_tag "/#{thumb}?#{File.mtime(File.join(Rails.root, 'public', thumb)).to_i}", size: '39x39', style: 'float: left;' %>
       </div>
     <%- end -%>
     <br clear="all" />
