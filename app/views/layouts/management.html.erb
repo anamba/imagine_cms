@@ -16,6 +16,26 @@
   if defined?(ImagineCmsAdditionalNavSections)
     @nav_sections += ImagineCmsAdditionalNavSections.is_a?(Proc) ? ImagineCmsAdditionalNavSections.call(self) : ImagineCmsAdditionalNavSections
   end
+  
+  #
+  # how to use a Proc to add nav sections:
+  #
+  # ImagineCmsAdditionalNavSections = Proc.new { |context|
+  #   nav_sections = []
+  #
+  #   context.instance_eval {
+  #     if is_logged_in_user?
+  #       if user_has_permission?(:manage_cms)
+  #         nav_sections << [ 'Recipes', { controller: '/management/recipes', action: 'index' } ]
+  #       end
+  #       if user_has_permission?(:manage_members)
+  #         nav_sections << [ 'Members', { controller: '/management/members', action: 'index' } ]
+  #       end
+  #     end
+  #   }
+  #
+  #   nav_sections
+  # }
 -%>
 <!DOCTYPE html>
 <html>
