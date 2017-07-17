@@ -38,9 +38,7 @@ module CmsApplicationHelper
     valid
   end
   
-  ### COMPAT: convert_content_path
   def convert_content_path
-    # logger.debug "DEPRECATION WARNING (Imagine CMS) WARNING: convert_content_path called"
     params[:content_path] = params[:content_path].to_s.split('/') rescue []
   end
   
