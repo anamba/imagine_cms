@@ -124,6 +124,13 @@ class CmsPage < ActiveRecord::Base
     self.valid?
   end
   
+  # pass a hash to set page attributes in bulk
+  def set_page_attributes(attrs)
+    attrs.each do |key, value|
+      objects.find_or_initialize_by(name: key, obj_type: 'attribute').update_attributes(content: value)
+    end
+  end
+  
   
   def article_date_month ; article_date.strftime("%B")      ; end
   def article_date_mon   ; article_date.strftime("%b")      ; end
