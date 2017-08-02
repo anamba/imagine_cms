@@ -691,7 +691,14 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     data = params[:file][:data]
     original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
     localfile = File.join(target_dir, original_filename)
-    FileUtils.cp(data.tempfile, localfile)
+    
+    im = MiniMagick::Image.open(data.path())
+    if im['dimensions'][0] > CmsImageMaxWidth || im['dimensions'][1] > CmsImageMaxHeight
+      im.resize "#{CmsImageMaxWidth}x#{CmsImageMaxHeight}"
+      im.write(localfile)
+    else
+      FileUtils.cp(data.path(), localfile)
+    end
     
     finish_upload_status "'#{File.basename(localfile)}'"
   end
@@ -715,7 +722,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
-    im = MiniMagick::Image.from_file(localfile)
+    im = MiniMagick::Image.open(localfile)
     im.resize "500x400>"
     im.write(testfile)
     File.chmod(0644, testfile)
