@@ -1414,10 +1414,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       if @pg.new_record? && @parent
         @parent.objects.where(:obj_type => 'attribute').each do |obj|
+          next if defined?(CmsNewPagesDoNotInherit) && CmsNewPagesDoNotInherit['attributes'] && CmsNewPagesDoNotInherit['attributes'].include?(obj.name)
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
         @parent.objects.where(:obj_type => 'option').each do |obj|
+          next if defined?(CmsNewPagesDoNotInherit) && CmsNewPagesDoNotInherit['options'] && CmsNewPagesDoNotInherit['options'].include?(obj.name)
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
