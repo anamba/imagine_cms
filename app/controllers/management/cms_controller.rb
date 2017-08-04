@@ -1229,7 +1229,10 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def crop_thumb
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-thumb' + File.extname(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
+    FileUtils.mv(origfile, localfile)
     File.chmod(0644, localfile)
     
     # get out now if user clicked finish
@@ -1313,8 +1316,10 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def crop_feature_image
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
-    File.chmod(0644, localfile)
+    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-feature' + File.extname(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
+    FileUtils.mv(origfile, localfile)
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
