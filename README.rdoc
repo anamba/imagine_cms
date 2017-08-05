@@ -12,12 +12,12 @@ Imagine was created in the Rails 1.0 days, to run a large number of technically 
 
 All that is now firmly in the past. By extracting Imagine functionality into a gem (a Rails Engine), we have achieved compatibility with Rails 3.2 and Ruby 1.9 and removed roadblocks to a future upgrade to Rails 4 and Ruby 2, all while remaining backwards compatible with the legacy Imagine CMS database structure.
 
-* Imagine 3.0 (Rails 3.2, Ruby 1.9): [DONE] 90% restored functionality, no database changes.
-* Imagine 3.1 (Rails 3.2, Ruby 1.9/2.0): [DONE, but released as 3.0.x] 100% restored functionality, plus a few extras and fixes.
-* Imagine 4.0 (Rails 4.0, Ruby 2.1): [DONE] Compatibility with Rails 4.0
-* Imagine 4.1 (Rails 4.1, Ruby 2.1): [DONE]
-* Imagine 4.2 (Rails 4.2, Ruby 2.1): [in progress on master]
-* Imagine 5.0 (Rails 5.0, Ruby 2.2): [PLANNED, Mid 2015] Compatibility with Rails 5.0, switch to a cross-browser editor
+* Imagine 3.0 (Rails 3.2, Ruby 1.9/2.0): [DONE, v3.0-stable] 100% restored functionality (plus a few extras and fixes), no database changes.
+* Imagine 4.0 (Rails 4.0, Ruby 2.1): [DONE, v4.0-stable] Compatibility with Rails 4.0
+* Imagine 4.1 (Rails 4.1, Ruby 2.1): [DONE, v4.1-stable] Compatibility with Rails 4.1
+* Imagine 4.2 (Rails 4.2, Ruby 2.2): [DONE, v4.2-stable] Compatibility with Rails 4.2, many minor fixes and UI improvements
+* Imagine 5.0 (Rails 5.0, Ruby 2.2): [SKIPPED] Compatibility with Rails 5.0
+* Imagine 5.1 (Rails 5.1, Ruby 2.4): [in progress] Compatibility with Rails 5.1, cross-browser editor
 
 In the future, there are plans to:
 * refactor & rewrite the worst parts (substitutions, galleries)
@@ -31,9 +31,9 @@ However, this will probably require forking off a separate project (imagine_cms_
 
 =Current Status
 
-Imagine 4.0 is ready for production use (v4.0-stable branch). Imagine 3 is also available for apps tied to Rails 3.2 (v3.0-stable branch).
+Imagine 4.2 is ready for production use (v4.2-stable branch). Imagine 3 is also available for apps tied to Rails 3.2 (v3.0-stable branch).
 
-Imagine 4.1 is in progress on master.
+Imagine 5.1 is in progress on master.
 
 One major feature from the old days is still missing: browser-based editing of view layouts and stylesheets. While convenient, this was probably not ever a good idea, so we're working on a better solution. We've also added a new feature, uploaded images and files can be stored on S3 (galleries still live on the local disk, so in a multiple app server setup, a shared filesystem is required).
 
@@ -43,7 +43,7 @@ If we can make a clean break from all of these "traditions," that will be a good
 
 =Hosting
 
-Imagine can run on most "standard" Rails hosting platforms, anything that uses Passenger, Unicorn, etc. On hosts that don't allow (or recommend) writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (note: this has not been tested).
+Imagine can run on most "standard" Rails hosting platforms, anything that uses Passenger, Unicorn, Puma, etc. On hosts that don't allow (or recommend) writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (note: this has not been tested in production).
 
 =Getting Help
 
