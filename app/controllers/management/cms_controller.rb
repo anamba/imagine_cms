@@ -481,7 +481,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             val.gsub!(/<br>(<\/h\d>|<\/p>)/, '\1')
           end
           
-          obj.content = val
+          obj.content = val.force_encoding("UTF-8")
           obj.save
         end
         
