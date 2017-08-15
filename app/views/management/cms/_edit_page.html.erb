@@ -128,12 +128,12 @@
     <td><%= text_area :pg, :summary, :class => 'form', :style => 'width: 100%; height: 50px;' %></td>
   </tr>
   <tr>
-    <td>Thumbnail:</td>
+    <td style="vertical-align: top;">Thumbnail:</td>
     <td>
       <%- if @pg.new_record? -%>
         A thumbnail cannot be added until you save this page.
       <%- else -%>
-        <div id="thumbnail_preview" style="width: 100%; height: 150px; background: url('<%= @pg.thumbnail_path %>') left top no-repeat; background-size: contain;" onclick="jQuery('#pg_thumbnail_path').toggle();"></div>
+        <div id="thumbnail_preview" style="width: 100%; height: auto; max-height: 150px; background: url('<%= @pg.thumbnail_path %>') left top no-repeat; background-size: contain;" onclick="jQuery('#pg_thumbnail_path').toggle();"></div>
         <%= button_to_function "Select Thumbnail...",
                                "selectThumbnail('#{url_for action: 'upload_thumb', id: @pg}');",
                                class: 'form_button' %>
@@ -146,12 +146,12 @@
   </tr>
   <%- if @pg.respond_to?(:feature_image_path) -%>
   <tr>
-    <td>Feature Image:</td>
+    <td style="vertical-align: top;">Feature Image:</td>
     <td>
       <%- if @pg.new_record? -%>
         A feature image cannot be added until you save this page.
       <%- else -%>
-        <div id="feature_image_preview" style="width: 100%; height: 150px; background: url('<%= @pg.feature_image_path %>') left top no-repeat; background-size: contain;" onclick="jQuery('#pg_feature_image_path').toggle();"></div>
+        <div id="feature_image_preview" style="width: 100%; height: auto; max-height: 150px; background: url('<%= @pg.feature_image_path %>') left top no-repeat; background-size: contain;" onclick="jQuery('#pg_feature_image_path').toggle();"></div>
         <%= button_to_function "Select Feature Image...",
                                "selectThumbnail('#{url_for action: 'upload_feature_image', id: @pg}');",
                                class: 'form_button' %>
