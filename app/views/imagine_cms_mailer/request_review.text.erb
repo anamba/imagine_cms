@@ -1,0 +1,10 @@
+<%= @sender.name %> (<%= @sender.username %>) has made a change to the web site and requests that the site administrators review and publish the change. (A copy of this request has been sent to each site administrator with a valid email address on file.)
+
+Title:   <%= @page_title %>
+URL:     <%= @page_url %>
+Version: <%= @page_version %>
+Description of change:
+<%= @change_description %>
+
+View/approve this change:
+<%= @page_url %>/version/<%= @page_version %>

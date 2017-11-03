@@ -565,17 +565,24 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @version = params[:version].to_i
     
     # send email to request administrative review
-    # find all users with email address set
-    User.all.reject { |u| !u.active? || !u.can_manage_cms_publishing? || !u.cms_allowed_sections.blank? }.each do |u|
-      next unless valid_email_address?(u.email_address)
+    emails = []
+    
+    User.find_each do |u|
+      next unless u.active? && valid_email_address?(u.email_address)              # must be active and have valid email address
+      next unless u.can_manage_cms_publishing? && u.cms_allowed_sections.blank?   # and have permission to publish
+      emails << ImagineCmsMailer.request_review(url_for(controller: '/cms/content', action: 'show', content_path: @pg.path.split('/')), @pg.title, @version, u, @user, params[:change_description].to_s)
+    end
+    
+    # email delivery could may fail, catch exceptions here
+    emails.each do |email|
       begin
-        Mailer.deliver_cms_request_review(url_for(:controller => '/cms/content', :action => 'show', :content_path => []) + @pg.path, @pg.title, @version, u, @user, params[:change_description].to_s)
+        email.deliver_now
       rescue Exception => e
         logger.error(e)
       end
     end
     
-    render :nothing => true
+    render nothing: true
   end
   
   #
