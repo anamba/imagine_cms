@@ -294,7 +294,7 @@ module Cms # :nodoc:
         end
         
         @pages.each_with_index do |page, index|
-          @page_contents[page.id] = render_to_string :inline => substitute_placeholders(@page_objects["#{key}-template"] || options[:template] || '', page, :index => index+1, :count => @pages.size)
+          @page_contents[page.id] = render_to_string :inline => substitute_placeholders(@page_objects["#{key}-template"] || '', page, :index => index+1, :count => @pages.size)
         end
       end
       
