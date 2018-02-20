@@ -13,7 +13,7 @@
     <td bgcolor="#dedede" width="10%">&nbsp;</td>
     <td bgcolor="#dedede" width="10%">&nbsp;</td>
   </tr>
-  <%- @users.each do |u| %>
+  <%- @usrs.each do |u| %>
   <tr>
     <td><%= link_to u.username, :action => 'edit', :id => u %></td>
     <td><%= u.first_name %></td>
