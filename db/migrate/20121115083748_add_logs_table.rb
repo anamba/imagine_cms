@@ -1,28 +1,23 @@
 class AddLogsTable < ActiveRecord::Migration
   
-  def up
-    create_table "logs" do |t|
-      t.column "name",              :string
-      t.column "description",       :text
+  def change
+    create_table :logs do |t|
+      t.string :name
+      t.text :description
       
-      t.column "created_on",        :timestamp
+      t.datetime :created_on
     end
     
-    create_table "log_entries" do |t|
-      t.column "log_id",            :integer, :null => false
+    create_table :log_entries do |t|
+      t.integer :log_id, null: false
       
-      t.column "type",              :string, :null => false
-      t.column "description",       :text
-      t.column "data",              :text
+      t.string :type, null: false
+      t.text :description
+      t.text :data
       
-      t.column "created_on",        :timestamp
+      t.datetime :created_on
     end
-    add_index "log_entries", ["type"], :name => "IDX_log_entries_type"
-  end
-  
-  def down
-    drop_table "log_entries"
-    drop_table "logs"
+    add_index "log_entries", ["type"], name: "IDX_log_entries_type"
   end
   
 end

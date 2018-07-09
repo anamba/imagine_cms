@@ -21,7 +21,7 @@ require 'rails_rinku'
 require 'acts_as_tree'
 require 'net/dns'
 require 'codemirror-rails'
-require 'RMagick'
+require 'rmagick'
 require 'mini_magick'
 
 require 'auto_link_email_addresses'
@@ -61,8 +61,9 @@ module ImagineCms
       ActionController::Base.send :extend, ActionControllerExtensions::ClassMethods
       ActionController::Base.send :include, ActionControllerExtensions::InstanceMethods
       
-      require 'extensions/action_controller_caching_extensions'
-      ActionController::Base.send :extend, ActionControllerCachingExtensions::ClassMethods
+      # looks like this may no longer be needed with updated versions of actionpack-page_caching gem
+      # require 'extensions/action_controller_caching_extensions'
+      # ActionController::Base.send :extend, ActionControllerCachingExtensions::ClassMethods
       
       ActionController::Base.send :helper_method, :user_has_permission?
       ActionController::Base.send :helper_method, :user_has_permissions?

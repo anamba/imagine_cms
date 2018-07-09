@@ -481,7 +481,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
             val.gsub!(/<br>(<\/h\d>|<\/p>)/, '\1')
           end
           
-          obj.content = val
+          obj.content = val.to_s.force_encoding("UTF-8")
           obj.save
         end
         
@@ -565,17 +565,24 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @version = params[:version].to_i
     
     # send email to request administrative review
-    # find all users with email address set
-    User.all.reject { |u| !u.active? || !u.can_manage_cms_publishing? || !u.cms_allowed_sections.blank? }.each do |u|
-      next unless valid_email_address?(u.email_address)
+    emails = []
+    
+    User.find_each do |u|
+      next unless u.active? && valid_email_address?(u.email_address)              # must be active and have valid email address
+      next unless u.can_manage_cms_publishing? && u.cms_allowed_sections.blank?   # and have permission to publish
+      emails << ImagineCmsMailer.request_review(url_for(controller: '/cms/content', action: 'show', content_path: @pg.path.split('/')), @pg.title, @version, u, @user, params[:change_description].to_s)
+    end
+    
+    # email delivery could may fail, catch exceptions here
+    emails.each do |email|
       begin
-        Mailer.deliver_cms_request_review(url_for(:controller => '/cms/content', :action => 'show', :content_path => []) + @pg.path, @pg.title, @version, u, @user, params[:change_description].to_s)
+        email.deliver_now
       rescue Exception => e
         logger.error(e)
       end
     end
     
-    render :nothing => true
+    render nothing: true
   end
   
   #
@@ -691,7 +698,14 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     data = params[:file][:data]
     original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
     localfile = File.join(target_dir, original_filename)
-    FileUtils.cp(data.tempfile, localfile)
+    
+    im = MiniMagick::Image.open(data.path())
+    if im['dimensions'][0] > CmsImageMaxWidth || im['dimensions'][1] > CmsImageMaxHeight
+      im.resize "#{CmsImageMaxWidth}x#{CmsImageMaxHeight}"
+      im.write(localfile)
+    else
+      FileUtils.cp(data.path(), localfile)
+    end
     
     finish_upload_status "'#{File.basename(localfile)}'"
   end
@@ -715,7 +729,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
-    im = MiniMagick::Image.from_file(localfile)
+    im = MiniMagick::Image.open(localfile)
     im.resize "500x400>"
     im.write(testfile)
     File.chmod(0644, testfile)
@@ -1222,7 +1236,10 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def crop_thumb
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-thumb' + File.extname(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
+    FileUtils.mv(origfile, localfile)
     File.chmod(0644, localfile)
     
     # get out now if user clicked finish
@@ -1306,8 +1323,10 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   def crop_feature_image
     @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
-    File.chmod(0644, localfile)
+    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-feature' + File.extname(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
+    FileUtils.mv(origfile, localfile)
     
     # get out now if user clicked finish
     if params[:next_clicked].to_i != 1
@@ -1407,10 +1426,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       if @pg.new_record? && @parent
         @parent.objects.where(:obj_type => 'attribute').each do |obj|
+          next if defined?(CmsNewPagesDoNotInherit) && CmsNewPagesDoNotInherit['attributes'] && CmsNewPagesDoNotInherit['attributes'].include?(obj.name)
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
         @parent.objects.where(:obj_type => 'option').each do |obj|
+          next if defined?(CmsNewPagesDoNotInherit) && CmsNewPagesDoNotInherit['options'] && CmsNewPagesDoNotInherit['options'].include?(obj.name)
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end

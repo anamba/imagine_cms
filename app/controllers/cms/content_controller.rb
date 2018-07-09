@@ -149,7 +149,7 @@ module Cms # :nodoc:
           params[:page] = 'index'
         end
         
-        if @pg = CmsPage.includes(:template).find_by_path(db_path.join('/'))
+        if @pg = (CmsPage.includes(:template).find_by_path(db_path.join('/')) || CmsPage.includes(:template).find_by_path(db_path.map { |segment| segment.gsub(/([A-Za-z\d])_/, '\1-') }.join('/')))
           if edit_mode
             redirect_to controller: '/management/cms', action: 'edit_page_content', id: @pg and return true
           else
@@ -294,7 +294,7 @@ module Cms # :nodoc:
         end
         
         @pages.each_with_index do |page, index|
-          @page_contents[page.id] = render_to_string :inline => substitute_placeholders(@page_objects["#{key}-template"] || options[:template] || '', page, :index => index+1, :count => @pages.size)
+          @page_contents[page.id] = render_to_string :inline => substitute_placeholders(@page_objects["#{key}-template"] || '', page, :index => index+1, :count => @pages.size)
         end
       end
       

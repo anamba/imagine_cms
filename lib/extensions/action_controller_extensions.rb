@@ -8,7 +8,9 @@ module ActionControllerExtensions
     # Takes a symbol/string or array of symbols/strings and returns true if user has all
     # of the named permissions.
     def user_has_permissions?(*permission_set)
-      return false if !(@user ||= authenticate_user)
+      @user ||= authenticate_user
+      return false unless @user
+      return true if @user.is_superuser?
       
       permission_set = [ permission_set ] unless permission_set.is_a?(Array)
       

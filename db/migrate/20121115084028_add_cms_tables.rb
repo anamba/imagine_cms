@@ -4,110 +4,111 @@ class AddCmsTables < ActiveRecord::Migration
   class CmsSnippet < ActiveRecord::Base ; acts_as_versioned ; end
   class CmsPage < ActiveRecord::Base ; acts_as_versioned ; end
   
-  def self.up
-    create_table "cms_templates" do |t|
-      t.column "name",              :string
-      t.column "content",           :text
-      t.column "options_yaml",      :text
+  def up
+    create_table :cms_templates do |t|
+      t.string :name
+      t.text :content
+      t.text :options_yaml
       
-      t.column "version",           :integer, :default => 0, :null => false
+      t.integer :version, default: 0, null: false
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     CmsTemplate.create_versioned_table  # => CmsTemplateVersions
     
-    create_table "cms_snippets" do |t|
-      t.column "name",              :string
-      t.column "content",           :text
+    create_table :cms_snippets do |t|
+      t.string :name
+      t.text :content
       
-      t.column "version",           :integer, :default => 0, :null => false
+      t.integer :version, default: 0, null: false
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     CmsSnippet.create_versioned_table  # => CmsSnippetVersions
     
-    create_table "cms_pages" do |t|
-      t.column "cms_template_id",   :integer, :null => false
-      t.column "cms_template_version", :integer, :null => false
+    create_table :cms_pages do |t|
+      t.integer :cms_template_id, null: false
+      t.integer :cms_template_version, null: false
       
-      t.column "parent_id",         :integer, :references => :cms_pages
+      t.integer :parent_id, references: :cms_pages
       
-      t.column "name",              :string
-      t.column "title",             :string
-      t.column "path",              :text
-      t.column "article_date",      :datetime
-      t.column "article_end_date",  :datetime
+      t.string :name
+      t.string :title
+      t.string :path
+      t.datetime :article_date
+      t.datetime :article_end_date
       
-      t.column "summary",           :text
-      t.column "thumbnail_path",    :string, :limit => 255
-      t.column "feature_image_path", :string, :limit => 255
-      t.column "position",          :integer, :default => 0
-      t.column "comment_count",     :integer, :default => 0
+      t.text :summary
+      t.string :thumbnail_path
+      t.string :feature_image_path
+      t.integer :position, default: 0
+      t.integer :comment_count, default: 0
       
-      t.column "version",           :integer, :default => 0, :null => false
-      t.column "published_version", :integer, :default => 0, :null => false
-      t.column "published_date",    :datetime, :null => false
-      t.column "expiration_date",   :datetime
-      t.column "expires",           :boolean, :default => false
-      t.column "search_index",      :text
-      t.column "html_head",         :text
+      t.integer :version, default: 0, null: false
+      t.integer :published_version, default: 0, null: false
+      t.datetime :published_date, null: false
+      t.datetime :expiration_date
+      t.boolean :expires, default: false
+      t.text :search_index
+      t.text :html_head
       
-      t.column "updated_by",        :integer, :null => false
-      t.column "updated_by_username", :string, :null => false
+      t.integer :updated_by, null: false
+      t.string :updated_by_username, null: false
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     CmsPage.create_versioned_table  # => CmsPageVersions
     
-    create_table "cms_page_objects" do |t|
-      t.column "cms_page_id",       :integer, :null => false
-      t.column "cms_page_version",  :integer, :null => false
+    create_table :cms_page_objects do |t|
+      t.integer :cms_page_id, null: false
+      t.integer :cms_page_version, null: false
       
-      t.column "name",              :string
-      t.column "obj_type",          :string # one of [ :text, :asset ]
-      t.column "content",           :text   # if :text, then text; if :asset, then asset_id
-      t.column "options",           :text   # options hash
+      t.string :name
+      t.string :obj_type    # one of [ :text, :asset ]
+      t.text :content       # if :text, then text; if :asset, then asset_id
+      t.text :options       # options hash
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     
-    create_table "cms_page_tags" do |t|
-      t.column "cms_page_id",       :integer, :null => false
-      t.column "name",              :string, :null => false
-      t.column "created_on",        :timestamp
+    create_table :cms_page_tags do |t|
+      t.integer :cms_page_id, null: false
+      t.string :name, null: false
+      
+      t.datetime :created_on
     end
     
-    create_table "cms_page_comments" do |t|
-      t.column "cms_page_id",       :integer, :null => false
+    create_table :cms_page_comments do |t|
+      t.integer :cms_page_id, null: false
       
-      t.column "owner",             :string, :null => false
-      t.column "owner_url",         :string, :limit => 255
-      t.column "owner_email",       :string, :limit => 255
-      t.column "content",           :text
+      t.string :owner, null: false
+      t.string :owner_url
+      t.string :owner_email
+      t.text :content
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     
-    create_table "cms_assets" do |t|
-      t.column "name",              :string
-      t.column "content_type",      :string
+    create_table :cms_assets do |t|
+      t.string :name
+      t.string :content_type
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     
-    create_table "cms_asset_tags" do |t|
-      t.column "cms_asset_id",      :integer, :null => false
-      t.column "user_id",           :integer, :null => false
-      t.column "name",              :string
+    create_table :cms_asset_tags do |t|
+      t.integer :cms_asset_id, null: false
+      t.integer :user_id, null: false
+      t.string :name
       
-      t.column "created_on",        :timestamp
-      t.column "updated_on",        :timestamp
+      t.datetime :created_on
+      t.datetime :updated_on
     end
     
     execute 'create index cms_snippets_name_index on cms_snippets (name(255))'
@@ -116,23 +117,23 @@ class AddCmsTables < ActiveRecord::Migration
     execute 'create index cms_page_objects_cms_page_id_cms_page_version_index on cms_page_objects (cms_page_id, cms_page_version)'
   end
   
-  def self.down
+  def down
     execute 'drop index cms_page_objects_cms_page_id_cms_page_version_index on cms_page_objects'
     execute 'drop index cms_page_objects_cms_page_id_obj_type_index on cms_page_objects'
     execute 'drop index cms_pages_path_index on cms_pages'
     execute 'drop index cms_snippets_name_index on cms_snippets'
     
-    drop_table "cms_asset_tags"
-    drop_table "cms_assets"
-    drop_table "cms_page_comments"
-    drop_table "cms_page_tags"
-    drop_table "cms_page_objects"
-    drop_table "cms_page_versions"
-    drop_table "cms_pages"
-    drop_table "cms_snippet_versions"
-    drop_table "cms_snippets"
-    drop_table "cms_template_versions"
-    drop_table "cms_templates"
+    drop_table :cms_asset_tags
+    drop_table :cms_assets
+    drop_table :cms_page_comments
+    drop_table :cms_page_tags
+    drop_table :cms_page_objects
+    drop_table :cms_page_versions
+    drop_table :cms_pages
+    drop_table :cms_snippet_versions
+    drop_table :cms_snippets
+    drop_table :cms_template_versions
+    drop_table :cms_templates
   end
   
 end

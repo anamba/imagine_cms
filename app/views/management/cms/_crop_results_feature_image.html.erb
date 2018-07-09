@@ -1,1 +1,1 @@
-<%= javascript_tag "$('pg_feature_image_path').value = '#{page_image_path(@pg, @image_file)}'; $('feature_image_preview').innerHTML = '#{page_image_tag(@pg, @image_file)}'; cancelSelectThumbnail();" %>
+<%= javascript_tag "jQuery('#pg_feature_image_path').val('#{page_image_path(@pg, @image_file)}'); jQuery('#feature_image_preview').css({ 'background-image': 'url(\\\'#{page_image_path(@pg, @image_file)}\\\')' }); cancelSelectThumbnail();" %>

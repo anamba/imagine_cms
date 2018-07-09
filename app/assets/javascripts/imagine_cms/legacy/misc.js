@@ -117,78 +117,76 @@ function selectTab(tabName, tabArray, tabBtnPrefix, tabDivPrefix, hiddenTextFiel
 
 
 function setReportDates(interval) {
-    startDateField = $('report_start_date');
-    endDateField = $('report_end_date');
-    today = startDate = endDate = new Date();
+    var startDateField = $('report_start_date');
+    var endDateField = $('report_end_date');
+    var today = new Date();
+    var startDate = new Date();
+    var endDate = new Date();
     
     switch (interval) {
         case 'yesterday':
-            startDate = new Date('' + (today.getMonth()+1) + '/' + (today.getDate()-1) + '/' + today.getYear());
+            startDate = new Date(today.getYear(), today.getMonth(), today.getDate()-1);
             endDate = startDate;
             break;
             
         case 'last_month':
-            startDate = new Date('' + today.getMonth() + '/1/' + today.getYear());
-            endDate = new Date('' + (today.getMonth()+1) + '/0/' + today.getYear());
+            startDate = new Date(today.getYear(), today.getMonth()-1, 1);
+            endDate = new Date(today.getYear(), today.getMonth(), 0);
             break;
             
         case 'last_quarter':
-            startMonth = Math.floor(today.getMonth() / 3) * 3 - 3;
-            startYear = today.getYear();
+            var startMonth = Math.floor(today.getMonth() / 3) * 3 - 3;
+            var startYear = today.getYear();
             if (startMonth < 0) {
                 startMonth += 12;
                 startYear--;
             }
-            endMonth = startMonth + 3;
-            endYear = startYear;
+            var endMonth = startMonth + 3;
+            var endYear = startYear;
             if (endMonth > 11) {
                 endMonth -= 12;
                 endYear++;
             }
-            startDate = new Date('' + (startMonth+1) + '/1/' + startYear);
-            endDate = new Date('' + (endMonth+1) + '/0/' + endYear);
+            startDate = new Date(startYear, startMonth, 1);
+            endDate = new Date(endYear, endMonth, 0);
             break;
             
         case 'last_year':
-            startDate = new Date('1/1/' + (today.getYear()-1));
-            endDate = new Date('12/31/' + (today.getYear()-1));
+            startDate = new Date(today.getYear()-1, 0, 1);
+            endDate = new Date(today.getYear()-1, 11, 31);
             break;
             
-        case 'today':
-            startDate = new Date('' + (today.getMonth()+1 )+ '/' + today.getDate() + '/' + today.getYear());
-            endDate = startDate;
-            break;
+        // case 'today':  // same as default
             
         case 'this_month':
-            startDate = new Date('' + (today.getMonth()+1) + '/1/' + today.getYear());
-            endDate = new Date('' + (today.getMonth()+2) + '/0/' + today.getYear());
+            startDate = new Date(today.getYear(), today.getMonth(), 1);
+            endDate = new Date(today.getYear(), today.getMonth()+1, 0);
             break;
             
         case 'this_quarter':
-            startMonth = Math.floor(today.getMonth() / 3) * 3;
-            endMonth = startMonth + 3;
-            endYear = startYear;
+            var startMonth = Math.floor(today.getMonth() / 3) * 3;
+            var endMonth = startMonth + 3;
+            var endYear = today.getYear();
             if (endMonth > 11) {
                 endMonth -= 12;
                 endYear++;
             }
-            startDate = new Date('' + (startMonth+1) + '/1/' + today.getYear());
-            endDate = new Date('' + (endMonth+1) + '/0/' + endYear);
+            startDate = new Date(today.getYear(), startMonth, 1);
+            endDate = new Date(endYear, endMonth, 0);
             break;
             
         case 'this_year':
-            startDate = new Date('1/1/' + today.getYear());
-            endDate = new Date('12/31/' + today.getYear());
+            startDate = new Date(today.getYear(), 0, 1);
+            endDate = new Date(today.getYear(), 11, 31);
             break;
         
         case 'all_time':
-            startDate = new Date('1/1/' + (today.getYear()-5));
-            endDate = new Date('12/31/' + (today.getYear()+50));
+            startDate = new Date(100, 0, 1);
+            endDate = new Date(1099, 11, 31);
             break;
         
         default:
-            // same as "today"
-            startDate = new Date('' + (today.getMonth()+1 )+ '/' + today.getDate() + '/' + today.getYear());
+            startDate = new Date(today.getYear(), today.getMonth(), today.getDate());
             endDate = startDate;
             break;
     }

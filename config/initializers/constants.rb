@@ -14,6 +14,9 @@ UseCmsPageCaching = false unless defined? UseCmsPageCaching
 UseCmsAccessLevels = false unless defined? UseCmsAccessLevels
 EnableAssetTimestamping = true unless defined? EnableAssetTimestamping
 
+CmsImageMaxWidth = 2500 unless defined? CmsImageMaxWidth
+CmsImageMaxHeight = 2500 unless defined? CmsImageMaxHeight
+
 # CMS gallery setup
 GalleryMaxWidth = 586 unless defined? GalleryMaxWidth
 GalleryMaxHeight = 400 unless defined? GalleryMaxHeight

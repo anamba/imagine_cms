@@ -1,6 +1,6 @@
 <%= flash_message %>
 
-<%= form_for(@user) do |f| %>
+<%= form_for(@usr) do |f| %>
 <table>
   <tr>
     <td>First name:</td>
@@ -28,7 +28,7 @@
     <td><%= f.password_field :password_confirmation %></td>
   </tr>
   
-  <%- if @user.username != session[:user_username] -%>
+  <%- if @usr.username != session[:user_username] -%>
     <tr>
       <td>This user is allowed to:</td>
       <td>

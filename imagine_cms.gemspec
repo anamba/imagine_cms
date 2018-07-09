@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rails",               [ ">= 4.1.0", "< 5.0" ]
   s.add_dependency "rails-observers",     "~> 0.1"
   s.add_dependency "actionpack-action_caching", "~> 1.0"
-  s.add_dependency "actionpack-page_caching", "~> 1.0"
+  s.add_dependency "actionpack-page_caching", "~> 1.1"
   s.add_dependency "aws-sdk",             "~> 2.0.0"
   s.add_dependency "rubyzip",             "~> 1.0"
   s.add_dependency "rinku",               "~> 1.7"
