@@ -209,7 +209,7 @@ module CmsApplicationHelper
       @pg.revert_to(@pg.published_version)
     end
     
-    @page_objects = HashObject.new
+    @page_objects = OpenStruct.new
     query = @pg.objects.where(:cms_page_version => @pg.version)
     query = query.where(:obj_type => obj_type) if obj_type
     query = query.where(:name => name) if name
@@ -286,7 +286,7 @@ module CmsApplicationHelper
     # pull all folder content
     folders = []
     for i in 0...@page_objects["#{key}-sources-folder-count"].to_i
-      folders << HashObject.new(src: @page_objects["#{key}-sources-folder#{i}"].strip,
+      folders << OpenStruct.new(src: @page_objects["#{key}-sources-folder#{i}"].strip,
                                 expand_folders: @page_objects["#{key}-sources-folder#{i}-expand-folders"])
     end
     folders = folders.reject { |f| f.src.blank? }
@@ -295,7 +295,7 @@ module CmsApplicationHelper
       folders = substitute_placeholders(options[:folders] || '', pg).split(',').map do |f|
         bits = f.strip.split(':')
         
-        obj = HashObject.new
+        obj = OpenStruct.new
         obj.src = bits[0]
         obj.expand_folders = 'true'
         

@@ -26,8 +26,6 @@ require 'mini_magick'
 
 require 'auto_link_email_addresses'
 require 'extensions/array_extensions'
-require 'hash_object'
-require 'hash_wrapper'
 
 
 module ImagineCms

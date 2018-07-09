@@ -1,7 +1,7 @@
 <%-
   timeout ||= 0
   captions = []
-  settings = HashObject.new({})
+  settings = OpenStruct.new({})
   path = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, name)
   
   begin
@@ -13,7 +13,7 @@
   timeout = 6
   
   begin
-    settings = HashObject.new(YAML.load(File.open(File.join(path, 'settings.yml')).read))
+    settings = OpenStruct.new(YAML.load(File.open(File.join(path, 'settings.yml')).read))
     timeout = settings.slide_duration.to_i
     autoplay = (settings.autoplay == 'true')
   rescue

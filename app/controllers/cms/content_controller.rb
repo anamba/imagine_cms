@@ -310,7 +310,7 @@ module Cms # :nodoc:
       @pg.template = CmsTemplate.new
       @pg.template.name = (params[:temp] || params[:snip])[:name] || 'New Template'
       @pg.template.content = (params[:temp] || params[:snip])[:content]
-      @page_objects = HashObject.new
+      @page_objects = OpenStruct.new
       render :inline => substitute_placeholders(@pg.template.content, @pg), :layout => 'application'
     end
     

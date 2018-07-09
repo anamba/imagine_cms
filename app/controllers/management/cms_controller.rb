@@ -88,7 +88,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       # begin
         @pg = CmsPage.new
-        @page_objects = HashObject.new
+        @page_objects = OpenStruct.new
         render_to_string :inline => @temp.content
       # rescue Exception => e
       #   message = e.message
@@ -122,7 +122,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       begin
         @pg = CmsPage.new
-        @page_objects = HashObject.new
+        @page_objects = OpenStruct.new
         render_to_string :inline => @snip.content
       rescue Exception => e
         message = e.message
@@ -327,7 +327,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   def page_attribute
     render :nothing => true and return unless params[:name]
     
-    @page_objects = HashObject.new({ params[:name] => params[:value] })
+    @page_objects = OpenStruct.new({ params[:name] => params[:value] })
     render :partial => 'page_attribute', :locals => { :name => params[:name] }
   end
   
@@ -335,7 +335,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @pg = CmsPage.find(params[:id])
     validate_user_access or return
     
-    @page_objects = HashObject.new(params[:page_objects] || {})
+    @page_objects = OpenStruct.new(params[:page_objects] || {})
     
     if request.get?
       @pg.version = params[:version] if params[:version] && params[:version].to_i != @pg.version
@@ -1421,8 +1421,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     end
     
     def load_page_objects
-      @page_objects = HashObject.new
-      @template_options = HashObject.new
+      @page_objects = OpenStruct.new
+      @template_options = OpenStruct.new
       
       if @pg.new_record? && @parent
         @parent.objects.where(:obj_type => 'attribute').each do |obj|
@@ -1488,12 +1488,12 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       ret['autoplay'] ||= true
       ret['show_thumbs'] ||= true
       
-      return HashObject.new(ret)
+      return OpenStruct.new(ret)
     end
     
     # prerequisites: @pg (CmsPage)
     def save_gallery_settings_to_file(gallery_id, settings_hash, options = {})
-      settings_hash = settings_hash.hash if settings_hash.kind_of?(HashObject)
+      settings_hash = settings_hash.hash if settings_hash.kind_of?(OpenStruct)
       
       galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
       gallery_dir = File.join(galleries_dir, gallery_id)
