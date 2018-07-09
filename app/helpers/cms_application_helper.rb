@@ -42,15 +42,7 @@ module CmsApplicationHelper
     params[:content_path] = params[:content_path].to_s.split('/') rescue []
   end
   
-  ### COMPAT - template_exists?
-  def template_exists?(template, extension = nil)
-    # ignore extension
-    # logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: template_exists? called")
-    partial = File.join(File.dirname(template), '_' + File.basename(template))
-    lookup_context.find_all(template).any? || lookup_context.find_all(partial).any?
-  end
-  
-  ### COMPAT - template_exists?
+  ### COMPAT - url_for_current
   def url_for_current
     # logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
     request.fullpath

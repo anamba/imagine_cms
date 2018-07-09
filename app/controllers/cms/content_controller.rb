@@ -6,7 +6,7 @@ module Cms # :nodoc:
     
     caches_action :rss_feed
     
-    before_filter :convert_content_path
+    before_action :convert_content_path
     
     # Routes:
     # match 'plcalendar(/:action(/:id))' => 'cms/content#page_list_calendar'

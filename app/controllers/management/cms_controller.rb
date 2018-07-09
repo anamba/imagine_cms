@@ -2,8 +2,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   include ActionController::Caching::Pages
   self.page_cache_directory = "#{Rails.root}/public"
   
-  before_filter :check_permissions
-  before_filter :block_basic_users, :except => [
+  before_action :check_permissions
+  before_action :block_basic_users, :except => [
     :index, :edit_page_content,
     :disable_caching, :garbage_collect,
     :select_page, :list_pages_select, :request_review,
@@ -24,7 +24,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     :pages, :list_pages, :edit_page, :show_template_options, :page_attribute, :set_page_version
   ]
   
-  before_filter :convert_invalid_chars_in_params
+  before_action :convert_invalid_chars_in_params
   
   upload_status_for :receive_image
   upload_status_for :add_to_gallery
@@ -176,8 +176,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @pg.template ||= @parent.template
     end
     
-    @attrs = CmsPageObject.where(obj_type: 'attribute').uniq.pluck(:name).sort
-    @taglist = CmsPageTag.uniq.pluck(:name).sort
+    @attrs = CmsPageObject.where(obj_type: 'attribute').pluck(:name).uniq.sort
+    @taglist = CmsPageTag.pluck(:name).uniq.sort
     
     if params[:mode] == 'ajax_new' || params[:mode] == 'ajax_edit'
       @pg.published_version = -1 if params[:mode] == 'ajax_new'

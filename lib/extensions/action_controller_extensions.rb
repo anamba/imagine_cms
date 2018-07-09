@@ -31,7 +31,7 @@ module ActionControllerExtensions
     
     # Saves the current request to the session so that it can be replayed later
     # (for example, after authentication). Only params of type String, Hash and
-    # Array will be saved. save_request is called in a before_filter in
+    # Array will be saved. save_request is called in a before_action in
     # application.rb.
     #
     # Two levels of saved params are required so that params can be unsaved in

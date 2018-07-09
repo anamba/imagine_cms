@@ -17,12 +17,13 @@ All that is now firmly in the past. By extracting Imagine functionality into a g
 * Imagine 4.1 (Rails 4.1, Ruby 2.1): [DONE, v4.1-stable] Compatibility with Rails 4.1
 * Imagine 4.2 (Rails 4.2, Ruby 2.2): [DONE, v4.2-stable] Compatibility with Rails 4.2, many minor fixes and UI improvements
 * Imagine 5.0 (Rails 5.0, Ruby 2.2): [SKIPPED] Compatibility with Rails 5.0
-* Imagine 5.1 (Rails 5.1, Ruby 2.4): [in progress] Compatibility with Rails 5.1, cross-browser editor
+* Imagine 5.1 (Rails 5.1, Ruby 2.4): [SKIPPED] Compatibility with Rails 5.1
+* Imagine 5.2 (Rails 5.2, Ruby 2.5): [in progress] Compatibility with Rails 5.2, CKEditor
 
 In the future, there are plans to:
-* refactor & rewrite the worst parts (substitutions, galleries)
+* refactor & rewrite the oldest parts (substitutions, galleries)
 * drop ERB templating for something safer
-* drop Prototype for jQuery
+* drop Prototype for vanilla JS
 * modernize the HTML, CSS, JS bits
 
 However, this will probably require forking off a separate project (imagine_cms_classic?) to avoid breaking existing sites, while also keeping up with Rails updates.
@@ -52,47 +53,3 @@ Get paid support and hosting for Imagine CMS straight from the people who made i
 =Customizing & Contributing
 
 Pull requests always appreciated (recommend getting in touch first). If companies or individuals are willing to sponsor major features on the roadmap (or features that meet their own needs) development can proceed more quickly.
-
-=Migrating from Imagine 2.x
-
-Putting this at the end because this information may not useful to the general public at the moment. It will evolve over time into a general getting started guide.
-
-File/code changes:
-* Rename all .rhtml files to .html.erb, .rxml to .xml.builder
-* Find and replace: RAILS_ROOT => Rails.root
-* Find and replace: SITE_ROOT => Rails.root
-* Find and replace: RAILS_ENV => Rails.env (constants only! leave the environment variables)
-
-Assets:
-* Delete prototype.js, effect.js, controls.js, dragdrop.js, imagine.js, reset.css, manage.css; move everything else to assets
-* Create symlinks to assets in public (images, javascripts, stylesheets, files)
-
-Config changes:
-* Move constants from config/environment.rb to config/initializers/imagine_cms.rb. Use Object.send(:remove_const, :ConstantName) as needed to override default values (bit of a stupid workaround but it works).
-* [To enable S3 asset storage] Create config/imagine_cms.yml (see sample in test/dummy/config) and add AWS account credentials (preferably IAM, not master account). If using CloudFront, enable "Forward Query Strings" (Behaviors > Edit) to make sure visitors see the latest versions of uploaded assets.
-
-Third party libraries no longer included:
-* Install fop in vendor/ if needed.
-
-Layout changes:
-* Under app/views/application: Update three partial paths: 'shared/ccs_header' => 'imagine_cms/header', 'shared/ccs_toolbar' => 'imagine_cms/toolbar', '/management/dialogs' => 'imagine_cms/dialogs'
-* Add: <%= csrf_meta_tags %>
-* Change to standard Rails includes, plus print:
-    <%= stylesheet_link_tag 'application', :media => 'all' %>
-    <%= stylesheet_link_tag 'print', :media => 'print' %>
-    <%= javascript_include_tag 'application' %>
-
-View changes:
-* Change <% form_tag do %> and similar to <%= form_tag %>
-
-Major functions that were (re)moved, and how to get them back:
-* script/clear_cache: Use rake imagine_cms:cache:clear
-* Exception emails: Install exception_notifier gem and add to config/environments/production.rb:
-  config.middleware.use ExceptionNotifier,
-    :email_prefix => "[EXCEPTION] ",
-    :sender_address => %{"Exception Notifier" <sender@example.com>},
-    :exception_recipients => %w{recipient@example.com}
-
-Recommended Rails config changes:
-* config.assets.compile = true (optional, easy way out for sites with a lot of customizations)
-* config.assets.precompile += %w( ... ) (if compile = false, this must be updated properly)

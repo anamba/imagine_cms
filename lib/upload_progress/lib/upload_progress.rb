@@ -58,7 +58,7 @@ module UploadProgress
   # object from the session with the +upload_progress+ method and display your own
   # results.  
   #
-  # Completion of the upload status updating occurs automatically with an +after_filter+ call to
+  # Completion of the upload status updating occurs automatically with an +after_action+ call to
   # +finish_upload_status+.  Because the upload must be posted into a hidden IFRAME to enable
   # Ajax updates during the upload, +finish_upload_status+ overwrites the results of any previous
   # +render+ or +redirect_to+ so it can render the necessary Javascript that will properly terminate 
@@ -173,7 +173,7 @@ module UploadProgress
   # * If you are properly running multiple FCGI processes, then you will see multiple entries for rendering the "upload_status" action before the "Finish processing..." log entry.  This is a *good thing* :)
   #
   module ClassMethods
-    # Creates an +after_filter+ which will call +finish_upload_status+
+    # Creates an +after_action+ which will call +finish_upload_status+
     # creating the document that will be loaded into the hidden IFRAME, terminating
     # the status polling forms created with +form_with_upload_progress+.
     #
@@ -182,7 +182,7 @@ module UploadProgress
     # in the +form_tag_with_upload_progress+ helper.
     #
     def upload_status_for(*actions)
-      after_filter :finish_upload_status, :only => actions
+      after_action :finish_upload_status, :only => actions
       
       define_method(actions.last.is_a?(Hash) && actions.last[:status] || :upload_status) do
         render(:inline => '<%= upload_progress_status %>', :layout => false)

@@ -1,5 +1,5 @@
 class UtilController < ApplicationController # :nodoc:
-  skip_before_filter :check_ssl_requirement
+  skip_before_action :check_ssl_requirement
   
   def calendar
     @month = (params[:month] || Time.now.month).to_i

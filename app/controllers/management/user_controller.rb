@@ -1,5 +1,5 @@
 class Management::UserController < Management::ApplicationController
-  skip_before_filter :authenticate_user, :only => [ :login, :logout, :create_first ]
+  skip_before_action :authenticate_user, :only => [ :login, :logout, :create_first ]
   
   ###
   ### login

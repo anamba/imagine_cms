@@ -1,5 +1,5 @@
 class Management::UsersController < Management::ApplicationController
-  before_filter :check_permissions, except: [ :edit, :update ]
+  before_action :check_permissions, except: [ :edit, :update ]
   
   def check_permissions
     render :action => 'permission_denied' if !user_has_permission?(:manage_users)
