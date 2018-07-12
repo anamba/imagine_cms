@@ -106,7 +106,7 @@ class CmsPage < ActiveRecord::Base
       end
     end
     
-    self.search_index = sanitize_index(content)
+    self.search_index = ActionController::Base.helpers.strip_tags(content.gsub('><', '> <'))
   end
   
   def update_index!
@@ -137,27 +137,5 @@ class CmsPage < ActiveRecord::Base
   def article_date_day   ; article_date.strftime("%d").to_i ; end
   def article_date_year  ; article_date.strftime("%Y").to_i ; end
   def article_date_yr    ; article_date.strftime("%y").to_i ; end
-  
-  
-  protected
-    
-    def sanitize_index(html)
-      return html if html.blank?
-      if html.index("<")
-        text = ""
-        tokenizer = HTML::Tokenizer.new(html)
-        
-        while token = tokenizer.next
-          node = HTML::Node.parse(nil, 0, 0, token, false)
-          # result is only the content of any Text nodes
-          text << ' ' + node.to_s if node.class == HTML::Text  
-        end
-        # strip any comments, and if they have a newline at the end (ie. line with
-        # only a comment) strip that too, as well as any erb stuff
-        text.gsub(/<!--(.*?)-->[\n]?/m, "").gsub(/\<%.*?%\>/m, '').gsub(/&\w+;/, '').strip
-      else
-        html # already plain text
-      end 
-    end
     
 end

@@ -557,7 +557,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       end
     end
     
-    render :nothing => true
+    render plain: 'success'
   end
   
   def request_review
