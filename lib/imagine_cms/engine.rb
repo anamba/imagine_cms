@@ -67,7 +67,7 @@ module ImagineCms
       ActionController::Base.send :helper_method, :user_has_permissions?
       ActionController::Base.send :helper_method, :insert_object, :text_editor, :texteditor, :page_list, :pagelist, :snippet
       
-      # before_action :create_settings_object, :set_default_session_values, :check_ssl_requirement, :expire_session_data
+      # before_action :create_settings_object, :set_default_session_values, :expire_session_data
       ActionController::Base.send :before_action, :expire_session_data
     end
     
