@@ -30,7 +30,7 @@ module CmsApplicationHelper
         # require 'net/dns'
         res = Net::DNS::Resolver.new
         valid = valid && res.mx(host).size > 0
-      rescue Exception => e
+      rescue StandardError => e
         logger.error(e)
       end
     end
@@ -354,7 +354,7 @@ module CmsApplicationHelper
             single_pages << parent_page  # user specified a single page, not a folder
           end
         end
-      rescue Exception => e
+      rescue StandardError => e
         logger.debug e
       end
     end

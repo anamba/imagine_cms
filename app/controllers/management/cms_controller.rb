@@ -90,7 +90,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         @pg = CmsPage.new
         @page_objects = OpenStruct.new
         render_to_string :inline => @temp.content
-      # rescue Exception => e
+      # rescue StandardError => e
       #   message = e.message
       #   flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
       #   logger.debug e
@@ -124,7 +124,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         @pg = CmsPage.new
         @page_objects = OpenStruct.new
         render_to_string :inline => @snip.content
-      rescue Exception => e
+      rescue StandardError => e
         message = e.message
         flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
         logger.debug e
@@ -577,7 +577,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     emails.each do |email|
       begin
         email.deliver_now
-      rescue Exception => e
+      rescue StandardError => e
         logger.error(e)
       end
     end
@@ -831,7 +831,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           
           File.unlink(localfile) if localfile != jpgfile
           
-        rescue Exception => e
+        rescue StandardError => e
           logger.error(e)
         end
       end
@@ -905,14 +905,14 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       begin
         File.unlink(tempfile)
         File.unlink(tempthumbfile)
-      rescue Exception => e
+      rescue StandardError => e
         # not that big a deal if we can't delete
       end
     end
     
     begin
       Dir.rmdir(File.join(Rails.root, 'public', @dirname, 'temp'))
-    rescue Exception => e
+    rescue StandardError => e
       # not that big a deal if we can't delete
     end
     
@@ -1097,11 +1097,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           begin
             zipentry.extract(localfile)
             last_id += 1
-          rescue Exception => e
+          rescue StandardError => e
             logger.error(e)
           end
         end
-      rescue Exception => e
+      rescue StandardError => e
         logger.debug params.inspect
         logger.error(e)
         finish_upload_status "''" and return
@@ -1451,7 +1451,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     def load_template_options
       begin
         render_to_string :inline => @pg.template.content
-      rescue Exception => e
+      rescue StandardError => e
         logger.debug e
       end
     end
@@ -1560,7 +1560,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           # photo preview images
           preview_images.each { |img| create_preview_image(img, management_dir, options[:force]) }
           
-        rescue Exception => e
+        rescue StandardError => e
           # some error handling here
           session[:broken_galleries] << File.basename(g)
           

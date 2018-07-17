@@ -9,7 +9,7 @@
         summary ||= excerpt(page.search_index, term_variant, radius: 150)
       end
     end
-  rescue Exception => e
+  rescue StandardError => e
     logger.error "Error creating search index excerpt: #{e}"
   end
   

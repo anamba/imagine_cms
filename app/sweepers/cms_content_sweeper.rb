@@ -62,7 +62,7 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
       else
         FileUtils.rm_r(Dir.glob("#{cache_dir}/*")) rescue Errno::ENOENT
       end
-    rescue Exception => e
+    rescue StandardError => e
       Rails.logger.error "Error while clearing cache: #{e.message}" unless e.is_a?(NoMethodError)
     end
   end

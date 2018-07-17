@@ -34,7 +34,7 @@ module Cms # :nodoc:
           params[:page] = 'index'
           template_found = true
         end
-      rescue Exception => e
+      rescue StandardError => e
         if e.message =~ /string contains null byte/
           # do nothing
         else
@@ -204,7 +204,7 @@ module Cms # :nodoc:
             return true
           end
         end
-      rescue Exception => e
+      rescue StandardError => e
         logger.error "Error rendering from db: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
         rendering_error(e) and return true
       end
