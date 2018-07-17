@@ -197,7 +197,7 @@ module Cms # :nodoc:
             
             render inline: template_content
             
-            if UseCmsPageCaching && @allow_caching && perform_caching && request.format == Mime::HTML
+            if UseCmsPageCaching && @allow_caching && perform_caching && request.format == Mime[:html]
               cache_page
             end
             
@@ -205,7 +205,7 @@ module Cms # :nodoc:
           end
         end
       rescue Exception => e
-        logger.error "Error rendering from db: #{e.class}: #{e.message}"
+        logger.error "Error rendering from db: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
         rendering_error(e) and return true
       end
       
