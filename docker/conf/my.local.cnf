@@ -1,0 +1,14 @@
+[mysqld]
+max_connections = 10
+performance_schema = 0
+
+# innodb
+innodb_buffer_pool_size = 5M
+
+# myisam, which we don't really use
+key_buffer_size = 8
+
+# slow_query_log = 1
+# slow_query_log_file = /var/log/mysql/mariadb-slow.log
+# long_query_time = 5
+# log_queries_not_using_indexes = 1

@@ -7,3 +7,7 @@ test/dummy/tmp/
 test/dummy/.sass-cache
 
 *.gem
+
+prototype-rails
+
+docker-compose.override.yml

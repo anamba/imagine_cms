@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  web:  # (passenger + sidekiq)
+    build: .
+    links:
+      - db
+      # - redis
+    environment:
+      PASSENGER_APP_ENV: development
+      MYSQL_HOST: db                    # if this is changed, update nginx-vhost.conf as well
+      REDIS_URL: redis://redis:6379/1   # if this is changed, update nginx-vhost.conf as well
+      
+  db:
+    image: mariadb:10.2.16
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      
+  # redis:
+  #   image: redis:3.2.11-32bit  # not really 32-bit, just compiled that way to reduce memory usage
