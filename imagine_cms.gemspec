@@ -36,11 +36,11 @@ Gem::Specification.new do |s|
   s.add_dependency "rinku",               "~> 2.0"
   s.add_dependency "net-dns",             "~> 0.7"
   s.add_dependency "acts_as_tree",        "~> 2.7"
-  s.add_dependency "safe_yaml"
-  s.add_dependency "codemirror-rails"
+  s.add_dependency "safe_yaml",           "~> 1.0"
 
   # on the way out, but still needed for now
   # s.add_dependency "prototype-rails",     "~> 4.2.0"
+  s.add_dependency "codemirror-rails"
   s.add_dependency "rmagick",             [ ">= 1.15.0", "< 3.0" ]
   s.add_dependency "mini_magick",         [ ">= 3.3", "< 5.0" ]
   s.add_dependency "non-stupid-digest-assets", "~> 1.0"
