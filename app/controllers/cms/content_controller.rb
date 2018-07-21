@@ -151,7 +151,7 @@ module Cms # :nodoc:
         
         if @pg = (CmsPage.includes(:template).find_by_path(db_path.join('/')) || CmsPage.includes(:template).find_by_path(db_path.map { |segment| segment.gsub(/([A-Za-z\d])_/, '\1-') }.join('/')))
           if edit_mode
-            redirect_to controller: '/management/cms', action: 'edit_page_content', id: @pg and return true
+            redirect_to controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg and return true
           else
             # return if page is offline and viewer is not an admin
             if @pg.published_version < 0
@@ -204,6 +204,8 @@ module Cms # :nodoc:
             return true
           end
         end
+      rescue ActionController::RoutingError
+        # no need to log this
       rescue StandardError => e
         logger.error "Error rendering from db: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
         rendering_error(e) and return true

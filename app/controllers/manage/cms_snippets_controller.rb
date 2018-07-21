@@ -18,13 +18,12 @@ class Manage::CmsSnippetsController < Manage::ApplicationController
     @cms_snippet.assign_attributes(cms_snippet_params)
     
     begin
-      @pg = CmsPage.new
-      @page_objects = OpenStruct.new
-      render_to_string inline: @cms_snippet.content
+      ctrl = Manage::CmsPagesController.new
+      ctrl.instance_variable_set('@pg', CmsPage.new)
+      ctrl.instance_variable_set('@page_objects', OpenStruct.new)
+      ctrl.render_to_string inline: @cms_template.content
     rescue StandardError => e
-      message = e.message
-      flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
-      logger.debug e
+      flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
       render action: 'edit' and return
     end
     
@@ -46,13 +45,12 @@ class Manage::CmsSnippetsController < Manage::ApplicationController
     @cms_snippet.assign_attributes(cms_snippet_params)
     
     begin
-      @pg = CmsPage.new
-      @page_objects = OpenStruct.new
-      render_to_string inline: @cms_snippet.content
+      ctrl = Manage::CmsPagesController.new
+      ctrl.instance_variable_set('@pg', CmsPage.new)
+      ctrl.instance_variable_set('@page_objects', OpenStruct.new)
+      ctrl.render_to_string inline: @cms_template.content
     rescue StandardError => e
-      message = e.message
-      flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
-      logger.debug e
+      flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
       render action: 'edit' and return
     end
     
