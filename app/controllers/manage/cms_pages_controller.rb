@@ -6,6 +6,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
   before_action :convert_invalid_chars_in_params
   
   upload_status_for :receive_image
+  upload_status_for :receive_gallery
   upload_status_for :add_to_gallery
   
   cache_sweeper :cms_content_sweeper
@@ -629,8 +630,8 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     # need to scale up requested position/dimensions based on how big test image
     # is relative to original image
-    orig_im = MiniMagick::Image.from_file(localfile)
-    test_im = MiniMagick::Image.from_file(testfile)
+    orig_im = MiniMagick::Image.open(localfile)
+    test_im = MiniMagick::Image.open(testfile)
     scale = orig_im[:width].to_f / test_im[:width]
     
     x1 = params[:image][:x1].to_i * scale
@@ -728,7 +729,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
-    im = MiniMagick::Image.from_file(localfile)
+    im = MiniMagick::Image.open(localfile)
     im.resize("500x400>")
     im.write(testfile)
     File.chmod(0644, testfile)
@@ -750,8 +751,8 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     # need to scale up requested position/dimensions based on how big test image
     # is relative to original image
-    orig_im = MiniMagick::Image.from_file(localfile)
-    test_im = MiniMagick::Image::from_file(testfile)
+    orig_im = MiniMagick::Image.open(localfile)
+    test_im = MiniMagick::Image.open(testfile)
     scale = orig_im[:width].to_f / test_im[:width]
     
     x1 = params[:image][:x1].to_i * scale
@@ -814,7 +815,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
     
     # make a smaller version to help with cropping
-    im = MiniMagick::Image.from_file(localfile)
+    im = MiniMagick::Image.open(localfile)
     im.resize("500x400>")
     im.write(testfile)
     File.chmod(0644, testfile)
@@ -836,8 +837,8 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     # need to scale up requested position/dimensions based on how big test image
     # is relative to original image
-    orig_im = MiniMagick::Image.from_file(localfile)
-    test_im = MiniMagick::Image::from_file(testfile)
+    orig_im = MiniMagick::Image.open(localfile)
+    test_im = MiniMagick::Image.open(testfile)
     scale = orig_im[:width].to_f / test_im[:width]
     
     x1 = params[:image][:x1].to_i * scale
@@ -912,7 +913,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
         begin
           zipentry.extract(localfile)
           
-          im = MiniMagick::Image.from_file(localfile)
+          im = MiniMagick::Image.open(localfile)
           im.write(jpgfile)
           
           File.unlink(localfile) if localfile != jpgfile
@@ -943,7 +944,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       
       next if File.exist?(thumbfile)
       
-      im = MiniMagick::Image.from_file(File.join(Rails.root, 'public', img))
+      im = MiniMagick::Image.open(File.join(Rails.root, 'public', img))
       im.resize "80x80" # hardcoded!
       im.write(thumbfile)
       File.chmod(0644, thumbfile)
@@ -976,13 +977,13 @@ class Manage::CmsPagesController < Manage::ApplicationController
       localfile = File.join(Rails.root, 'public', @dirname, (index+1).to_s + '.jpg')
       thumbfile = File.join(Rails.root, 'public', @dirname, (index+1).to_s + '-thumb.jpg')
       
-      im = MiniMagick::Image.from_file(tempfile)
+      im = MiniMagick::Image.open(tempfile)
       if im[:width] > max_width || im[:height] > max_height
         im.resize("#{max_width}x#{max_height}")
       end
       im.write(localfile)
       
-      small = MiniMagick::Image.from_file(tempfile)
+      small = MiniMagick::Image.open(tempfile)
       small.crop_resized(GalleryThumbWidth, GalleryThumbHeight)
       small.write(thumbfile)
       
@@ -1165,7 +1166,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       
       localfile = resize_image(localfile)
       
-      small = MiniMagick::Image.from_file(localfile)
+      small = MiniMagick::Image.open(localfile)
       small.crop_resized(GalleryThumbWidth, GalleryThumbHeight)
       small.write(thumbfile)
       
@@ -1200,7 +1201,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
         tempfile = File.join(temp_location, File.basename(img, File.extname(img))) + File.extname(img)
         thumbfile = File.join(@gallery_dir, File.basename(img, File.extname(img))) + '-thumb.jpg'
         
-        small = MiniMagick::Image.from_file(tempfile)
+        small = MiniMagick::Image.open(tempfile)
         small.crop_resized(GalleryThumbWidth, GalleryThumbHeight)
         small.write(thumbfile)
         
@@ -1435,7 +1436,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     end
     
     def resize_image(localfile)
-      im = MiniMagick::Image::from_file(localfile)
+      im = MiniMagick::Image.open(localfile)
       
       if im[:width] > GalleryMaxWidth || im[:height] > GalleryMaxHeight
         im.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}")
