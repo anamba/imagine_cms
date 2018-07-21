@@ -1,10 +1,6 @@
 class Management::UsersController < Management::ApplicationController
   before_action :check_permissions, except: [ :edit, :update ]
   
-  def check_permissions
-    render :action => 'permission_denied' if !user_has_permission?(:manage_users)
-  end
-  
   ###
   ### user list
   ###
@@ -39,8 +35,6 @@ class Management::UsersController < Management::ApplicationController
   end
   
   def edit
-    return update if request.post?
-    
     unless user_has_permission?(:manage_users) || @user.id == params[:id].to_i
       render plain: "Sorry, you don't have permission to access this section.", layout: true and return false
     end
@@ -56,7 +50,7 @@ class Management::UsersController < Management::ApplicationController
     end
     
     if user_has_permission?(:manage_users)
-      params[:user].each { |k,v| @usr.send("#{k}=", v) }
+      params[:usr].each { |k,v| @usr.send("#{k}=", v) }
     elsif @user.id == @usr.id
       @usr.first_name = params[:user][:first_name]
       @usr.last_name = params[:user][:last_name]
@@ -101,4 +95,12 @@ class Management::UsersController < Management::ApplicationController
     @usr.destroy
     redirect_to :action => 'index'
   end
+
+
+  protected
+
+    def check_permissions
+      render :action => 'permission_denied' if !user_has_permission?(:manage_users)
+    end
+
 end
