@@ -20,6 +20,7 @@ RUN apt-get install -y nodejs yarn
 RUN apt-get install -y tzdata
 RUN apt-get install -y mysql-client
 RUN apt-get install -y libmagickcore-dev libmagickwand-dev  # for rmagick2 gem
+RUN apt-get install -y imagemagick                          # for mini-magick gem
 RUN apt-get install -y openjdk-8-jre-headless               # java for fop
 RUN apt-get install -y memcached                            # for rack-attack and rails cache
 RUN apt-get install -y cmake pkg-config                     # for rugged (git)
@@ -52,8 +53,7 @@ COPY docker/startup/101_mkdir.sh /etc/my_init.d/
 COPY docker/startup/201_bundler.sh /etc/my_init.d/
 COPY docker/startup/211_yarn.sh /etc/my_init.d/
 
-# Copy in our vhost config, then remove the default vhost (so that ours will respond to any Host)
-COPY docker/conf/nginx-vhost.conf /etc/nginx/sites-enabled/webapp.conf
+# Remove the default vhost (so that ours will respond to any Host)
 RUN rm -f /etc/nginx/sites-enabled/default
 
 # For convenience

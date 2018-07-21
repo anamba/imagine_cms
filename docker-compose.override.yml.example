@@ -12,6 +12,7 @@ services:
       - ../mysite:/home/app/myapp:delegated                      # set to (relative) path to site you want to run
       # - .:/home/app/imagine_cms:delegated                      # when working on imagine itself
       # - ./prototype-rails:/home/app/prototype-rails:delegated  # when working on imagine dependency prototype-rails
+      - ./docker/conf/nginx-vhost.conf:/etc/nginx/sites-enabled/webapp.conf:delegated
       - log:/home/app/myapp/log
       - node_modules:/home/app/myapp/node_modules
       - rvm:/usr/local/rvm
