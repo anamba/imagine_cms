@@ -307,11 +307,15 @@ module Cms # :nodoc:
     
     def preview_template
       @pg = CmsPage.new
-      @pg.template = CmsTemplate.new
-      @pg.template.name = (params[:temp] || params[:snip])[:name] || 'New Template'
-      @pg.template.content = (params[:temp] || params[:snip])[:content]
+      if params[:id] && (t = CmsTemplate.find_by_id(params[:id])) && (pg = t.pages.where('published_version >= 0').order('updated_on desc').first)
+        @pg = pg
+      else
+        @pg.template = CmsTemplate.new
+        @pg.template.name = 'Template Preview'
+      end
+      @pg.template.content = params[:content]
       @page_objects = OpenStruct.new
-      render :inline => substitute_placeholders(@pg.template.content, @pg), :layout => 'application'
+      render inline: substitute_placeholders(@pg.template.content, @pg), layout: 'application'
     end
     
     def page_list_calendar

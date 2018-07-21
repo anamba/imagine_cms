@@ -10,7 +10,7 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
   end
   
   def delete_all_cached_pages
-    cache_dir = File.expand_path(Management::CmsController.page_cache_directory)
+    cache_dir = File.expand_path(Manage::CmsPagesController.page_cache_directory)
     public_dir = File.expand_path("#{Rails.root}/public")
     
     # this could throw Errno::ENOENT
@@ -46,7 +46,7 @@ class CmsContentSweeper < ActionController::Caching::Sweeper
             expire_page controller: 'cms/content', action: 'show', content_path: page.path.split('/')
             
             # then attempt to remove entire directory tree, after sanity check
-            path = File.expand_path(File.join(Management::CmsController.page_cache_directory, page.path))
+            path = File.expand_path(File.join(Manage::CmsPagesController.page_cache_directory, page.path))
             Dir.chdir Rails.root
             Dir.glob(Pathname.new(path).relative_path_from(Pathname.new(Rails.root)).to_s, File::FNM_CASEFOLD).each do |path|
               path = File.realpath(File.expand_path(path, Rails.root))

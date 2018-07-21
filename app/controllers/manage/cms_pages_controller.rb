@@ -1,29 +1,8 @@
-class Management::CmsController < Management::ApplicationController # :nodoc:
+class Manage::CmsPagesController < Manage::ApplicationController
   include ActionController::Caching::Pages
   self.page_cache_directory = "#{Rails.root}/public"
   
   before_action :check_permissions
-  before_action :block_basic_users, :except => [
-    :index, :edit_page_content,
-    :disable_caching, :garbage_collect,
-    :select_page, :list_pages_select, :request_review,
-    :toolbar_preview, :toolbar_edit,
-    
-    :create_file_link, :upload_file, :receive_file,
-    
-    :upload_image, :receive_image, :crop_image, :save_crop, :upload_status,
-    :upload_thumb, :crop_thumb, :save_crop_thumb,
-    :upload_feature_image, :crop_feature_image, :save_crop_feature_image,
-    
-    :receive_gallery, :complete_gallery, :gallery_setup, :add_to_gallery,
-    :gallery_management, :select_gallery, :set_gallery_order, :save_gallery_settings,
-    :sort_images, :sort_images_save,
-    :image_details, :update_caption,
-    :delete_photo, :delete_gallery,
-    
-    :pages, :list_pages, :edit_page, :show_template_options, :page_attribute, :set_page_version
-  ]
-  
   before_action :convert_invalid_chars_in_params
   
   upload_status_for :receive_image
@@ -31,120 +10,19 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
   
   cache_sweeper :cms_content_sweeper
   
-  def check_permissions
-    if !user_has_permission?(:manage_cms)
-      render '/imagine_cms/errors/permission_denied', :layout => false
-      return false
-    end
-  end
-  
-  def block_basic_users
-    return true unless UseCmsAccessLevels
-    unless user_has_permission?(:manage_cms_full_access) && @user.cms_allowed_sections.to_s.strip.blank?
-      render '/imagine_cms/errors/permission_denied'
-      return false
-    end
-  end
-  
-  def validate_user_access
-    unless @user.cms_allowed_sections.to_s.strip.blank?
-      allowed_sections = @user.cms_allowed_sections.split(',').map { |s| s.strip }.reject { |s| s.blank? }
-      if @pg
-        path = '/' + @pg.path
-      else
-        parent = CmsPage.find_by_id(params[:parent_id] || params[:pg][:parent_id]) rescue nil
-        return false if !parent
-        path = '/' + parent.path
-      end
-      
-      allowed = false
-      allowed_sections.each { |s| allowed ||= (path =~ /^#{s}/) }
-      
-      if !allowed
-        respond_to do |wants|
-          wants.js    { render :text => "Sorry, you don't have permission to edit this page."         }
-          wants.html  { redirect_to "/#{@pg.path}#{@pg.path == '' ? '' : '/'}version/#{@pg.version}"  }
-        end
-        return false
-      end
-    end
-    
-    true
-  end
-  
   
   def index
-  end
-  
-  def templates
-    @temps = CmsTemplate.order(:name)
-  end
-  
-  def edit_template
-    @temp = CmsTemplate.find_by_id(params[:id]) || CmsTemplate.new
-    
-    if request.post?
-      @temp.assign_attributes(cms_template_params)
-      
-      # begin
-        @pg = CmsPage.new
-        @page_objects = OpenStruct.new
-        render_to_string :inline => @temp.content
-      # rescue StandardError => e
-      #   message = e.message
-      #   flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
-      #   logger.debug e
-      #   return
-      # end
-      
-      # this must come after the render_to_string so that we capture template
-      # options embedded in snippets
-      @temp.options = @template_options
-      
-      if !@temp.save
-        flash.now[:error] = @temp.errors.full_messages.join('<br/>')
-      else
-        flash[:notice] = 'Template saved.'
-        redirect_to :action => 'edit_template', :id => @temp.id and return
-      end
-    end
-  end
-  
-  def snippets
-    @snippets = CmsSnippet.order(:name)
-  end
-  
-  def edit_snippet
-    @snip = CmsSnippet.find_by_id(params[:id]) || CmsSnippet.new
-    
-    if request.post?
-      @snip.assign_attributes(cms_snippet_params)
-      
-      begin
-        @pg = CmsPage.new
-        @page_objects = OpenStruct.new
-        render_to_string :inline => @snip.content
-      rescue StandardError => e
-        message = e.message
-        flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
-        logger.debug e
-        return
-      end
-      
-      if !@snip.save
-        @error = @snip.errors.full_messages.join('<br/>')
-      else
-        flash[:notice] = 'Snippet saved.'
-        redirect_to :action => 'edit_snippet', :id => @snip.id and return
-      end
-    end
-  end
-  
-  def pages
     @page_levels = [ '' ].concat((params[:path] || session[:cms_pages_path] || '').split('/').reject { |l| l.blank? })
     @page_levels << ''
     @path = ''
     @page = nil
+  end
+
+  def new
+    validate_user_access or return
+    @pg ||= CmsPage.new
+
+    edit_page
   end
   
   def list_pages
@@ -335,7 +213,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     @pg = CmsPage.find(params[:id])
     validate_user_access or return
     
-    @page_objects = OpenStruct.new(params[:page_objects] || {})
+    @page_objects = params[:page_objects] ? OpenStruct.new(params[:page_objects].to_unsafe_h) : OpenStruct.new
     
     if request.get?
       @pg.version = params[:version] if params[:version] && params[:version].to_i != @pg.version
@@ -365,7 +243,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     elsif request.post?
       CmsPage.transaction do
         # need to revise this later if we implement deletion of page objects
-        old_objs = @pg.objects.where(:cms_page_version => @pg.version).all
+        old_objs = @pg.objects.where(cms_page_version: @pg.version).to_a
         
         @pg.updated_by = session[:user_id]
         @pg.updated_by_username = session[:user_username]
@@ -376,7 +254,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         end
         
         @pg.updated_on = Time.now.utc
-        @pg.save
+        @pg.save  # create a new version for new page objects to reference
         
         # do a little bit of classification... for now, just identify page lists
         page_lists = []
@@ -432,9 +310,9 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           end
         end
         
-        @page_objects.each do |key,val|
+        @page_objects.to_h.each do |key,val|
           key =~ /^obj-(\w+?)-(.+?)$/
-          obj = @pg.objects.build(:name => $2, :obj_type => $1)
+          obj = @pg.objects.build(name: $2, obj_type: $1)
           
           # do a little bit of "censorship" to fix up Word pastes and strange things from the editor
           if val.is_a?(String)
@@ -482,12 +360,13 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
           end
           
           obj.content = val.to_s.force_encoding("UTF-8")
-          obj.save
+          obj.save!
         end
         
         old_objs.each do |obj|
           unless @pg.objects.where(name: obj.name, cms_page_version: @pg.version)
-            obj = @pg.objects.build(:name => obj.name, :obj_type => obj.type, :content => obj.content)
+            obj = @pg.objects.build(name: obj.name, obj_type: obj.type, content: obj.content)
+            obj.save!
           end
         end
         
@@ -553,7 +432,6 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         @pg.published_version = params[:pg][:published_version]
         @pg.update_index
         @pg.save_without_revision
-        logger.debug @pg.errors.full_messages.inspect
       end
     end
     
@@ -609,8 +487,8 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @cms_text_editor_placed = true
       content = ''.html_safe
       content << text_area(:page_objects, key, { :dojoType => 'Editor2', :toolbarGroup => 'main', :isToolbarGroupLeader => 'false',
-                           :focusOnLoad => focusOnLoad.to_s, :style => 'border: 2px dashed gray; padding: 5px',
-                           :minHeight => '100px' }.update(html_options))
+                            :focusOnLoad => focusOnLoad.to_s, :style => 'border: 2px dashed gray; padding: 5px',
+                            :minHeight => '100px' }.update(html_options))
       content << content_tag(:div, ''.html_safe, :id => "page_object_config_#{key}")
       content << javascript_tag("jQuery(document).ready(function () { scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version}); });")
       content << observe_field("page_objects_#{key}", :function => "scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});", :frequency => 2)
@@ -683,9 +561,9 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     
     if File.exist?(target_dir)
-      redirect_to :action => 'select_gallery', :id => @pg, :gallery_id => params[:gallery_id]
+      redirect_to action: 'select_gallery', id: @pg, gallery_id: params[:gallery_id]
     else
-      render :partial => 'upload_image'
+      render partial: 'upload_image'
     end
   end
   
@@ -790,6 +668,214 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     render :partial => 'crop_results'
   end
   
+  
+  def upload_file
+    @pg = CmsPage.find_by_id(params[:id])
+    render :partial => 'upload_file'
+  end
+  
+  def receive_file
+    @pg = CmsPage.find_by_id(params[:id])
+    
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    FileUtils.mkdir_p target_dir
+    
+    data = params[:file][:data]
+    original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
+    localfile = File.join(target_dir, original_filename)
+    FileUtils.cp(data.tempfile, localfile)
+    File.chmod(0644, localfile)
+    
+    finish_upload_status "'#{File.basename(localfile)}'"
+  end
+  
+  def create_file_link
+    @pg = CmsPage.find_by_id(params[:id])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    @filename = localfile.split('/').map { |s| CGI::escape(s) }.join('/') + "?#{File.mtime(localfile).to_i}"
+    
+    bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['file_bucket'] rescue nil
+    prefix = ImagineCmsConfig['amazon_s3']['file_prefix'] rescue nil
+    upload_to_s3(localfile, @pg, bucket, prefix)
+    
+    render :partial => 'create_file_link'
+  end
+  
+  
+  def upload_thumb
+    @pg = CmsPage.find_by_id(params[:id])
+    render :partial => 'upload_thumb'
+  end
+  
+  def crop_thumb
+    @pg = CmsPage.find_by_id(params[:id])
+    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-thumb' + File.extname(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
+    FileUtils.mv(origfile, localfile)
+    File.chmod(0644, localfile)
+    
+    # get out now if user clicked finish
+    if params[:next_clicked].to_i != 1
+      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
+      upload_to_s3(localfile, @pg)
+      render :partial => 'crop_results_thumb' and return
+    end
+    
+    
+    # if we're still here... let's crop!
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
+    
+    # make a smaller version to help with cropping
+    im = MiniMagick::Image.from_file(localfile)
+    im.resize("500x400>")
+    im.write(testfile)
+    File.chmod(0644, testfile)
+    
+    @width = im[:width]
+    @height = im[:height]
+    @height = 1 if @height == 0
+    @image_file = File.basename(testfile)
+    @aspect_ratio = @width.to_f/@height
+    
+    render :partial => 'crop_thumb'
+  end
+  
+  def save_crop_thumb
+    @pg = CmsPage.find_by_id(params[:id])
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    testfile = File.join(target_dir, File.basename(params[:filename]))
+    localfile = testfile.split(/-croptest/).join('')
+    
+    # need to scale up requested position/dimensions based on how big test image
+    # is relative to original image
+    orig_im = MiniMagick::Image.from_file(localfile)
+    test_im = MiniMagick::Image::from_file(testfile)
+    scale = orig_im[:width].to_f / test_im[:width]
+    
+    x1 = params[:image][:x1].to_i * scale
+    y1 = params[:image][:y1].to_i * scale
+    width = params[:image][:width].to_i * scale
+    height = params[:image][:height].to_i * scale
+    
+    max_width = params[:image][:max_width].to_i
+    max_height = params[:image][:max_height].to_i
+    dirty = false
+    
+    # crop if user selected something
+    if params[:image][:width].to_i > 0
+      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
+      orig_im.crop("#{width}x#{height}+#{x1}+#{y1}")
+      dirty = true
+    end
+    
+    # resize if the resultant image is bigger than max dims
+    if max_width > 0 && max_height > 0
+      if orig_im[:width] > max_width || orig_im[:height] > max_height
+        logger.debug "resizing to max dims #{max_width} x #{max_height}"
+        orig_im.resize("#{max_width}x#{max_height}>")
+        dirty = true
+      end
+    end
+    
+    orig_im.write(localfile) if dirty
+    File.chmod(0644, localfile)
+    
+    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
+    File.unlink testfile
+    upload_to_s3(localfile, @pg)
+    
+    render :partial => 'crop_results_thumb'
+  end
+  
+  def upload_feature_image
+    @pg = CmsPage.find_by_id(params[:id])
+    render :partial => 'upload_feature_image'
+  end
+  
+  def crop_feature_image
+    @pg = CmsPage.find_by_id(params[:id])
+    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
+    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-feature' + File.extname(params[:filename])
+    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
+    FileUtils.mv(origfile, localfile)
+    
+    # get out now if user clicked finish
+    if params[:next_clicked].to_i != 1
+      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
+      upload_to_s3(localfile, @pg)
+      render :partial => 'crop_results_feature_image' and return
+    end
+    
+    
+    # if we're still here... let's crop!
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
+    
+    # make a smaller version to help with cropping
+    im = MiniMagick::Image.from_file(localfile)
+    im.resize("500x400>")
+    im.write(testfile)
+    File.chmod(0644, testfile)
+    
+    @width = im[:width]
+    @height = im[:height]
+    @height = 1 if @height == 0
+    @image_file = File.basename(testfile)
+    @aspect_ratio = @width.to_f/@height
+    
+    render :partial => 'crop_feature_image'
+  end
+  
+  def save_crop_feature_image
+    @pg = CmsPage.find_by_id(params[:id])
+    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
+    testfile = File.join(target_dir, File.basename(params[:filename]))
+    localfile = testfile.split(/-croptest/).join('')
+    
+    # need to scale up requested position/dimensions based on how big test image
+    # is relative to original image
+    orig_im = MiniMagick::Image.from_file(localfile)
+    test_im = MiniMagick::Image::from_file(testfile)
+    scale = orig_im[:width].to_f / test_im[:width]
+    
+    x1 = params[:image][:x1].to_i * scale
+    y1 = params[:image][:y1].to_i * scale
+    width = params[:image][:width].to_i * scale
+    height = params[:image][:height].to_i * scale
+    
+    max_width = params[:image][:max_width].to_i
+    max_height = params[:image][:max_height].to_i
+    dirty = false
+    
+    # crop if user selected something
+    if params[:image][:width].to_i > 0
+      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
+      orig_im.crop("#{width}x#{height}+#{x1}+#{y1}")
+      dirty = true
+    end
+    
+    # resize if the resultant image is bigger than max dims
+    if max_width > 0 && max_height > 0
+      if orig_im[:width] > max_width || orig_im[:height] > max_height
+        logger.debug "resizing to max dims #{max_width} x #{max_height}"
+        orig_im.resize("#{max_width}x#{max_height}>")
+        dirty = true
+      end
+    end
+    
+    orig_im.write(localfile) if dirty
+    File.chmod(0644, localfile)
+    
+    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
+    File.unlink testfile
+    upload_to_s3(localfile, @pg)
+    
+    render :partial => 'crop_results_feature_image'
+  end
+  
+
   def receive_gallery
     @pg = CmsPage.find_by_id(params[:id])
     
@@ -1085,7 +1171,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       
       File.chmod(0644, localfile, thumbfile)
       
-      create_preview_images(:force => 1)
+      create_preview_images(force: true)
       
     elsif ext == '.zip'
       begin
@@ -1130,7 +1216,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       preview_images = []
       Dir.glob("#{@gallery_dir}/*.{jpg,jpeg,png,gif}").each { |img| preview_images << img unless File.basename(img).include?('thumb') }
       
-      preview_images.each { |img| create_preview_image(img, management_dir, 1) }
+      preview_images.each { |img| create_preview_image(img, management_dir, true) }
     end
     
     File.delete(data_dest)
@@ -1194,230 +1280,49 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     redirect_to :action => 'select_gallery', :id => params[:id]
   end
-  
-  
-  def upload_file
-    @pg = CmsPage.find_by_id(params[:id])
-    render :partial => 'upload_file'
-  end
-  
-  def receive_file
-    @pg = CmsPage.find_by_id(params[:id])
-    
-    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    FileUtils.mkdir_p target_dir
-    
-    data = params[:file][:data]
-    original_filename = data.original_filename.strip.gsub(/[\?\s\/\:\\]+/, '-').gsub(/^-/, '').gsub(/-$/, '')
-    localfile = File.join(target_dir, original_filename)
-    FileUtils.cp(data.tempfile, localfile)
-    File.chmod(0644, localfile)
-    
-    finish_upload_status "'#{File.basename(localfile)}'"
-  end
-  
-  def create_file_link
-    @pg = CmsPage.find_by_id(params[:id])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
-    @filename = localfile.split('/').map { |s| CGI::escape(s) }.join('/') + "?#{File.mtime(localfile).to_i}"
-    
-    bucket = ImagineCmsConfig['amazon_s3'][Rails.env]['file_bucket'] rescue nil
-    prefix = ImagineCmsConfig['amazon_s3']['file_prefix'] rescue nil
-    upload_to_s3(localfile, @pg, bucket, prefix)
-    
-    render :partial => 'create_file_link'
-  end
-  
-  
-  def upload_thumb
-    @pg = CmsPage.find_by_id(params[:id])
-    render :partial => 'upload_thumb'
-  end
-  
-  def crop_thumb
-    @pg = CmsPage.find_by_id(params[:id])
-    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
-    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-thumb' + File.extname(params[:filename])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
-    FileUtils.mv(origfile, localfile)
-    File.chmod(0644, localfile)
-    
-    # get out now if user clicked finish
-    if params[:next_clicked].to_i != 1
-      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
-      upload_to_s3(localfile, @pg)
-      render :partial => 'crop_results_thumb' and return
-    end
-    
-    
-    # if we're still here... let's crop!
-    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
-    
-    # make a smaller version to help with cropping
-    im = MiniMagick::Image.from_file(localfile)
-    im.resize("500x400>")
-    im.write(testfile)
-    File.chmod(0644, testfile)
-    
-    @width = im[:width]
-    @height = im[:height]
-    @height = 1 if @height == 0
-    @image_file = File.basename(testfile)
-    @aspect_ratio = @width.to_f/@height
-    
-    render :partial => 'crop_thumb'
-  end
-  
-  def save_crop_thumb
-    @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    testfile = File.join(target_dir, File.basename(params[:filename]))
-    localfile = testfile.split(/-croptest/).join('')
-    
-    # need to scale up requested position/dimensions based on how big test image
-    # is relative to original image
-    orig_im = MiniMagick::Image.from_file(localfile)
-    test_im = MiniMagick::Image::from_file(testfile)
-    scale = orig_im[:width].to_f / test_im[:width]
-    
-    x1 = params[:image][:x1].to_i * scale
-    y1 = params[:image][:y1].to_i * scale
-    width = params[:image][:width].to_i * scale
-    height = params[:image][:height].to_i * scale
-    
-    max_width = params[:image][:max_width].to_i
-    max_height = params[:image][:max_height].to_i
-    dirty = false
-    
-    # crop if user selected something
-    if params[:image][:width].to_i > 0
-      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
-      orig_im.crop("#{width}x#{height}+#{x1}+#{y1}")
-      dirty = true
-    end
-    
-    # resize if the resultant image is bigger than max dims
-    if max_width > 0 && max_height > 0
-      if orig_im[:width] > max_width || orig_im[:height] > max_height
-        logger.debug "resizing to max dims #{max_width} x #{max_height}"
-        orig_im.resize("#{max_width}x#{max_height}>")
-        dirty = true
-      end
-    end
-    
-    orig_im.write(localfile) if dirty
-    File.chmod(0644, localfile)
-    
-    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
-    File.unlink testfile
-    upload_to_s3(localfile, @pg)
-    
-    render :partial => 'crop_results_thumb'
-  end
-  
-  def upload_feature_image
-    @pg = CmsPage.find_by_id(params[:id])
-    render :partial => 'upload_feature_image'
-  end
-  
-  def crop_feature_image
-    @pg = CmsPage.find_by_id(params[:id])
-    origfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, File.basename(params[:filename]))
-    newfilename = File.basename(params[:filename], File.extname(params[:filename])) + '-feature' + File.extname(params[:filename])
-    localfile = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, newfilename)
-    FileUtils.mv(origfile, localfile)
-    
-    # get out now if user clicked finish
-    if params[:next_clicked].to_i != 1
-      @image_file = localfile + "?#{File.mtime(localfile).to_i}"
-      upload_to_s3(localfile, @pg)
-      render :partial => 'crop_results_feature_image' and return
-    end
-    
-    
-    # if we're still here... let's crop!
-    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    testfile = File.join(target_dir, File.basename(localfile, File.extname(localfile))) + '-croptest' + File.extname(localfile)
-    
-    # make a smaller version to help with cropping
-    im = MiniMagick::Image.from_file(localfile)
-    im.resize("500x400>")
-    im.write(testfile)
-    File.chmod(0644, testfile)
-    
-    @width = im[:width]
-    @height = im[:height]
-    @height = 1 if @height == 0
-    @image_file = File.basename(testfile)
-    @aspect_ratio = @width.to_f/@height
-    
-    render :partial => 'crop_feature_image'
-  end
-  
-  def save_crop_feature_image
-    @pg = CmsPage.find_by_id(params[:id])
-    target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    testfile = File.join(target_dir, File.basename(params[:filename]))
-    localfile = testfile.split(/-croptest/).join('')
-    
-    # need to scale up requested position/dimensions based on how big test image
-    # is relative to original image
-    orig_im = MiniMagick::Image.from_file(localfile)
-    test_im = MiniMagick::Image::from_file(testfile)
-    scale = orig_im[:width].to_f / test_im[:width]
-    
-    x1 = params[:image][:x1].to_i * scale
-    y1 = params[:image][:y1].to_i * scale
-    width = params[:image][:width].to_i * scale
-    height = params[:image][:height].to_i * scale
-    
-    max_width = params[:image][:max_width].to_i
-    max_height = params[:image][:max_height].to_i
-    dirty = false
-    
-    # crop if user selected something
-    if params[:image][:width].to_i > 0
-      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
-      orig_im.crop("#{width}x#{height}+#{x1}+#{y1}")
-      dirty = true
-    end
-    
-    # resize if the resultant image is bigger than max dims
-    if max_width > 0 && max_height > 0
-      if orig_im[:width] > max_width || orig_im[:height] > max_height
-        logger.debug "resizing to max dims #{max_width} x #{max_height}"
-        orig_im.resize("#{max_width}x#{max_height}>")
-        dirty = true
-      end
-    end
-    
-    orig_im.write(localfile) if dirty
-    File.chmod(0644, localfile)
-    
-    @image_file = localfile + "?#{File.mtime(localfile).to_i}"
-    File.unlink testfile
-    upload_to_s3(localfile, @pg)
-    
-    render :partial => 'crop_results_feature_image'
-  end
-  
-  
+
+
+
   protected
     
+    def check_permissions
+      if !user_has_permission?(:manage_cms)
+        render '/imagine_cms/errors/permission_denied', :layout => false
+        return false
+      end
+    end
+
+    def validate_user_access
+      unless @user.cms_allowed_sections.to_s.strip.blank?
+        allowed_sections = @user.cms_allowed_sections.split(',').map { |s| s.strip }.reject { |s| s.blank? }
+        if @pg
+          path = '/' + @pg.path
+        else
+          parent = CmsPage.find_by_id(params[:parent_id] || params[:pg][:parent_id]) rescue nil
+          return false if !parent
+          path = '/' + parent.path
+        end
+        
+        allowed = false
+        allowed_sections.each { |s| allowed ||= (path =~ /^#{s}/) }
+        
+        if !allowed
+          respond_to do |wants|
+            wants.js    { render :text => "Sorry, you don't have permission to edit this page."         }
+            wants.html  { redirect_to "/#{@pg.path}#{@pg.path == '' ? '' : '/'}version/#{@pg.version}"  }
+          end
+          return false
+        end
+      end
+      
+      true
+    end
+
     def cms_page_params
       params.require(:pg).permit(:cms_template_id, :cms_template_version, :parent_id, :published_version,
-                                 :name, :title, :path, :html_head, :summary, :position,
-                                 :article_date, :article_end_date, :published_date, :expiration_date, :expires,
-                                 :thumbnail_path, :feature_image_path, :redirect_enabled, :redirect_to)
-    end
-    
-    def cms_template_params
-      params.require(:temp).permit(:name, :content)
-    end
-    
-    def cms_snippet_params
-      params.require(:snip).permit(:name, :content)
+                                  :name, :title, :path, :html_head, :summary, :position,
+                                  :article_date, :article_end_date, :published_date, :expiration_date, :expires,
+                                  :thumbnail_path, :feature_image_path, :redirect_enabled, :redirect_to)
     end
     
     def load_page_objects
@@ -1425,23 +1330,23 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       @template_options = OpenStruct.new
       
       if @pg.new_record? && @parent
-        @parent.objects.where(:obj_type => 'attribute').each do |obj|
+        @parent.objects.where(obj_type: 'attribute').each do |obj|
           next if defined?(CmsNewPagesDoNotInherit) && CmsNewPagesDoNotInherit['attributes'] && CmsNewPagesDoNotInherit['attributes'].include?(obj.name)
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
-        @parent.objects.where(:obj_type => 'option').each do |obj|
+        @parent.objects.where(obj_type: 'option').each do |obj|
           next if defined?(CmsNewPagesDoNotInherit) && CmsNewPagesDoNotInherit['options'] && CmsNewPagesDoNotInherit['options'].include?(obj.name)
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
       else
         @tags = @pg.tags.map { |t| t.name }.join(', ')
-        @pg.objects.where(:obj_type => 'attribute').each do |obj|
+        @pg.objects.where(obj_type: 'attribute').each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
-        @pg.objects.where(:obj_type => 'option').each do |obj|
+        @pg.objects.where(obj_type: 'option').each do |obj|
           key = "obj-#{obj.obj_type.to_s}-#{obj.name}"
           @page_objects[key] = obj.content
         end
@@ -1450,16 +1355,43 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
     
     def load_template_options
       begin
-        render_to_string :inline => @pg.template.content
+        render_to_string inline: @pg.template.content
       rescue StandardError => e
         logger.debug e
       end
     end
     
-    def garbage_collect
-      GC.start
+    def upload_to_s3(filename, page, bucket = nil, prefix = nil)
+      s3retries = 0
+      s3success = false
+      
+      if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
+        s3 = Aws::S3::Client.new
+        
+        bucket ||= ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
+        prefix ||= ImagineCmsConfig['amazon_s3']['image_prefix']
+        
+        params = {}
+        params[:bucket] = bucket
+        params[:key] = "#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}"
+        params[:body] = open(filename)
+        params[:acl] = 'public-read'
+        params[:metadata] = ImagineCmsConfig['amazon_s3']['metadata']
+        
+        while !s3success && s3retries < 2
+          response = s3.put_object(params)
+          s3success = response.successful?
+          s3retries += 1
+        end
+        File.unlink(filename) if s3success
+      end
+      
+      s3success
     end
     
+
+
+
     def create_captions_file(pg_id, options = {})
       @pg ||= CmsPage.find_by_id(pg_id)
       gallery_id = options[:gallery_id] || params[:gallery_id]
@@ -1513,11 +1445,11 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
       localfile
     end
     
-    def create_preview_image(src_file, dest, force = 0, overlay = 'gallery_small_overlay.png', thumb_size = 90)
+    def create_preview_image(src_file, dest, force = false, overlay = 'gallery_small_overlay.png', thumb_size = 90)
       raise "Source file required" if src_file.blank?
       
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
-      if !File.exist?(dest) || force == 1
+      if !File.exist?(dest) || force
         logger.debug "Reading source file #{src_file}"
         im = Magick::Image::read(src_file)[0]
         im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'app', 'assets', 'images', 'management', overlay))[0]
@@ -1568,37 +1500,9 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
         end
       end
     end
-    
-    def upload_to_s3(filename, page, bucket = nil, prefix = nil)
-      s3retries = 0
-      s3success = false
-      
-      if ImagineCmsConfig['amazon_s3'] && ImagineCmsConfig['amazon_s3']['enabled']
-        s3 = Aws::S3::Client.new
-        
-        bucket ||= ImagineCmsConfig['amazon_s3'][Rails.env]['image_bucket']
-        prefix ||= ImagineCmsConfig['amazon_s3']['image_prefix']
-        
-        params = {}
-        params[:bucket] = bucket
-        params[:key] = "#{prefix}/#{page.path.blank? ? 'index' : page.path}/#{File.basename(filename)}"
-        params[:body] = open(filename)
-        params[:acl] = 'public-read'
-        params[:metadata] = ImagineCmsConfig['amazon_s3']['metadata']
-        
-        while !s3success && s3retries < 2
-          response = s3.put_object(params)
-          s3success = response.successful?
-          s3retries += 1
-        end
-        File.unlink(filename) if s3success
-      end
-      
-      s3success
-    end
-    
-end
 
+end
+  
 module MiniMagick
   class Image
     def crop_resized(ncols, nrows, gravity='Center')

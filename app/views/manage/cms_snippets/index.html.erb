@@ -1,6 +1,6 @@
 <h2>CMS &raquo; Snippets</h2>
 
-<p><%= button_to 'Create New Snippet', { action: 'edit_snippet' }, method: :get %></p>
+<p><%= button_to 'Create New Snippet', new_manage_cms_snippet_path, method: :get %></p>
 
 <%= flash_message %>
 
@@ -8,5 +8,5 @@
   <tr>
     <th>Name</th>
   </tr>
-  <%= render partial: 'snippet', collection: @snippets %>
+  <%= render @cms_snippets %>
 </table>

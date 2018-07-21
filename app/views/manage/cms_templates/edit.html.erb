@@ -1,0 +1,26 @@
+<%= flash_message %>
+
+<h2><%= params[:action].titlecase %> Template</h2>
+
+<%= form_with(model: [:manage, @cms_template]) do |f| %>
+  <%= f.text_field :name, placeholder: 'Template Name', size: '50' %>
+  <div class="codemirror-html-container">
+    <%= f.text_area :content, class: 'codemirror-html autocomplete-off' %>
+  </div>
+  <%= f.submit 'Save Template', class: 'form_button' %>
+  <button onclick="jQuery('#preview_frame').show(); jQuery('#preview_frame')[0].scrollIntoView(); jQuery('#preview_content').val(jQuery('textarea[name=\'cms_template[content]\']').val()); jQuery('#preview_form').submit(); return false;" class="form_button">Preview</button>
+  <%= link_to 'Cancel', action: 'index' %>
+  <br>
+  
+  <br>
+  <%= render partial: 'template_reference' %>
+  <br>
+  
+  <iframe id="preview_frame" name="preview_frame"></iframe>
+<% end %>
+
+<%= form_tag(url_for(controller: '/cms/content', action: 'preview_template'), id: 'preview_form', target: 'preview_frame') do %>
+  <%= text_area_tag 'content', '', id: 'preview_content', style: 'display: none;' %>
+  <%= hidden_field_tag 'mode', 'preview' %>
+  <%= hidden_field_tag 'id', params[:id] %>
+<% end %>

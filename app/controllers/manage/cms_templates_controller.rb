@@ -1,0 +1,97 @@
+class Manage::CmsTemplatesController < Manage::ApplicationController
+  before_action :check_permissions
+  before_action :block_basic_users
+
+  cache_sweeper :cms_content_sweeper
+  
+  def index
+    @cms_templates = CmsTemplate.order(:name)
+  end
+
+  def new
+    @cms_template = CmsTemplate.new
+    render action: 'edit'
+  end
+  
+  def create
+    @cms_template = CmsTemplate.new
+    @cms_template.assign_attributes(cms_template_params)
+    
+    begin
+      @pg = CmsPage.new
+      @page_objects = OpenStruct.new
+      render_to_string inline: @cms_template.content
+    rescue StandardError => e
+      message = e.message
+      flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
+      logger.debug e
+      render action: 'edit' and return
+    end
+    
+    # this must come after the render_to_string so that we capture template
+    # options embedded in snippets
+    @cms_template.options = @cms_templatelate_options
+    
+    if !@cms_template.save
+      flash.now[:error] = @cms_template.errors.full_messages.join('<br>').html_safe
+      render action: 'edit'
+    else
+      flash[:notice] = 'Template created.'
+      redirect_to action: 'edit', id: @cms_template
+    end
+  end
+
+  def edit
+    @cms_template = CmsTemplate.find(params[:id])
+  end
+
+  def update
+    @cms_template = CmsTemplate.find(params[:id])
+    @cms_template.assign_attributes(cms_template_params)
+    
+    begin
+      @pg = CmsPage.new
+      @page_objects = OpenStruct.new
+      render_to_string inline: @cms_template.content
+    rescue StandardError => e
+      message = e.message
+      flash.now[:error] = "<pre>#{ERB::Util.html_escape(message)}</pre>".html_safe
+      logger.debug e
+      render action: 'edit' and return
+    end
+    
+    # this must come after the render_to_string so that we capture template
+    # options embedded in snippets
+    @cms_template.options = @cms_templatelate_options
+    
+    if !@cms_template.save
+      flash.now[:error] = @cms_template.errors.full_messages.join('<br>').html_safe
+      render action: 'edit'
+    else
+      flash[:notice] = 'Template saved.'
+      redirect_to action: 'edit', id: @cms_template.id
+    end
+  end
+
+  protected
+
+    def check_permissions
+      if !user_has_permission?(:manage_cms)
+        render '/imagine_cms/errors/permission_denied', layout: false
+        return false
+      end
+    end
+
+    def block_basic_users
+      return true unless UseCmsAccessLevels
+      unless user_has_permission?(:manage_cms_full_access)
+        render '/imagine_cms/errors/permission_denied'
+        return false
+      end
+    end
+
+    def cms_template_params
+      params.require(:cms_template).permit(:name, :content)
+    end
+    
+end

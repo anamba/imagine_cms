@@ -34,7 +34,7 @@
 </script>
 
 <%- for feed in [].concat(@rss_feeds || []) -%>
-  <%= auto_discovery_link_tag(:rss, { :controller => '/cms/content', :action => 'rss_feed', :page_id => @pg.id, :page_list_name => feed }, :title => feed) if @pg && @pg.id %>
+  <%= auto_discovery_link_tag(:rss, { controller: '/cms/content', action: 'rss_feed', page_id: @pg.id, page_list_name: feed }, title: feed) if @pg && @pg.id %>
 <%- end -%>
 
 <%=raw @cms_head %>

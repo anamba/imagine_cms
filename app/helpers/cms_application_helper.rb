@@ -11,9 +11,8 @@ module CmsApplicationHelper
   end
   
   # Returns true if the user is editing the current page.
-  # (This just means that we are rendering :controller => 'management/cms', :action => 'edit_page_content'.)
   def is_editing_page?
-    params[:controller] == 'management/cms' && params[:action] == 'edit_page_content'
+    params[:controller] == 'manage/cms_pages' && params[:action] == 'edit_page_content'
   end
   
   # Determines whether the input string is a valid email address per RFC specification

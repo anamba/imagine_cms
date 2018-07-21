@@ -8,7 +8,7 @@
 <p>
   <ul>
     <%- if user_has_permission? :manage_cms -%>
-    <li><%= link_to 'CMS', :controller => '/management/cms', :action => 'index' %>
+    <li><%= link_to 'CMS', manage_cms_path %>
         - Manage content management system</li>
     <%- end -%>
     <%- if user_has_permission? :manage_users -%>

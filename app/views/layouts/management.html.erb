@@ -4,9 +4,9 @@
   
   if is_logged_in_user?
     if user_has_permission?(:manage_cms)
-      @nav_sections << [ 'Pages', { controller: '/management/cms', action: 'pages' } ]
-      @nav_sections << [ 'Templates', { controller: '/management/cms', action: 'templates' } ]
-      @nav_sections << [ 'Snippets', { controller: '/management/cms', action: 'snippets' } ]
+      @nav_sections << [ 'Pages', manage_cms_pages_path ]
+      @nav_sections << [ 'Templates', manage_cms_templates_path ]
+      @nav_sections << [ 'Snippets', manage_cms_snippets_path ]
     end
     if user_has_permission?(:manage_users)
       @nav_sections << [ 'Users', { controller: '/management/users', action: 'index' } ]

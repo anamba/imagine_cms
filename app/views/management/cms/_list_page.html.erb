@@ -1,8 +1,0 @@
-<div id="<%= "cb_item_#{list_page.id}" %>" class="cb_item" style="width: 148px; overflow: hidden; margin: 2px; float: left; cursor: pointer" onclick="$('view_link').href = '<%= list_page.path.blank? ? '' : '/' + list_page.path %>/version/<%= list_page.published_version > 0 ? list_page.published_version : list_page.version %>'; $('new_link').onclick = function () { editProperties('<%=raw url_for :action => 'edit_page', :mode => 'ajax_new', :parent_id => list_page %>', 'Create New Page under /<%= list_page.path %>'); return false; }; $('edit_link').onclick = function () { editProperties('<%=raw url_for :action => 'edit_page', :id => list_page, :mode => 'ajax_edit' %>', 'Page Properties: <%= list_page.name %>'); return false; }; $('edit_content_link').href = '<%=raw url_for :action => 'edit_page_content', :id => list_page %>'; $('delete_link').href = '<%=raw url_for :action => 'delete_page', :id => list_page.id %>'; setTimeout('cbSelectItem(\'' + this.id + '\', <%= @page_level %>, \'<%=raw url_for :action => 'list_pages', :level => @page_level + 1, :parent_id => list_page.id %>\');', 200);" ondblclick="$('edit_content_link').click();">
-  <table cellpadding="0" cellspacing="0" border="0">
-    <tr>
-      <td valign="top"><%= image_tag 'management/icon_page.gif', style: 'margin: 2px 5px 0 0;' %></td>
-      <td<%= list_page.published_version >= 0 ? '' : ' style="color: gray"'.html_safe %>><%= list_page.name %></td>
-    </tr>
-  </table>
-</div>

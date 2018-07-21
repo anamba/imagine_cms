@@ -3,13 +3,13 @@
     <tbody>
       <tr valign="top" align="left">
       <% if @pg -%>
-        <td onclick="location.href = '<%= url_for :controller => '/management/cms', :action => 'edit_page_content', :id => @pg, :version => params[:version] %>';">
+        <td onclick="location.href = '<%= url_for controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg, version: params[:version] %>';">
           <!-- save -->
           <span class="iconContainer">
             <span title="Edit" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
           </span>
         </td>
-        <td onclick="location.href = '<%= url_for :controller => '/management/cms', :action => 'edit_page_content', :id => @pg, :version => params[:version] %>';" style="vertical-align: middle; cursor: pointer">
+        <td onclick="location.href = '<%= url_for controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg, version: params[:version] %>';" style="vertical-align: middle; cursor: pointer">
           <span title="Edit" style="font-family: Arial">Edit</span>
         </td>
         
@@ -30,8 +30,8 @@
           </span>
         </td>
         
-        <td onclick="location.href = '<%= url_for :controller => '/management/cms', :action => 'pages', :path => (@pg ? @pg.path : nil) %>';" style="vertical-align: middle; cursor: pointer">
-          <a href="<%= url_for :controller => '/management/cms', :action => 'pages', :path => (@pg ? @pg.path : nil) %>" style="text-decoration: none"><span title="Manage Pages" style="font-family: Arial; color: #3c3c3c;">Pages</span></a>
+        <td onclick="location.href = '<%= url_for controller: '/manage/cms_pages', action: 'index', path: (@pg ? @pg.path : nil) %>';" style="vertical-align: middle; cursor: pointer">
+          <a href="<%= url_for controller: '/manage/cms_pages', action: 'index', path: (@pg ? @pg.path : nil) %>" style="text-decoration: none"><span title="Manage Pages" style="font-family: Arial; color: #3c3c3c;">Pages</span></a>
         </td>
         
         <td isSpacer="true">
@@ -65,7 +65,7 @@
         
         <td style="vertical-align: middle;">
           <%- if !UseCmsAccessLevels || user_has_permission?(:manage_cms_publishing) -%>
-            <%= form_remote_tag(:url => { :controller => '/management/cms', :action => 'set_page_version', :id => @pg },
+            <%= form_remote_tag(:url => { :controller => '/manage/cms_pages', :action => 'set_page_version', :id => @pg },
                                :loading => "$('set_page_version_loading').show();",
                                :complete => "$('set_page_version_loading').hide();" + (@pg ? "$('pg_published_version_container').style.borderColor = ($('pg_published_version').value == '0' || $('pg_published_version').value == '#{@pg.versions.last.version}') ? '#EBEBEB' : 'red';" : '')) do -%>
               <div id="pg_published_version_container" style="border-color: <%= @pg && (@pg.published_version == 0 || @pg.published_version == @pg.versions.last.version) ? '#EBEBEB' : 'red' %>; border-style: solid; border-width: 2px;">
@@ -78,7 +78,7 @@
             <% end %>
           <%- else -%>
             <%- if params[:version] && params[:version].to_i != @pg.published_version && !(@pg.published_version == 0 && params[:version].to_i == @pg.versions.count) -%>
-              <%= form_remote_tag(:url => { :controller => '/management/cms', :action => 'request_review', :id => @pg, :version => (params[:version] || @pg.published_version) },
+              <%= form_remote_tag(:url => { :controller => '/manage/cms_pages', :action => 'request_review', :id => @pg, :version => (params[:version] || @pg.published_version) },
                                  :loading => "$('set_page_version_loading').show();",
                                  :complete => "$('set_page_version_loading').hide();") do -%>
                 <%= submit_tag "Submit Version #{(params[:version])} for Review" %>
