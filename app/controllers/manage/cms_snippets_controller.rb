@@ -15,25 +15,7 @@ class Manage::CmsSnippetsController < Manage::ApplicationController
 
   def create
     @cms_snippet = CmsSnippet.new
-    @cms_snippet.assign_attributes(cms_snippet_params)
-    
-    begin
-      ctrl = Manage::CmsPagesController.new
-      ctrl.instance_variable_set('@pg', CmsPage.new)
-      ctrl.instance_variable_set('@page_objects', OpenStruct.new)
-      ctrl.render_to_string inline: @cms_template.content
-    rescue StandardError => e
-      flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
-      render action: 'edit' and return
-    end
-    
-    if !@cms_snippet.save
-      flash.now[:error] = @cms_snippet.errors.full_messages.join('<br>').html_safe
-      render action: 'edit'
-    else
-      flash[:notice] = 'Snippet created.'
-      redirect_to action: 'edit', id: @cms_snippet.id
-    end
+    update
   end
   
   def edit
@@ -41,15 +23,15 @@ class Manage::CmsSnippetsController < Manage::ApplicationController
   end
   
   def update
-    @cms_snippet = CmsSnippet.find(params[:id])
+    @cms_snippet ||= CmsSnippet.find(params[:id])
     @cms_snippet.assign_attributes(cms_snippet_params)
     
     begin
       ctrl = Manage::CmsPagesController.new
       ctrl.instance_variable_set('@pg', CmsPage.new)
       ctrl.instance_variable_set('@page_objects', OpenStruct.new)
-      ctrl.render_to_string inline: @cms_template.content
-    rescue StandardError => e
+      ctrl.render_to_string inline: @cms_snippet.content
+    rescue ScriptError, StandardError => e
       flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
       render action: 'edit' and return
     end

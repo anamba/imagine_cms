@@ -15,29 +15,7 @@ class Manage::CmsTemplatesController < Manage::ApplicationController
   
   def create
     @cms_template = CmsTemplate.new
-    @cms_template.assign_attributes(cms_template_params)
-    
-    begin
-      ctrl = Manage::CmsPagesController.new
-      ctrl.instance_variable_set('@pg', CmsPage.new)
-      ctrl.instance_variable_set('@page_objects', OpenStruct.new)
-      ctrl.render_to_string inline: @cms_template.content
-    rescue StandardError => e
-      flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
-      render action: 'edit' and return
-    end
-    
-    # this must come after the render_to_string so that we capture template
-    # options embedded in snippets
-    @cms_template.options = @cms_template_options
-    
-    if !@cms_template.save
-      flash.now[:error] = @cms_template.errors.full_messages.join('<br>').html_safe
-      render action: 'edit'
-    else
-      flash[:notice] = 'Template created.'
-      redirect_to action: 'edit', id: @cms_template
-    end
+    update
   end
 
   def edit
@@ -45,7 +23,7 @@ class Manage::CmsTemplatesController < Manage::ApplicationController
   end
 
   def update
-    @cms_template = CmsTemplate.find(params[:id])
+    @cms_template ||= CmsTemplate.find(params[:id])
     @cms_template.assign_attributes(cms_template_params)
     
     begin
@@ -53,7 +31,7 @@ class Manage::CmsTemplatesController < Manage::ApplicationController
       ctrl.instance_variable_set('@pg', CmsPage.new)
       ctrl.instance_variable_set('@page_objects', OpenStruct.new)
       ctrl.render_to_string inline: @cms_template.content
-    rescue StandardError => e
+    rescue ScriptError, StandardError => e
       flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
       render action: 'edit' and return
     end
