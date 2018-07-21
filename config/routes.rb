@@ -13,12 +13,13 @@ Rails.application.routes.draw do
         get :list_pages, :select_page, :list_pages_select
         post :list_pages, :select_page, :list_pages_select
         get :toolbar_preview
+        get :page_attribute
       end
       member do
         get :toolbar_preview, :toolbar_edit
         post :set_page_version, :request_review
 
-        get :edit_page, :show_template_options, :page_attribute, :page_tags_for_lookup
+        get :edit_page, :show_template_options, :page_tags_for_lookup
         post :edit_page
         post :delete_page
 

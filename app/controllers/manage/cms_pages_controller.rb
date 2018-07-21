@@ -106,19 +106,19 @@ class Manage::CmsPagesController < Manage::ApplicationController
         tags_to_delete.each { |t| t.destroy }
         
         # now try to save page objects (just attributes in this case)
-        objects_to_delete = @pg.objects.where("obj_type = 'attribute' or obj_type = 'option'").all
+        objects_to_delete = @pg.objects.where("obj_type = 'attribute' or obj_type = 'option'").to_a
         
-        (params[:page_objects] || {}).each do |key,val|
+        params[:page_objects].to_unsafe_h.each do |key, val|
           next if val.blank?
           
           if key =~ /^obj-(\w+?)-(.+?)$/
-            obj = @pg.objects.where(:name => $2, :obj_type => $1).first
-            obj ||= @pg.objects.build(:name => $2, :obj_type => $1)
+            obj = @pg.objects.where(name: $2, obj_type: $1).first
+            obj ||= @pg.objects.build(name: $2, obj_type: $1)
             obj.content = val
-            obj.save
-            objects_to_delete = objects_to_delete.reject { |obj| obj.name == $2 }
+            obj.save!
+            objects_to_delete.reject! { |obj| obj.name == $2 }
           end
-        end
+        end if params[:page_objects]
         
         objects_to_delete.each { |t| t.destroy }
         
@@ -131,7 +131,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
           flash[:notice] = 'Page saved.'
           session[:cms_pages_path] = @pg.path
           render :update do |page|
-            page.redirect_to :action => 'pages'
+            page.redirect_to action: 'index'
           end
         end
         
@@ -163,7 +163,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       @pg.destroy
     end
     
-    redirect_to :action => 'pages'
+    redirect_to action: 'index'
   end
   
   def select_page
@@ -236,7 +236,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       @page_title = @pg.title
       
       @cms_head ||= ''
-      @cms_head << "<script type=\"text/javascript\" src=\"#{url_for(action: 'page_tags_for_lookup')}\"></script>"
+      @cms_head << "<script type=\"text/javascript\" src=\"#{url_for(action: 'page_tags_for_lookup', format: 'js')}\"></script>"
       
       @template_content = substitute_placeholders(@pg.template.content, @pg)
       render layout: 'application'

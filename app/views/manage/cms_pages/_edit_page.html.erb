@@ -181,15 +181,15 @@
               <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
               <%= javascript_tag "$('custom_attribute_name').onkeydown = disableEnterKey; new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });" %>
               
-              <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '/manage/cms/page_attribute?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", :class => 'form_button', :style => 'margin-bottom: 5px;' %>
+              <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '#{url_for(controller: '/manage/cms_pages', action: 'page_attribute')}?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", :class => 'form_button', :style => 'margin-bottom: 5px;' %>
             </div>
           </td>
         </tr>
       </table>
       <div id="custom_attributes" style="background-color: white; min-height: 40px; overflow: auto; border: 1px solid #aaaaaa">
-        <%- @page_objects.each do |key,val| -%>
+        <%- @page_objects.to_h.each do |key, val| -%>
           <%- key =~ /^obj-(\w+?)-(.+?)$/ -%>
-          <%= render :partial => 'page_attribute', :locals => { :name => $2 } if $1 == 'attribute' %>
+          <%= render partial: 'page_attribute', locals: { name: $2 } if $1 == 'attribute' %>
         <%- end -%>
       </div>
     </td>
