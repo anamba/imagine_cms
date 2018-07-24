@@ -1,6 +1,6 @@
 <%-
-  @nav_sections = []
-  @subnav_sections = []
+  @nav_sections ||= []
+  @subnav_sections ||= []
   
   if is_logged_in_user?
     if user_has_permission?(:manage_cms)
@@ -17,11 +17,15 @@
     @nav_sections += ImagineCmsAdditionalNavSections.is_a?(Proc) ? ImagineCmsAdditionalNavSections.call(self) : ImagineCmsAdditionalNavSections
   end
   
+  if defined?(ImagineCmsAdditionalSubnavSections)
+    @subnav_sections += ImagineCmsAdditionalSubnavSections.is_a?(Proc) ? ImagineCmsAdditionalSubnavSections.call(self) : ImagineCmsAdditionalSubnavSections
+  end
+  
   #
   # how to use a Proc to add nav sections:
   #
   # ImagineCmsAdditionalNavSections = Proc.new { |context|
-  #   nav_sections = []
+  #   addl_sections = []
   #
   #   context.instance_eval {
   #     if is_logged_in_user?
@@ -34,7 +38,7 @@
   #     end
   #   }
   #
-  #   nav_sections
+  #   addl_sections
   # }
 -%>
 <!DOCTYPE html>
