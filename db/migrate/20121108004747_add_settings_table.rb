@@ -1,4 +1,4 @@
-class AddSettingsTable < ActiveRecord::Migration
+class AddSettingsTable < ActiveRecord::Migration[4.2]
   
   def change
     create_table :settings do |t|

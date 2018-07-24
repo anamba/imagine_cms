@@ -1,4 +1,4 @@
-class AddCmsTables < ActiveRecord::Migration
+class AddCmsTables < ActiveRecord::Migration[4.2]
   
   class CmsTemplate < ActiveRecord::Base ; acts_as_versioned ; end
   class CmsSnippet < ActiveRecord::Base ; acts_as_versioned ; end

@@ -1,4 +1,4 @@
-class AddUsersTables < ActiveRecord::Migration
+class AddUsersTables < ActiveRecord::Migration[4.2]
   
   def up
     create_table :users do |t|

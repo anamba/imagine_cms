@@ -1,4 +1,4 @@
-class AddLogsTable < ActiveRecord::Migration
+class AddLogsTable < ActiveRecord::Migration[4.2]
   
   def change
     create_table :logs do |t|
