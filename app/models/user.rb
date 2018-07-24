@@ -20,7 +20,7 @@ class User < ActiveRecord::Base # :nodoc:
   
   def password=(val) # :nodoc:
     @password = val
-    self.password_hash = User.hash_password(val) if (val ||= "") != ""
+    self.password_hash = self.class.hash_password(val) unless val.blank?
   end
   
   def self.hash_password(val, salt = '') # :nodoc:

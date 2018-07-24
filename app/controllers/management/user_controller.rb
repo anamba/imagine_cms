@@ -10,9 +10,9 @@ class Management::UserController < Management::ApplicationController
     if request.post?
       test = ::User.find_by_username(params[:login][:username]) rescue nil
       if (test && test.password_hash == User.hash_password(params[:login][:password], test.password_hash[0,16]))
-        if (test.active != 1)
+        if test.active != true && test.active != 1
           flash[:error] = 'Your account has been disabled by an administrator.'
-          redirect_to :action => 'login' and return false
+          redirect_to action: 'login' and return false
         end
         session[:user_authenticated] = true
         
@@ -30,7 +30,7 @@ class Management::UserController < Management::ApplicationController
         end
       else
         flash[:error] = 'Invalid username or password, please try again.'
-        redirect_to params[:redirect_on_failure] || { :action => 'login' }
+        redirect_to params[:redirect_on_failure] || { action: 'login' }
       end
     end
   end
@@ -96,7 +96,8 @@ class Management::UserController < Management::ApplicationController
   ###
   
   def create_first
-    redirect_to :action => 'login' and return unless User.list.empty?
+    redirect_to action: 'login' and return unless User.list.size == 0
+
     @user = User.new(params[:user])
     
     if request.post?
@@ -105,7 +106,7 @@ class Management::UserController < Management::ApplicationController
       
       if @user.save
         flash[:notice] = 'User created successfully. Please log in now.'
-        redirect_to :controller => 'user', :action => 'login'
+        redirect_to action: 'login'
       else
         @errors = 'The following errors occurred:'
         @errors = @user.errors.full_messages

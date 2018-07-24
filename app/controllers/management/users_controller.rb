@@ -50,7 +50,7 @@ class Management::UsersController < Management::ApplicationController
     end
     
     if user_has_permission?(:manage_users)
-      params[:usr].each { |k,v| @usr.send("#{k}=", v) }
+      params[:user].each { |k,v| @usr.send("#{k}=", v) }
     elsif @user.id == @usr.id
       @usr.first_name = params[:user][:first_name]
       @usr.last_name = params[:user][:last_name]
