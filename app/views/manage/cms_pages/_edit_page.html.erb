@@ -16,11 +16,11 @@
 
 <div id="save_errors" class="error"></div>
 
-<%= form_remote_tag url: { action: 'edit_page', id: @pg.id },
+<%= form_remote_tag url: { action: 'edit_page', id: @pg },
                     loading: "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';" do %>
 <table id="dlg-page-properties">
   <col width="120"><col width="*"><col width="5">
-<%- if (@pg.id || 2) > 1 -%>
+<%- if @pg.id != 1 -%>
   <tr>
     <td>Name (for URL):</td>
     <td>
@@ -67,7 +67,7 @@
       </div>
       <script type="text/javascript">
         jQuery('#pg_cms_template_id').change(function () {
-          jQuery.get('<%= url_for(action: 'show_template_options', id: @pg.id) %>?template_id=' + jQuery(this).val(), function (data) {
+          jQuery.get('<%= url_for(action: 'show_template_options', id: @pg) %>?template_id=' + jQuery(this).val(), function (data) {
             jQuery('#edit_page_template_options').html(data);
           });
         });
