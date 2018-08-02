@@ -16,23 +16,23 @@
 
 <div id="save_errors" class="error"></div>
 
-<%= form_remote_tag :url => { :action => 'edit_page', :id => @pg },
-                    :loading => "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';" do %>
+<%= form_remote_tag url: { action: 'edit_page', id: @pg.id },
+                    loading: "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';" do %>
 <table id="dlg-page-properties">
   <col width="120"><col width="*"><col width="5">
 <%- if (@pg.id || 2) > 1 -%>
   <tr>
     <td>Name (for URL):</td>
     <td>
-      <%= text_field :pg, :name, :class => 'form', :style => 'margin-bottom: 0; width: 150px', :onchange => (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = $('original_name').value; };") %><br/>
-      <%= text_field_tag :original_name, @pg.name, :style => 'display: none' %>
-      <%= text_field :pg, :parent_id, :style => 'display: none' %>
+      <%= text_field :pg, :name, class: 'form', style: 'margin-bottom: 0; width: 150px', onchange: (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = $('original_name').value; };") %><br/>
+      <%= text_field_tag :original_name, @pg.name, style: 'display: none' %>
+      <%= text_field :pg, :parent_id, style: 'display: none' %>
     </td>
   </tr>
 <%- end -%>
   <tr>
     <td>Page Title:</td>
-    <td><%= text_field :pg, :title, :class => 'form', :style => 'width: 100%;' %></td>
+    <td><%= text_field :pg, :title, class: 'form', style: 'width: 100%;' %></td>
   </tr>
   <%- if @pg.respond_to?(:redirect_enabled) -%>
   <tr>
@@ -60,14 +60,14 @@
   <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">Template:</div></td>
     <td>
-      <%= select :pg, :cms_template_id, CmsTemplate.order(:name).map { |t| [ t.name, t.id ] }, {}, :class => 'form', :style => 'width: 100%;' %>
+      <%= select :pg, :cms_template_id, CmsTemplate.order(:name).map { |t| [ t.name, t.id ] }, {}, class: 'form', style: 'width: 100%;' %>
       
       <div id="edit_page_template_options">
-        <%= render :partial => 'template_options' %>
+        <%= render partial: 'template_options' %>
       </div>
       <script type="text/javascript">
         jQuery('#pg_cms_template_id').change(function () {
-          jQuery.get('<%= url_for(:action => 'show_template_options', :id => @pg) %>?template_id=' + jQuery(this).val(), function (data) {
+          jQuery.get('<%= url_for(action: 'show_template_options', id: @pg.id) %>?template_id=' + jQuery(this).val(), function (data) {
             jQuery('#edit_page_template_options').html(data);
           });
         });
@@ -80,10 +80,10 @@
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td width="115">
-            <%= date_picker :pg, :article_date, :default_value => (@pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %>
+            <%= date_picker :pg, :article_date, default_value: (@pg.article_date || @pg.created_on || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %>
           </td>
           <td width="120">
-            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"'.html_safe %>>&ndash; <%= date_picker :pg, :article_end_date, :default_value => (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 5.years.from_now %></div>
+            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"'.html_safe %>>&ndash; <%= date_picker :pg, :article_end_date, default_value: (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %></div>
           </td>
           <td align="right" width="180">
             <input type="checkbox" id="use_article_date_range" name="use_article_date_range" value="1" onclick="$('div_article_end_date').toggle();"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? ' checked="checked"' : '' %> /><label for="use_article_date_range">Use date range</label>
@@ -94,20 +94,20 @@
   </tr>
   <tr>
     <td valign="middle">Tags:</td>
-    <td><%= text_field_tag :tags, @tags, :class => 'form', :style => 'width: 100%' %></td>
+    <td><%= text_field_tag :tags, @tags, class: 'form', style: 'width: 100%' %></td>
   </tr>
   <tr class="page-field">
     <td>Publish Version:</td>
-    <td><%= select :pg, :published_version, [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, :class => 'form', :style => 'width: 100%' %></td>
+    <td><%= select :pg, :published_version, [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, class: 'form', style: 'width: 100%' %></td>
   </tr>
   <tr>
     <td>Publish Date:</td>
     <td>
       <table border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <td width="120"><%= date_picker :pg, :published_date, :default_value => (@pg.published_date || @pg.created_on || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 2.years.from_now %></td>
+          <td width="120"><%= date_picker :pg, :published_date, default_value: (@pg.published_date || @pg.created_on || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 2.years.from_now %></td>
           <td width="60">Position:</td>
-          <td><%= text_field :pg, :position, :class => 'form', :style => 'width: 20px' %></td>
+          <td><%= text_field :pg, :position, class: 'form', style: 'width: 20px' %></td>
         </tr>
       </table>
     </td>
@@ -118,14 +118,14 @@
       <table border="0" cellpadding="0" cellspacing="0">
         <tr>
           <td width="100"><%= check_box :pg, :expires, {}, 'true', 'false' %><label>Expires on:</label></td>
-          <td width="120"><%= date_picker :pg, :expiration_date, :default_value => (@pg.expiration_date || @pg.published_date || Time.now), :start_date => Time.utc(2006, 1, 1), :end_date => 2.years.from_now %></td>
+          <td width="120"><%= date_picker :pg, :expiration_date, default_value: (@pg.expiration_date || @pg.published_date || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 2.years.from_now %></td>
         </tr>
       </table>
     </td>
   </tr>
   <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">Summary:</div></td>
-    <td><%= text_area :pg, :summary, :class => 'form', :style => 'width: 100%; height: 50px;' %></td>
+    <td><%= text_area :pg, :summary, class: 'form', style: 'width: 100%; height: 50px;' %></td>
   </tr>
   <tr>
     <td style="vertical-align: top;">Thumbnail:</td>
@@ -166,7 +166,7 @@
   <%- if @pg.respond_to?(:html_head) -%>
   <tr class="page-field">
     <td valign="top"><div style="margin-top: 4px;">HTML Head:<br>(advanced)</div></td>
-    <td><%= text_area :pg, :html_head, :class => 'form', :style => 'width: 100%; height: 35px; overflow: auto;' %></td>
+    <td><%= text_area :pg, :html_head, class: 'form', style: 'width: 100%; height: 35px; overflow: auto;' %></td>
   </tr>
   <%- end -%>
   <tr>
@@ -177,11 +177,11 @@
           <td>Add an attribute: &nbsp;</td>
           <td>
             <div style="position: relative;">
-              <%= text_field_tag :custom_attribute_name, '', :class => 'form', :style => 'margin-bottom: 4px;', :placeholder => '[ attribute name ]' %>
+              <%= text_field_tag :custom_attribute_name, '', class: 'form', style: 'margin-bottom: 4px;', placeholder: '[ attribute name ]' %>
               <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
               <%= javascript_tag "$('custom_attribute_name').onkeydown = disableEnterKey; new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });" %>
               
-              <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '#{url_for(controller: '/manage/cms_pages', action: 'page_attribute')}?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", :class => 'form_button', :style => 'margin-bottom: 5px;' %>
+              <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '#{url_for(controller: '/manage/cms_pages', action: 'page_attribute')}?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", class: 'form_button', style: 'margin-bottom: 5px;' %>
             </div>
           </td>
         </tr>
@@ -196,8 +196,8 @@
   <tr>
     <td></td>
     <td>
-      <%= submit_tag 'Save', :id => 'btn_save', :class => 'form_button', :style => 'width: 70px;' %>
-      <%= link_to_function 'Cancel', "cancelEditProperties();", :style => 'font-weight: normal;' %>
+      <%= submit_tag 'Save', id: 'btn_save', class: 'form_button', style: 'width: 70px;' %>
+      <%= link_to_function 'Cancel', "cancelEditProperties();", style: 'font-weight: normal;' %>
       <%= hidden_field_tag 'return_to', params[:return_to] %>
     </td>
   </tr>
