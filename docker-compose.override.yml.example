@@ -12,7 +12,6 @@ services:
       - ../mysite:/home/app/myapp:delegated                      # set to (relative) path to site you want to run
       # - .:/home/app/imagine_cms:delegated                      # when working on imagine itself
       # - ./prototype-rails:/home/app/prototype-rails:delegated  # when working on imagine dependency prototype-rails
-      - ./docker/conf/nginx-vhost.conf:/etc/nginx/sites-enabled/webapp.conf:delegated
       - log:/home/app/myapp/log
       - node_modules:/home/app/myapp/node_modules
       - rvm:/usr/local/rvm
@@ -25,7 +24,6 @@ services:
       - '3306'           # <---- or omit the first number entirely to use a random local port (use `docker ps`)
     volumes:
       - db-data:/var/lib/mysql
-      - ./docker/conf/my.local.cnf:/etc/mysql/conf.d/my.local.cnf
 
 volumes:
   db-data:

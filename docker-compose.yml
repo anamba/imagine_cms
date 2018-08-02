@@ -6,6 +6,8 @@ services:
     links:
       - db
       # - redis
+    volumes:
+      - ./docker/conf/nginx-vhost.conf:/etc/nginx/sites-enabled/webapp.conf:delegated
     environment:
       PASSENGER_APP_ENV: development
       MYSQL_HOST: db                    # if this is changed, update nginx-vhost.conf as well
@@ -13,6 +15,8 @@ services:
       
   db:
     image: mariadb:10.2.16
+    volumes:
+      - ./docker/conf/my.local.cnf:/etc/mysql/conf.d/my.local.cnf
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
       
