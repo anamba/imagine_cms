@@ -11,7 +11,7 @@
       <%= form_remote_tag :url => { :action => 'select_gallery', :id => @pg },
                           :update => 'select_gallery' do -%>
         Current Gallery:
-        <select name="gallery_id" onchange="new Ajax.Updater('gallery_container', '/manage/cms/select_gallery/<%= @pg.id %>', {asynchronous:true, evalScripts:true, parameters:Form.serialize(this.form)}); return false;">
+        <select name="gallery_id" onchange="new Ajax.Updater('gallery_container', '/manage/cms_pages/<%= @pg.id %>/select_gallery', {asynchronous:true, evalScripts:true, parameters:Form.serialize(this.form)}); return false;">
         <%-
           @galleries.each do |gallery|
             unless session[:broken_galleries].include?(File.basename(gallery))

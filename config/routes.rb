@@ -23,7 +23,7 @@ Rails.application.routes.draw do
         post :edit_page
         post :delete_page
 
-        get :edit_page_content
+        get :edit_page_content, :insert_page_object_config
         post :edit_page_content
 
         get :create_file_link, :upload_file, :receive_file

@@ -334,7 +334,7 @@ function showPageBrowser(field_id) {
     path = $(field_id).value;
     
     $('page_browser').innerHTML = 'Loading...'
-    new Ajax.Updater('page_browser', '/manage/cms/select_page?path=' + path, {asynchronous:true, evalScripts:true});
+    new Ajax.Updater('page_browser', '/manage/cms_pages/select_page?path=' + path, {asynchronous:true, evalScripts:true});
     $('page_browser_selection').value = path;
     showDojoDialog('page_browser_dialog');
 }
@@ -396,7 +396,7 @@ function scanForPageObjects(page_id, parent_key, version) {
   jQuery.each(found, function (key, val) {
     if (!cmsPageObjects[key]) {
       cmsPageObjects[key] = val;
-      jQuery.get('/manage/cms/insert_page_object_config/' + page_id + '?version= ' + version +
+      jQuery.get('/manage/cms_pages/' + page_id + '/insert_page_object_config?version= ' + version +
                  '&name=' + key + '&type=' + val + '&parent_key=' + parent_key);
     }
   });
