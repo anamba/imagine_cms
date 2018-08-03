@@ -23,7 +23,7 @@ Rails.application.routes.draw do
         get :toolbar_preview, :toolbar_edit
         post :set_page_version, :request_review
 
-        get :edit_page, :show_template_options, :page_tags_for_lookup
+        get :edit_page, :show_template_options
         post :edit_page
         post :delete_page
 

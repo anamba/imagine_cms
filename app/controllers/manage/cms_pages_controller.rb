@@ -236,7 +236,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       @page_title = @pg.title
       
       @cms_head ||= ''
-      @cms_head << "<script type=\"text/javascript\" src=\"#{url_for(action: 'page_tags_for_lookup', format: 'js')}\"></script>"
+      @taglist = CmsPageTag.pluck(:name).uniq.sort
       
       @template_content = substitute_placeholders(@pg.template.content, @pg)
       render layout: 'application'
@@ -403,18 +403,6 @@ class Manage::CmsPagesController < Manage::ApplicationController
       page.insert_html :bottom, "page_object_config_#{parent_key}", :partial => 'page_list',
                                                                     :locals => { :name => name, :key => key }
     end
-  end
-  
-  def page_tags_for_lookup
-    @tags = CmsPageTag.order(:name).map { |tag| tag.name }.uniq
-    headers['content-type'] = 'text/javascript'
-    render :layout => false
-  end
-  
-  def page_attributes_for_lookup
-    @attrs = CmsPageObject.where(:obj_type => 'attribute').uniq.pluck(:name).sort
-    headers['content-type'] = 'text/javascript'
-    render :layout => false
   end
   
   def page_list_add_tag

@@ -1,3 +1,10 @@
+<script type="text/javascript">
+  taglist = new Array(<%= @taglist.size %>)
+  <%- @taglist.each_with_index do |tag, i| -%>
+  taglist[<%= i %>]="<%=j tag %>";
+  <%- end -%>
+</script>
+
 <%= form_tag({}, id: 'page_content_form') do %>
   <%= submit_tag 'Save', id: 'btn_save', style: 'display: none' %>
   <%= render inline: @template_content %>
