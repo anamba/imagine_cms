@@ -27,10 +27,8 @@ class Manage::CmsSnippetsController < Manage::ApplicationController
     @cms_snippet.assign_attributes(cms_snippet_params)
     
     begin
-      ctrl = Manage::CmsPagesController.new
-      ctrl.instance_variable_set('@pg', CmsPage.new)
-      ctrl.instance_variable_set('@page_objects', OpenStruct.new)
-      ctrl.render_to_string inline: @cms_snippet.content
+      puts Cms::ContentController.renderer.new('action_dispatch.request.path_parameters' => {
+        controller: '/cms/content', action: 'show', id: CmsPage.new }).render inline: @cms_snippet.content
     rescue ScriptError, StandardError => e
       flash.now[:error] = "<pre title=\"#{ERB::Util.html_escape(e.backtrace.join("\n"))}\">#{ERB::Util.html_escape(e.message)}</pre>".html_safe
       render action: 'edit' and return

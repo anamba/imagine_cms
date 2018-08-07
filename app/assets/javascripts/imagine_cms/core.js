@@ -1,9 +1,11 @@
 jQuery(document).ready(function () {
+  window.CodemirrorInstances = [];
   jQuery('textarea.codemirror-html').each(function () {
     var cm = CodeMirror.fromTextArea(this, {
       mode: 'application/x-erb-imagine',
       lineNumbers: true
     });
+    window.CodemirrorInstances.push(cm);
   })
 });
 

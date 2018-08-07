@@ -8,7 +8,7 @@
     <%= f.text_area :content, class: 'codemirror-html autocomplete-off' %>
   </div>
   <%= f.submit 'Save Template', class: 'form_button' %>
-  <button onclick="jQuery('#preview_frame').show(); jQuery('#preview_frame')[0].scrollIntoView(); jQuery('#preview_content').val(jQuery('textarea[name=\'cms_template[content]\']').val()); jQuery('#preview_form').submit(); return false;" class="form_button">Preview</button>
+  <button onclick="window.CodemirrorInstances.forEach((cm) => { cm.save(); }); jQuery('#preview_frame').show(); jQuery('#preview_frame')[0].scrollIntoView(); jQuery('#preview_content').val(jQuery('textarea[name=\'cms_template[content]\']').val()); jQuery('#preview_form').submit(); return false;" class="form_button">Preview</button>
   <%= link_to 'Cancel', action: 'index' %>
   <br>
   

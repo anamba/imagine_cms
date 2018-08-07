@@ -149,7 +149,7 @@ module Cms # :nodoc:
           params[:page] = 'index'
         end
         
-        if @pg = (CmsPage.includes(:template).find_by_path(db_path.join('/')) || CmsPage.includes(:template).find_by_path(db_path.map { |segment| segment.gsub(/([A-Za-z\d])_/, '\1-') }.join('/')))
+        if @pg ||= (CmsPage.includes(:template).find_by_path(db_path.join('/')) || CmsPage.includes(:template).find_by_path(db_path.map { |segment| segment.gsub(/([A-Za-z\d])_/, '\1-') }.join('/')))
           if edit_mode
             redirect_to controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg and return true
           else
@@ -309,15 +309,16 @@ module Cms # :nodoc:
     
     def preview_template
       @pg = CmsPage.new
-      if params[:id] && (t = CmsTemplate.find_by_id(params[:id])) && (pg = t.pages.where('published_version >= 0').order('updated_on desc').first)
+      if params[:id] && (@cms_template = CmsTemplate.find_by_id(params[:id])) && (pg = @cms_template.pages.where('published_version >= 0').order('updated_on desc').first)
         @pg = pg
       else
-        @pg.template = CmsTemplate.new
-        @pg.template.name = 'Template Preview'
+        @cms_template = CmsTemplate.new(name: 'Template Preview')
+        @pg.template = @cms_template
       end
-      @pg.template.content = params[:content]
       @page_objects = OpenStruct.new
-      render inline: substitute_placeholders(@pg.template.content, @pg), layout: 'application'
+      @pg.template.content = params[:content]
+
+      render inline: render_cms_page_to_string(@pg, params[:content])
     end
     
     def page_list_calendar
@@ -364,28 +365,25 @@ module Cms # :nodoc:
     
     protected
     
-    def render_cms_page_to_string(page)
+    def render_cms_page_to_string(page, template_content = nil)
+      template_content = substitute_placeholders(template_content || page.template.content, page)
+      
       # sanitize possibly dangerous content before rendering
-      template_content = substitute_placeholders(page.template.content, page)
       template_content.gsub!(/<(%.*?(exec|system)\s?\(.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
-      # silence do
-        template_content = render_to_string(:inline => template_content,
-                                            :locals => { :page => page, :safe_level => 0 })
-      # end
+      template_content = render_to_string(inline: template_content,
+                                          locals: { page: page, safe_level: 0 })
       
+      # do it all over again one more time to get the second level stuff (usually within page lists)
       template_content = substitute_placeholders(template_content, page)
       template_content.gsub!(/<(%.*?(exec|system)\s?\(.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
-      # silence do
-        template_content = render_to_string(:inline => template_content,
-                                            :layout => 'application',
-                                            :locals => { :page => page })
-      # end
+      template_content = render_to_string(inline: template_content, layout: true,
+                                          locals: { page: page })
       
       template_content
     end
