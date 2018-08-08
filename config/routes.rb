@@ -14,10 +14,13 @@ Rails.application.routes.draw do
         post :list_pages, :select_page, :list_pages_select
         get :toolbar_preview
         get :page_attribute
-
+        
         # for new pages (no id yet)
         get :show_template_options
         post :edit_page
+
+        # page list dialog functions
+        post :page_list_add_folder, :page_list_add_tag
       end
       member do
         get :toolbar_preview, :toolbar_edit
