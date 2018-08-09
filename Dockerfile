@@ -1,7 +1,7 @@
 ### Docker image for imagine5 ###
 
 # See https://github.com/phusion/passenger-docker/blob/master/Changelog.md for a list of version numbers.
-FROM phusion/passenger-ruby25:0.9.34
+FROM phusion/passenger-ruby25:0.9.35
 LABEL maintainer="aaron@aaronnamba.com"
 
 # Set up 3rd party repos
@@ -29,10 +29,10 @@ RUN apt-get autoremove -y
 # Install the current gemset as a starting point (to make sure we didn't miss any apt dependencies),
 # while also making deploys and dev setup time quicker
 WORKDIR /home/app/myapp
-# COPY Gemfile Gemfile.lock ./
+COPY Gemfile ./
 RUN gem update --system
 RUN gem install bundler rake rack
-# RUN bundle install --jobs 8 --retry 3
+RUN bundle install --jobs 8 --retry 3
 
 #
 # Try to put things AFTER the apt/bundler steps so we don't have to redo them as often
