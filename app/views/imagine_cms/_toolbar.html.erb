@@ -1,12 +1,10 @@
 <%- if params[:action] != 'preview_template' -%>
   <style type="text/css">
-    #mainCCSToolbar { font-family: Arial; font-size: 12px; font-weight: normal; text-transform: none; line-height: 1.2; color: black; }
-    #mainCCSToolbar a { text-transform: none; font-weight: normal; color: black; }
+    #imagine_cms-toolbar { font-family: Arial; font-size: 12px; font-weight: normal; text-transform: none; line-height: 1.2; color: black; }
+    #imagine_cms-toolbar a { text-transform: none; font-weight: normal; color: black; }
   </style>
-  <table id="mainCCSToolbar" cellpadding="0" cellspacing="0" border="0" width="100%" style="display: none">
+  <div id="imagine_cms-toolbar" style="display: none;">
     <%- if [ 'cms/content', 'manage/cms_pages' ].include?(controller.controller_path) && params[:action] != 'preview_template' -%>
-      <tr>
-        <td>
       <%- if is_editing_page? -%>
         <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="true" focusOnLoad="false"
           toolbarTemplatePath="<%= url_for controller: '/manage/cms_pages', action: 'toolbar_edit', id: @pg, version: params[:version] %>"
@@ -20,9 +18,11 @@
           toolbarAlwaysVisible="true" style="height: 25px; vertical-align: middle">
         </div>
       <%- end -%>
-        </td>
-      </tr>
     <%- end -%>
-  </table>
-  <%= javascript_tag "if (loggedIn()) document.getElementById('mainCCSToolbar').style.display = 'block';" %>
+  </div>
+  <script type="text/javascript">
+    if (loggedIn()) {
+      document.getElementById('imagine_cms-toolbar').style.display = 'block';
+    }
+  </script>
 <%- end -%>
