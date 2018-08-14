@@ -309,6 +309,15 @@ module CmsApplicationHelper
         
         obj
       end
+      folders += substitute_placeholders(options[:pages] || '', pg).split(',').map do |f|
+        bits = f.strip.split(':')
+        
+        obj = OpenStruct.new
+        obj.src = bits[0]
+        obj.expand_folders = 'false'
+        
+        obj
+      end
       folders = folders.reject { |f| f.src.blank? }
       
       @page_objects["#{key}-sources-folder-count"] = folders.size

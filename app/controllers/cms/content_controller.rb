@@ -366,7 +366,7 @@ module Cms # :nodoc:
     protected
     
     def render_cms_page_to_string(page, template_content = nil)
-      template_content = substitute_placeholders(template_content || page.template.content, page)
+      template_content = (substitute_placeholders(template_content || page.template.content, page)) or return nil
       
       # sanitize possibly dangerous content before rendering
       template_content.gsub!(/<(%.*?(exec|system)\s?\(.*?\s*%)>/, '&lt;\1&gt;')
