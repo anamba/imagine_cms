@@ -36,14 +36,14 @@ class Manage::CmsTemplatesController < Manage::ApplicationController
     
     # this must come after the render_to_string so that we capture template
     # options embedded in snippets
-    @cms_template.options = @cms_templatelate_options
+    @cms_template.options = @cms_template_options
     
     if !@cms_template.save
       flash.now[:error] = @cms_template.errors.full_messages.join('<br>').html_safe
       render action: 'edit'
     else
       flash[:notice] = 'Template saved.'
-      redirect_to action: 'edit', id: @cms_template.id
+      redirect_to action: 'edit', id: @cms_template
     end
   end
 
