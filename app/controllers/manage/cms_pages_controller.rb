@@ -200,7 +200,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     load_page_objects
     load_template_options
     
-    render :partial => 'template_options'
+    render partial: 'template_options'
   end
   
   def page_attribute

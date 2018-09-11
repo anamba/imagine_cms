@@ -565,7 +565,7 @@ module CmsApplicationHelper
   def template_option(name, type = :string)
     return nil unless @pg
     
-    @template_options ||= {}
+    @template_options ||= OpenStruct.new
     @template_options[name] = type
     
     key = name.gsub(/[^\w\d]/, '_')

@@ -1,7 +1,7 @@
-<%- unless @template_options.empty? -%>
+<%- unless @template_options.to_h.empty? -%>
 <div style="background-color: white; width: 100%; border: 1px solid #aaaaaa;">
-  <%- @template_options.each do |name, type| -%>
-    <%- key = name.gsub(/[^\w\d]/, '_') -%>
+  <%- @template_options.to_h.each do |name, type| -%>
+    <%- key = name.to_s.gsub(/[^\w\d]/, '_') -%>
     <table width="100%">
       <col width="55%" /><col width="45%" />
       <tr>
