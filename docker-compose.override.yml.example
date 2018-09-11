@@ -15,6 +15,7 @@ services:
       - log:/home/app/myapp/log
       - node_modules:/home/app/myapp/node_modules
       - rvm:/usr/local/rvm
+      - ~/.gitconfig:/home/app/.gitconfig                        # if you want to commit from within the container
     # environment:
     #   PASSENGER_APP_ENV: production
 

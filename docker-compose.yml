@@ -14,7 +14,7 @@ services:
       REDIS_URL: redis://redis:6379/1   # if this is changed, update nginx-vhost.conf as well
       
   db:
-    image: mariadb:10.3.8
+    image: mariadb:10.3.9
     volumes:
       - ./docker/conf/my.local.cnf:/etc/mysql/conf.d/my.local.cnf
     environment:
