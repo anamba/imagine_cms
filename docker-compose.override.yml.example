@@ -2,7 +2,7 @@
 #
 # reminder: use `docker ps` to see the list of running containers and their port mappings
 #
-version: '3.4'
+version: '3'
 
 services:
   web:
@@ -18,6 +18,11 @@ services:
       - ~/.gitconfig:/home/app/.gitconfig                        # if you want to commit from within the container
     # environment:
     #   PASSENGER_APP_ENV: production
+    # networks:  # to use traefik, uncomment this along with the networks section at the bottom
+    #   - traefik
+    #   - default
+    # labels:
+    #   traefik.docker.network: traefik
 
   db:
     ports:               # access using mysql -P (not -p), ex: mysql -h 127.0.0.1 -P 33060 -u root
@@ -32,3 +37,7 @@ volumes:
   node_modules:
   tmp:
   rvm:
+
+# networks:
+#   traefik:
+#     external: true

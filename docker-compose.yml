@@ -1,11 +1,8 @@
-version: '3.4'
+version: '3'
 
 services:
   web:  # (passenger + sidekiq)
     build: .
-    links:
-      - db
-      # - redis
     volumes:
       - ./docker/conf/nginx-vhost.conf:/etc/nginx/sites-enabled/webapp.conf:delegated
     environment:
