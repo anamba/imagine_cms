@@ -11,11 +11,11 @@ services:
       REDIS_URL: redis://redis:6379/1   # if this is changed, update nginx-vhost.conf as well
       
   db:
-    image: mariadb:10.3.9
+    image: mariadb:10.3
     volumes:
       - ./docker/conf/my.local.cnf:/etc/mysql/conf.d/my.local.cnf
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
       
   # redis:
-  #   image: redis:3.2.12-32bit  # not really 32-bit, just compiled that way to reduce memory usage
+  #   image: redis:4.0-32bit  # not really 32-bit, just compiled that way to reduce memory usage
