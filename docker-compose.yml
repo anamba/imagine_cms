@@ -3,8 +3,6 @@ version: '3'
 services:
   web:  # (passenger + sidekiq)
     build: .
-    volumes:
-      - ./docker/conf/nginx-vhost.conf:/etc/nginx/sites-enabled/webapp.conf:delegated
     environment:
       PASSENGER_APP_ENV: development
       MYSQL_HOST: db                    # if this is changed, update nginx-vhost.conf as well

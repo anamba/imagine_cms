@@ -14,7 +14,7 @@ services:
       # - ./prototype-rails:/home/app/prototype-rails:delegated  # when working on imagine dependency prototype-rails
       - log:/home/app/myapp/log
       - node_modules:/home/app/myapp/node_modules
-      - rvm:/usr/local/rvm
+      - gems:/usr/local/rvm/gems
       - ~/.gitconfig:/home/app/.gitconfig                        # if you want to commit from within the container
     # environment:
     #   PASSENGER_APP_ENV: production
@@ -36,7 +36,8 @@ volumes:
   log:
   node_modules:
   tmp:
-  rvm:
+  gems:
+    external: true
 
 # networks:
 #   traefik:

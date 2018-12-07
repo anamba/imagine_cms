@@ -7,8 +7,8 @@ server {
     passenger_user app;
 
     passenger_ruby /usr/bin/ruby2.5;
-    passenger_env_var MYSQL_HOST db;  # keep this in sync with value in docker-compose.yml
-    passenger_env_var REDIS_URL redis://redis:6379/1;
+    passenger_env_var MYSQL_HOST '$MYSQL_HOST';
+    passenger_env_var REDIS_URL '$REDIS_URL';
 
     client_max_body_size 100M;
 }
