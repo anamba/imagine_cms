@@ -144,7 +144,7 @@ module ActionControllerExtensions
           
           pages = page_list_items(@pg, key, options).compact.uniq
           
-          options[:wrapper_div] = true
+          options[:wrapper_div] = true unless options.has_key?(:wrapper_div)
           
           render_page_list_segment(name, pages, options, html_options)
         end
