@@ -8,6 +8,9 @@
 		<script type="text/javascript">
 			function init(){
 				document.designMode = 'on';
+				document.execCommand('enableObjectResizing', false, true);
+				document.execCommand('enableInlineTableEditing', false, true);
+				document.execCommand('enableAbsolutePositionEditor', false, true);
 				try{
 					parentPageDomain = document.location.href.split('#')[1];
 					if(parentPageDomain){
