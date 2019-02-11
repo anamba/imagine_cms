@@ -23,7 +23,6 @@
     }, 200);
   });
   jQuery('#cb_item_<%= list_page.id %>').on('dblclick', (event) => {
-    event.preventDefault();
     location.href = jQuery('#edit_content_link')[0].href;
     return false;
   });

@@ -83,14 +83,14 @@ function dpNextMonth(object, method_prefix, max_year) {
  ********************************/
 
 var cbNumColumns = 0;
-var cbColWidth = '200px';
-var cbColHeight = '240px';
+var cbColWidth = 200;
+var cbColHeight = 240;
 
 function cbAddColumn() {
-    jQuery('#columnBrowser').css({ width: '' + ((cbNumColumns+1) * (cbColWidth+1)) + 'px' });
-    jQuery('#columnBrowserContainer').scrollLeft($('columnBrowserContainer').scrollWidth);
     jQuery('#columnBrowser').append('<div id="columnBrowserLevel' + cbNumColumns + '" class="cb_column">Loading...</div>');
+    jQuery('#columnBrowserContainer').scrollLeft(jQuery('#columnBrowserContainer')[0].scrollWidth);
     cbNumColumns++;
+    jQuery('#columnBrowser').css({ width: '' + ((cbColWidth+1) * cbNumColumns) + 'px' });
 }
 
 function getScrollbarPosition(el) {

@@ -51,6 +51,10 @@
     <%= stylesheet_link_tag "management", media: "all" %>
     <%= javascript_include_tag "application" %>
 
+    <%- if is_logged_in_user? -%>
+      <script src="/assets/dojo/dojo.js" type="text/javascript"></script>
+    <%- end -%>
+
     <%= csrf_meta_tag %>
   </head>
   
@@ -90,9 +94,5 @@
     <div id="management-content" style="padding: 15px 10px 1px 15px">
       <%= yield %>
     </div>
-
-    <%- if is_logged_in_user? -%>
-      <script src="/assets/dojo/dojo.js" type="text/javascript" async></script>
-    <%- end -%>
   </body>
 </html>

@@ -4,8 +4,8 @@
   cbColHeight = 400;
 -%>
 <script type="text/javascript">
-  window.cbColWidth = '<%= cbColWidth %>px';
-  window.cbColHeight = '<%= cbColHeight %>px';
+  window.cbColWidth = <%= cbColWidth %>;
+  window.cbColHeight = <%= cbColHeight %>;
 </script>
 <style type="text/css">
   .cb_column {
@@ -20,13 +20,13 @@
 
 <div id="columnBrowserToolbar">
   <%= link_to image_tag('management/btn-top-new.png'), '#', id: 'new_link' %>
-  <%= link_to image_tag('management/btn-top-edit.png'), '#', id: 'edit_content_link', target: '_blank' %>
+  <%= link_to image_tag('management/btn-top-edit.png'), '#', id: 'edit_content_link' %>
   <%= link_to image_tag('management/btn-top-properties.png'), '#', id: 'edit_link' %>
   <%= link_to image_tag('management/btn-top-preview.png'), '#', id: 'view_link', target: '_blank' %>
-  <%= link_to image_tag('management/btn-top-delete.png'), '#', id: 'delete_link', target: '_blank', method: :post, data: { confirm: 'Are you sure you want to delete the selected page?' } %>
+  <%= link_to image_tag('management/btn-top-delete.png'), '#', id: 'delete_link', method: :post, data: { confirm: 'Are you sure you want to delete the selected page?' } %>
 </div>
 
-<div id="columnBrowserContainer" style="height: <%= cbColHeight + 20 %>px;">
+<div id="columnBrowserContainer" style="height: <%= cbColHeight + 2 %>px;">
   <div id="columnBrowser" style="width: <%= (cbColWidth+1) * @page_levels.size %>px;">
     <%- @page_levels.each_with_index do |name, i| -%>
       <%-
@@ -38,9 +38,9 @@
         @page = CmsPage.find_by_path @path
         @page_level = i
         @pages = @parent.children if @parent
-        
+
         break_flag = false
-        
+
         if !@page
           @page = @parent.children.first || @parent || CmsPage.first
           break_flag = true
@@ -52,7 +52,7 @@
         <%- else -%>
           <%= render partial: 'list_pages' %>
         <%- end -%>
-        <%= javascript_tag "jQuery('#cb_item_#{@parent.id}').addClass('cb_item_selected');" if @parent %>
+        <%= javascript_tag "jQuery('#cb_item_#{@parent.id}').addClass('cb_item_selected')[0].scrollIntoView();" if @parent %>
       </div>
       <%- break if break_flag -%>
     <%- end -%>

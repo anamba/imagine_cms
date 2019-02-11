@@ -1276,34 +1276,34 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     def check_permissions
       if !user_has_permission?(:manage_cms)
-        render '/imagine_cms/errors/permission_denied', :layout => false
+        render '/imagine_cms/errors/permission_denied', layout: false
         return false
       end
     end
 
     def validate_user_access
       unless @user.cms_allowed_sections.to_s.strip.blank?
-        allowed_sections = @user.cms_allowed_sections.split(',').map { |s| s.strip }.reject { |s| s.blank? }
+        allowed = false
+        allowed_sections = @user.cms_allowed_sections.split(',').map(&:strip).reject(&:blank?)
         if @pg
           path = '/' + @pg.path
+          allowed_sections.each { |s| allowed ||= (path =~ /^#{s}/) }
         else
-          parent = CmsPage.find_by_id(params[:parent_id] || params[:pg][:parent_id]) rescue nil
-          return false if !parent
-          path = '/' + parent.path
+          if (parent = CmsPage.find_by_id(params[:parent_id] || params[:pg][:parent_id]) rescue nil)
+            path = '/' + parent.path
+            allowed_sections.each { |s| allowed ||= (path =~ /^#{s}/) }
+          end
         end
-        
-        allowed = false
-        allowed_sections.each { |s| allowed ||= (path =~ /^#{s}/) }
-        
-        if !allowed
+
+        unless allowed
           respond_to do |wants|
-            wants.js    { render :text => "Sorry, you don't have permission to edit this page."         }
+            wants.js    { render text: 'Sorry, you don\'t have permission to edit this page.' }
             wants.html  { redirect_to "/#{@pg.path}#{@pg.path == '' ? '' : '/'}version/#{@pg.version}"  }
           end
           return false
         end
       end
-      
+
       true
     end
 
