@@ -196,7 +196,7 @@
   </tr>
 </table>
 <% end -%>
-<<script type="text/javascript">
+<script type="text/javascript">
   jQuery('#pg_cms_template_id').change(function () {
     jQuery.get('<%= url_for(action: 'show_template_options', id: @pg) %>?template_id=' + jQuery(this).val(), null, function (data) {
       jQuery('#edit_page_template_options').html(data);

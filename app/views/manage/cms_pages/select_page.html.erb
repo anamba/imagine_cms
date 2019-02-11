@@ -1,23 +1,18 @@
 <%
   cbNumColumns = 0;
-  cbColWidth = 170;
+  cbColWidth = 200;
   cbColHeight = 200;
-  cbBorderWidth = 1;
-  cbColWidthFull = 172;
 -%>
-<%= javascript_tag <<-EOF
+<script type="text/javascript">
   dojo.require("dojo.widget.*");
   dojo.require("dojo.widget.Dialog");
   
-  cbColWidth = '#{cbColWidth}px';
-  cbColHeight = '#{cbColHeight}px';
-  cbBorderWidth = '#{cbBorderWidth}px';
-  cbColWidthFull = '#{cbColWidthFull}';
-EOF
-%>
+  window.cbColWidth = '<%= cbColWidth %>px';
+  window.cbColHeight = '<%= cbColHeight %>px';
+</script>
 
 <div id="columnBrowserContainer" style="width: 100%; height: <%= cbColHeight + 20 %>px; overflow: auto;">
-  <div id="columnBrowser" style="width: <%= cbColWidthFull * (@page_levels.size) %>px;">
+  <div id="columnBrowser" style="width: <%= (cbColWidth+1) * @page_levels.size %>px;">
     <% @page_levels.each_with_index do |name, i| %>
       <%
         if !name.blank?
@@ -42,7 +37,7 @@ EOF
           break_flag = true
         end
       -%>
-      <div id="columnBrowserLevel<%= i %>" style="width: <%= cbColWidth %>px; height: <%= cbColHeight %>px; overflow: auto; float: left; border: <%= cbBorderWidth %>px solid gray;">
+      <div id="columnBrowserLevel<%= i %>" class="cb_column">
         <% if i == 0 -%>
           <%= render :partial => 'list_page_select', :locals => { :list_page_select => CmsPage.find(1) } %>
         <% else -%>

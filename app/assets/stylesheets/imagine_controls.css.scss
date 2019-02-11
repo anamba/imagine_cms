@@ -34,13 +34,56 @@ div.auto_complete ul strong.highlight {
 
 
 /** column browser **/
-
-.cb_item {
-    color: black;
-    padding-left: 2px;
+#columnBrowserContainer {
+    width: 100%; max-height: 90vh;
+    overflow: auto;
+    border: 1px solid gray;
+    border-width: 0 0 0 1px;
 }
+#columnBrowserToolbar {
+    background-color: #ddd;
+    padding: 5px 4px 0;
+    margin: 0 0 5px;
+
+    a {
+        margin-left: 2px;
+    }
+    a:first-child { margin-left: 0; }
+}
+.cb_column {
+    overflow: auto;
+    float: left;
+    border: 1px solid gray;
+    border-width: 1px 1px 1px 0;
+}
+.cb_item {
+    position: relative;
+    color: black;
+    padding: 2px;
+    width: calc(100% - 22px);
+    overflow: hidden;
+    float: left;
+    cursor: pointer;
+
+    img { position: absolute; left: 5px; top: 5px; }
+    span {
+        display: block;
+        padding: 2px 0px 2px 20px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;      
+    }
+  }
 
 .cb_item.cb_item_selected {
     color: white;
     background-color: #506D91;
+}
+
+.cb_item.cb_item_offline {
+    color: gray;
+}
+.cb_item.cb_item_offline.cb_item_selected {
+    color: lightgray;
 }

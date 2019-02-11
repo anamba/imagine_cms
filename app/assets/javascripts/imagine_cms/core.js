@@ -85,16 +85,11 @@ function dpNextMonth(object, method_prefix, max_year) {
 var cbNumColumns = 0;
 var cbColWidth = '200px';
 var cbColHeight = '240px';
-var cbBorderWidth = '1px';
-var cbColWidthFull = 202;
 
 function cbAddColumn() {
-    var currentWidth = parseInt($('columnBrowser').style.width, 10);
-    // if (currentWidth < ((cbNumColumns+1) * cbColWidthFull)) {
-      $('columnBrowser').style.width = '' + ((cbNumColumns+1) * cbColWidthFull) + 'px';
-      $('columnBrowserContainer').scrollLeft = $('columnBrowserContainer').scrollWidth;
-    // }
-    $('columnBrowser').innerHTML += "<div id=\"columnBrowserLevel" + cbNumColumns + "\" style=\"width: " + cbColWidth + "; height: " + cbColHeight + "; overflow: auto; float: left; border-width: " + cbBorderWidth + " " + cbBorderWidth + " " + cbBorderWidth + " " + (cbNumColumns == 0 ? cbBorderWidth : '0') + "; border-style: solid; border-color: gray;\">Loading...</div>";
+    jQuery('#columnBrowser').css({ width: '' + ((cbNumColumns+1) * (cbColWidth+1)) + 'px' });
+    jQuery('#columnBrowserContainer').scrollLeft($('columnBrowserContainer').scrollWidth);
+    jQuery('#columnBrowser').append('<div id="columnBrowserLevel' + cbNumColumns + '" class="cb_column">Loading...</div>');
     cbNumColumns++;
 }
 
@@ -110,31 +105,25 @@ function setScrollbarPosition(el, coords) {
 }
 
 function cbSelectItem(el, currentLevel, urlForNextLevel) {
-    var el = $(el);
-    coords = getScrollbarPosition(el.parentNode);
+    var el = jQuery(el);
+    // coords = getScrollbarPosition(el.parentNode);
     
-    // remove all higher levels and unselect all other same-level divs
+    // remove all higher levels
     for (var i = currentLevel + 1; i <= cbNumColumns; i++) {
-        d = $('columnBrowserLevel' + i);
-        if (d) d.parentNode.removeChild(d);
+        jQuery('#columnBrowserLevel' + i).remove();
     }
     cbNumColumns = currentLevel + 1;
-    
-    prefix = 'cb_item_';
-    $A(el.parentNode.childNodes).each(function (d) {
-        if (d.id && d.id.substring(0, prefix.length) == prefix) {
-            d.className = 'cb_item';
-        }
-    })
-    
-    // select and expand current dept div
-    el.className = 'cb_item cb_item_selected';
-    
+
+    // unselect all other same-level divs and select target
+    // prefix = 'cb_item_';
+    el.siblings().removeClass('cb_item_selected');
+    el.addClass('cb_item_selected');
+
+    // display children
     cbAddColumn();
-    el = $(el.id);
-    new Ajax.Updater('columnBrowserLevel' + (currentLevel+1), urlForNextLevel, {method: 'GET', asynchronous:true, evalScripts:true});
-    
-    setScrollbarPosition(el.parentNode, coords);
+    new Ajax.Updater('columnBrowserLevel' + (currentLevel+1), urlForNextLevel, {method: 'GET', asynchronous: true, evalScripts: true});
+
+    // setScrollbarPosition(el.parentNode, coords);
 }
 
 
