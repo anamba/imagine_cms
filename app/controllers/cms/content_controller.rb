@@ -268,7 +268,7 @@ module Cms # :nodoc:
     def rss_feed
       min_time = Time.rfc2822(request.env["HTTP_IF_MODIFIED_SINCE"]) rescue nil
       if min_time && (Time.now - min_time) < 5.minutes
-        render text: '', status: '304 Not Modified' and return
+        render plain: '', status: '304 Not Modified' and return
       end
       
       @@cms_page_table_exists ||= CmsPage.table_exists?
@@ -292,7 +292,7 @@ module Cms # :nodoc:
         
         if min_time && @most_recent_pub_date.published_date && @most_recent_pub_date.published_date <= min_time
           # use cached version
-          render text: '', status: '304 Not Modified' and return
+          render plain: '', status: '304 Not Modified' and return
         end
         
         @pages.each_with_index do |page, index|

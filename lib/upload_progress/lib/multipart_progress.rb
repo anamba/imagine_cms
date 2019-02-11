@@ -20,7 +20,7 @@
 #
 #   class UploadController < ApplicationController
 #     def upload_status
-#       render :text => "Percent complete: " + @session[:uploads]['SOMEIDYOUSET'].completed_percent"
+#       render :plain => "Percent complete: " + @session[:uploads]['SOMEIDYOUSET'].completed_percent"
 #     end
 #   end
 #
