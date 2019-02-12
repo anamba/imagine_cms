@@ -6,7 +6,7 @@ class ImagineCmsMailer < ActionMailer::Base
     @page_version = page_version
     @recipient = recipient
     @sender = sender
-    @change_description = change_description
+    @change_description = change_description # not currently used
     
     mail(to: recipient.email_address, reply_to: (sender.email_address.blank? ? nil : sender.email_address),
          from: "#{sender.first_name} #{sender.last_name} <#{CmsRequestReviewEmailSender}>",

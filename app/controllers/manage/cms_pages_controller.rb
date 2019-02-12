@@ -448,10 +448,10 @@ class Manage::CmsPagesController < Manage::ApplicationController
         logger.error(e)
       end
     end
-    
-    render nothing: true
+
+    render plain: 'success'
   end
-  
+
   #
   # helpers
   #
