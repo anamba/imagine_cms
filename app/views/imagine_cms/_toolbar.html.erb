@@ -26,5 +26,9 @@
       </td>
     </tr>
   </table>
-  <%= javascript_tag "if (loggedIn()) $('mainCCSToolbar').show();" %>
+  <script type="text/javascript">
+    window.addEventListener('DOMContentLoaded', function(event) {
+      if (loggedIn()) $('mainCCSToolbar').show();
+    });
+  </script>
 <%- end -%>
