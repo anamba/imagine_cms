@@ -48,3 +48,14 @@ Get paid support and hosting for Imagine CMS straight from the people who made i
 ## Contributing
 
 Imagine 7 (Crystal) will be a true open source project, but this project (Ruby-based Imagine) will remain more or less closed for the foreseeable future. If companies or individuals are willing to sponsor or co-develop new features, we can work something out.
+
+## Building Docker Image
+
+(notes for myself)
+
+```bash
+docker build -t anamba/imagine5-dev:latest .
+docker tag anamba/imagine5-dev:latest anamba/imagine5-dev:5.2.1
+docker tag anamba/imagine5-dev:latest anamba/imagine5-dev:5.2
+docker push anamba/imagine5-dev
+```

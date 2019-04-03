@@ -10,10 +10,10 @@ RUN apt-get upgrade -y -o Dpkg::Options::="--force-confnew"
 
 # Install other packages we depend on
 RUN apt-get install -y mysql-client
+RUN apt-get install -y memcached
 RUN apt-get install -y libmagickcore-dev libmagickwand-dev  # for rmagick2 gem
 RUN apt-get install -y imagemagick                          # for mini-magick gem
-RUN apt-get install -y openjdk-8-jre-headless               # java for fop
-RUN apt-get install -y cmake pkg-config                     # for rugged (git)
+# RUN apt-get install -y openjdk-8-jre-headless             # java for fop (rarely used; add to your own Dockerfile if you need it)
 RUN apt-get autoremove -y
 
 # apt clean up
