@@ -177,12 +177,12 @@
 </div>
 
 <script type="text/javascript">
-  var displayAsList = jQuery('#page_objects_<%= key %>-style-display-as_list').checked;
-  jQuery('.page_list_<%= key %>_list_option').toggle(displayAsList);
-  jQuery('.page_list_<%= key %>_calendar_option').toggle(!displayAsList);
-  
   // reattach to a safe place in the DOM (away from styled regions)
-  jQuery(document).ready(function () {
+  window.addEventListener('DOMContentLoaded', (event) => {
+    var displayAsList = jQuery('#page_objects_<%= key %>-style-display-as_list').checked;
+    jQuery('.page_list_<%= key %>_list_option').toggle(displayAsList);
+    jQuery('.page_list_<%= key %>_calendar_option').toggle(!displayAsList);
+
     jQuery('#page_list_<%= key %>').appendTo(jQuery('#page_content_form')[0]);
     jQuery('#page_objects_<%= key %>-style-display-as_list').click(function () {
       jQuery('.page_list_<%= key %>_list_option').show();

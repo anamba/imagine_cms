@@ -8,7 +8,11 @@
         <%= text_field(:page_objects, "#{key}-sources-tag#{i}", :class => 'form', :style => 'margin: 0; padding: 2px; border: 1px solid gray; width: 98%;') %>
         
         <div id="page_objects_<%= key %>-sources-tag<%= i %>_auto_complete" class="auto_complete" style="display: none;"></div>
-        <%= javascript_tag "new Autocompleter.Local('page_objects_#{key}-sources-tag#{i}', 'page_objects_#{key}-sources-tag#{i}_auto_complete', taglist, { frequency: 0.1, minChars: 1 })" %>
+        <script type="text/javascript">
+          window.addEventListener('DOMContentLoaded', (event) => {
+            new Autocompleter.Local('page_objects_<%= key %>-sources-tag<%= i %>', 'page_objects_<%= key %>-sources-tag<%= i %>_auto_complete', taglist, { frequency: 0.1, minChars: 1 });
+          });
+        </script>
       </td>
       <td>
         <%= select(:page_objects, "#{key}-sources-tag#{i}-behavior", [ 'include', 'exclude', 'require' ], {}, :class => 'form', :style => 'margin: 0; padding: 1px; border: 1px solid gray; width: 100%;') %>

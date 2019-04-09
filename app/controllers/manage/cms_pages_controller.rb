@@ -475,12 +475,23 @@ class Manage::CmsPagesController < Manage::ApplicationController
       focusOnLoad = !defined?(@cms_text_editor_placed)
       @cms_text_editor_placed = true
       content = ''.html_safe
-      content << text_area(:page_objects, key, { :dojoType => 'Editor2', :toolbarGroup => 'main', :isToolbarGroupLeader => 'false',
-                            :focusOnLoad => focusOnLoad.to_s, :style => 'border: 2px dashed gray; padding: 5px',
-                            :minHeight => '100px' }.update(html_options))
-      content << content_tag(:div, ''.html_safe, :id => "page_object_config_#{key}")
-      content << javascript_tag("jQuery(document).ready(function () { scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version}); });")
-      content << observe_field("page_objects_#{key}", :function => "scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});", :frequency => 2)
+      content << text_area(:page_objects, key,
+                           { dojoType: 'Editor2', toolbarGroup: 'main', isToolbarGroupLeader: 'false',
+                             focusOnLoad: focusOnLoad.to_s, style: 'border: 2px dashed gray; padding: 5px',
+                             minHeight: '100px' }.update(html_options))
+      content << content_tag(:div, '', id: "page_object_config_#{key}")
+      script_tag = <<-EOT
+        <script type="text/javascript">
+          window.addEventListener('load', (event) => {
+            scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});
+            setInterval(function() {
+              scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});
+            }, 1000);
+          });
+        </script>
+        EOT
+      content << script_tag.html_safe
+        # content << observe_field("page_objects_#{key}", function: "scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});", frequency: 2)
       content
     when :page_list
       # set defaults unless values are present in template

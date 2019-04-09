@@ -813,17 +813,21 @@ module CmsApplicationHelper
     default_value = Time.parse(default_value) if default_value.is_a?(String)
     default_value ||= start_date
     
-    draw_calendar = "new Ajax.Updater('date_picker_#{object}_#{method_prefix}_days', '" + date_picker_url + "?" +
-                    "month=' + $('#{object}_#{method_prefix}_month_sel').value + " +
-                    "'&year=' + $('#{object}_#{method_prefix}_year_sel').value + " +
-                    "'&min_time=' + #{start_date.to_i} + " +
-                    "'&max_time=' + #{end_date.to_i} + " +
-                    "'&exclude_days=#{exclude_days.join(',')}' + " +
-                    "'&onchange=#{escape_javascript(options[:onchange])}' + " +
-                    "'&object=#{object}' + " +
-                    "'&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true})"
-    
-    ret = <<EOF
+    draw_calendar = <<-EOT
+      window.addEventListener('DOMContentLoaded', (event) => {
+        new Ajax.Updater('date_picker_#{object}_#{method_prefix}_days',
+                           '#{date_picker_url}?month=' + $('#{object}_#{method_prefix}_month_sel').value +
+                           '&year=' + $('#{object}_#{method_prefix}_year_sel').value +
+                           '&min_time=' + #{start_date.to_i} +
+                           '&max_time=' + #{end_date.to_i} +
+                           '&exclude_days=#{exclude_days.join(',')}' +
+                           '&onchange=#{escape_javascript(options[:onchange])}' +
+                           '&object=#{object}' +
+                           '&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true})
+        });
+      EOT
+
+    ret = <<-EOT
   <span><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><span id="date_picker_#{object}_#{method_prefix}_value" style="font-weight: normal;">#{default_value.strftime('%a %m/%d/%y')}</span></a></span>
   <span id="date_picker_#{object}_#{method_prefix}icon"><a href="#" onclick="showDatePicker('#{object}', '#{method_prefix}'); return false;"><img src="/assets/management/icon_time.gif" style="float: none" alt="date picker" /></a></span>
   <div id="date_picker_#{object}_#{method_prefix}main" style="display: none; background-color: white; border: 1px solid gray; padding: 3px; z-index: 101;" class="date-picker-main">
@@ -847,7 +851,7 @@ module CmsApplicationHelper
         <a href="#" onclick="hideDatePicker('#{object}', '#{method_prefix}'); return false;">Close</a>
     </div>
   </div>
-EOF
+EOT
     ret += javascript_tag(draw_calendar)
     ret.html_safe
   end

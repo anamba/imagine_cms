@@ -335,13 +335,15 @@ function closePageBrowser() {
     $(pageBrowserFieldID).value = $('page_browser_selection').value;
 }
 
-
+// first level of this hash is parent_key below
 var cmsPageObjects = {};
+
 function scanForPageObjects(page_id, parent_key, version) {
   if (jQuery('#page_objects_' + parent_key).val().length == 0) return;
-  
+
   var found = {};
-  
+  if (!cmsPageObjects[parent_key]) cmsPageObjects[parent_key] = {};
+
   var regex = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
   var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
   if (matches) {
@@ -356,7 +358,7 @@ function scanForPageObjects(page_id, parent_key, version) {
       }
     });
   }
-  
+
   var regex = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
   var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
   if (matches) {
@@ -371,22 +373,22 @@ function scanForPageObjects(page_id, parent_key, version) {
       }
     });
   }
-  
+
   // remove the cruft
   jQuery.each(cmsPageObjects, function(key, val) {
-    if (cmsPageObjects[key] != found[key]) {
+    if (cmsPageObjects[parent_key][key] != found[key]) {
       obj_key = val + '_container_obj-' + val + '-' + key.replace(/[^\w]/g, '_');
       while (jQuery('#' + obj_key).length > 0) {
         jQuery('#' + obj_key).remove();
       }
-      cmsPageObjects[key] = null;
+      cmsPageObjects[parent_key][key] = null;
     }
   });
   
   // bring in the new
   jQuery.each(found, function (key, val) {
-    if (!cmsPageObjects[key]) {
-      cmsPageObjects[key] = val;
+    if (!cmsPageObjects[parent_key][key]) {
+      cmsPageObjects[parent_key][key] = val;
       jQuery.get('/manage/cms_pages/' + page_id + '/insert_page_object_config?version= ' + version +
                  '&name=' + key + '&type=' + val + '&parent_key=' + parent_key);
     }
