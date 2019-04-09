@@ -27,7 +27,8 @@ COPY /docker/conf/nginx-vhost.conf.template /etc/nginx/
 RUN rm -f /etc/nginx/sites-enabled/default
 
 # Add custom services
-RUN mkdir /etc/service/memcached
+RUN mkdir -p /etc/service/memcached
+RUN rm -f /etc/service/memcached/down
 COPY docker/services/memcached /etc/service/memcached/run
 
 # For convenience
