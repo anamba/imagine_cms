@@ -70,7 +70,7 @@
   jQuery('#edit_content_link').prop('href', '<%=raw url_for action: 'edit_page_content', id: list_page, authenticity_token: form_authenticity_token.to_s %>');
   jQuery('#delete_link').prop('href', '<%=raw url_for action: 'delete_page', id: list_page.id %>');
 </script>
-<script type="text/javascript" async>
+<script type="text/javascript" defer>
   dojo.require("dojo.widget.*");
   dojo.require("dojo.widget.Dialog");
 </script>
