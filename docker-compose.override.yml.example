@@ -1,0 +1,30 @@
+# copy this to docker-compose.override.yml and uncomment lines as needed to override default settings
+#
+# reminder: use `docker ps` to see the list of running containers and their port mappings
+#
+version: '3'
+
+services:
+  web:
+    ports:
+      - '3000:80'        # <---- change the first number to set your local port (on 127.0.0.1)
+    volumes:
+      - ../mysite:/home/app/myapp:delegated                      # set to (relative) path to site you want to run
+      # - .:/home/app/imagine_cms:delegated                      # when working on imagine itself
+      - /home/app/myapp/log
+      - /home/app/myapp/node_modules
+      - gems:/usr/local/rvm/gems
+      - ~/.gitconfig:/home/app/.gitconfig                        # if you want to commit from within the container
+    # environment:
+    #   PASSENGER_APP_ENV: production
+
+  db:
+    ports:               # access using mysql -P (not -p), ex: mysql -h 127.0.0.1 -P 33060 -u root
+      # - '33060:3306'   # <---- change the first number to set your local port
+      - '3306'           # <---- or omit the first number entirely to use a random local port (use `docker ps`)
+    volumes:
+      - /var/lib/mysql
+
+volumes:
+  gems:
+    external: true
