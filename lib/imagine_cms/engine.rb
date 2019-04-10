@@ -26,7 +26,7 @@ module ImagineCms
     #
     require 'prototype-rails'
     require 'aws/s3'
-    require 'RMagick'
+    require 'rmagick'
     require 'mini_magick'
     require 'zip'
     require 'rails_rinku'
