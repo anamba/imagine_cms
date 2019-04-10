@@ -814,17 +814,15 @@ module CmsApplicationHelper
     default_value ||= start_date
     
     draw_calendar = <<-EOT
-      window.addEventListener('DOMContentLoaded', (event) => {
-        new Ajax.Updater('date_picker_#{object}_#{method_prefix}_days',
-                           '#{date_picker_url}?month=' + $('#{object}_#{method_prefix}_month_sel').value +
-                           '&year=' + $('#{object}_#{method_prefix}_year_sel').value +
-                           '&min_time=' + #{start_date.to_i} +
-                           '&max_time=' + #{end_date.to_i} +
-                           '&exclude_days=#{exclude_days.join(',')}' +
-                           '&onchange=#{escape_javascript(options[:onchange])}' +
-                           '&object=#{object}' +
-                           '&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true})
-        });
+      new Ajax.Updater('date_picker_#{object}_#{method_prefix}_days',
+                       '#{date_picker_url}?month=' + $('#{object}_#{method_prefix}_month_sel').value +
+                       '&year=' + $('#{object}_#{method_prefix}_year_sel').value +
+                       '&min_time=' + #{start_date.to_i} +
+                       '&max_time=' + #{end_date.to_i} +
+                       '&exclude_days=#{exclude_days.join(',')}' +
+                       '&onchange=#{escape_javascript(options[:onchange])}' +
+                       '&object=#{object}' +
+                       '&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true});
       EOT
 
     ret = <<-EOT
@@ -852,7 +850,17 @@ module CmsApplicationHelper
     </div>
   </div>
 EOT
-    ret += javascript_tag(draw_calendar)
+    ret += <<-EOT
+      <script type="text/javascript">
+        if (typeof(Ajax) == 'undefined') {
+          window.addEventListener('DOMContentLoaded', (event) => {
+            #{draw_calendar}
+          });
+        } else {
+          #{draw_calendar}
+        }
+      </script>
+      EOT
     ret.html_safe
   end
   

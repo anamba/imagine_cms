@@ -483,7 +483,6 @@ class Manage::CmsPagesController < Manage::ApplicationController
       script_tag = <<-EOT
         <script type="text/javascript">
           window.addEventListener('load', (event) => {
-            scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});
             setInterval(function() {
               scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});
             }, 1000);
@@ -491,7 +490,6 @@ class Manage::CmsPagesController < Manage::ApplicationController
         </script>
         EOT
       content << script_tag.html_safe
-        # content << observe_field("page_objects_#{key}", function: "scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});", frequency: 2)
       content
     when :page_list
       # set defaults unless values are present in template

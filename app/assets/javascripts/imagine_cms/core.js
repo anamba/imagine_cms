@@ -249,7 +249,7 @@ function cancelSelectThumbnail() {
     hideDojoDialog('select_thumbnail_dialog');
 }
 
-var gallerySize = [];
+if (!window.gallerySize) window.gallerySize = {};
 function changeGalleryImage(galleryName, index) {
     var target = galleryName + '_image_' + index;
     var caption = galleryName + '_caption_' + index;
