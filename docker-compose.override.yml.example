@@ -11,34 +11,20 @@ services:
     volumes:
       - ../mysite:/home/app/myapp:delegated                      # set to (relative) path to site you want to run
       # - .:/home/app/imagine_cms:delegated                      # when working on imagine itself
-      # - ./prototype-rails:/home/app/prototype-rails:delegated  # when working on imagine dependency prototype-rails
-      - log:/home/app/myapp/log
-      - node_modules:/home/app/myapp/node_modules
+      - /home/app/myapp/log
+      - /home/app/myapp/tmp
       - gems:/usr/local/rvm/gems
       - ~/.gitconfig:/home/app/.gitconfig                        # if you want to commit from within the container
     # environment:
     #   PASSENGER_APP_ENV: production
-    # networks:  # to use traefik, uncomment this along with the networks section at the bottom
-    #   - traefik
-    #   - default
-    # labels:
-    #   traefik.docker.network: traefik
 
   db:
     ports:               # access using mysql -P (not -p), ex: mysql -h 127.0.0.1 -P 33060 -u root
       # - '33060:3306'   # <---- change the first number to set your local port
       - '3306'           # <---- or omit the first number entirely to use a random local port (use `docker ps`)
     volumes:
-      - db-data:/var/lib/mysql
+      - /var/lib/mysql
 
 volumes:
-  db-data:
-  log:
-  node_modules:
-  tmp:
   gems:
     external: true
-
-# networks:
-#   traefik:
-#     external: true

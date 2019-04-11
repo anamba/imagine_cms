@@ -16,4 +16,4 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
       
   # redis:
-  #   image: redis:4.0-32bit  # not really 32-bit, just compiled that way to reduce memory usage
+  #   image: redis:5.0-32bit  # not really 32-bit, just compiled that way to reduce memory usage
