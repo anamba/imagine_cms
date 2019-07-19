@@ -233,29 +233,30 @@ module ActionControllerExtensions
         content << '</div>'
         content << <<-EOT
 <script type="text/javascript">
-  jQuery('##{key}').css({ opacity: '1', cursor: 'default' });
-  jQuery('.imagine_cms-paginator-link').not('.imagine_cms-paginator-link-selected').mouseover(function () {
-    jQuery(this).addClass('imagine_cms-paginator-link-selected');
-  }).mouseout(function () {
-    jQuery(this).removeClass('imagine_cms-paginator-link-selected');
-  });
-  
+  setTimeout(() => {
+    jQuery('##{key}').css({ opacity: '1', cursor: 'default' });
+    jQuery('.imagine_cms-paginator-link').not('.imagine_cms-paginator-link-selected').mouseover(function () {
+      jQuery(this).addClass('imagine_cms-paginator-link-selected');
+    }).mouseout(function () {
+      jQuery(this).removeClass('imagine_cms-paginator-link-selected');
+    });
 EOT
         num_segments.times do |seg|
           start = seg * limit
           content << <<-EOT
-  jQuery('##{key}-segment-#{seg}').click(function () {
-    jQuery('##{key}').css({ cursor: 'wait', opacity: '0.5' });
-    jQuery('html,body').animate({ scrollTop: jQuery('##{key}').position().top }, 200);
-    jQuery.get('#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', function (data) {
-      jQuery('##{key}').html(data);
-      jQuery('##{key}').css({ cursor: 'default', opacity: '1' });
-    });
-    return false;
-  })
+    jQuery('##{key}-segment-#{seg}').click(function () {
+      jQuery('##{key}').css({ cursor: 'wait', opacity: '0.5' });
+      jQuery('html,body').animate({ scrollTop: jQuery('##{key}').position().top }, 200);
+      jQuery.get('#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', function (data) {
+        jQuery('##{key}').html(data);
+        jQuery('##{key}').css({ cursor: 'default', opacity: '1' });
+      });
+      return false;
+    })
 EOT
         end
         content << <<-EOT
+  });
 </script>
 EOT
       end
