@@ -602,6 +602,7 @@ class Management::CmsController < Management::ApplicationController # :nodoc:
                            { dojoType: 'Editor2', toolbarGroup: 'main', isToolbarGroupLeader: 'false',
                              focusOnLoad: focusOnLoad.to_s, style: 'border: 2px dashed gray; padding: 5px',
                              minHeight: '100px' }.update(html_options))
+      content << content_tag(:div, '', id: "page_object_config_#{key}")
       script_tag = <<-EOT
         <script type="text/javascript">
           window.addEventListener('load', (event) => {
