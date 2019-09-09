@@ -7,11 +7,11 @@
 Imagine CMS is a web content management system developed by [Bigger Bird Creative, Inc.](https://biggerbird.com) in 2006 for its clients.
 Other CMSes came with a learning curve: not a problem for daily users, but clients who only used it once a month or so would forget everything by the next time they logged in.
 Simpler systems didn't have enough functionality to allow us to do what we wanted to do as designers and developers.
-Thus, we created a CMS that is easy for clients to use, stays out of our way, and provides useful automation (publishing and unpublishing on a schedule, navigation links, RSS feeds, etc.).
+Thus, we created a CMS that is easy for clients to use, stays out of our way, and provides useful automation (lists, publishing and unpublishing on a schedule, navigation links, RSS feeds, etc.).
 
 ## Current Status
 
-Imagine 5 is ready for production use (v5.2-stable branch). Imagine 6 (compatible with Rails 6) is in the planning phase.
+Imagine 5 is ready for production use (v5.2-stable branch), but is being wound down in favor of Imagine 6 and 7.
 
 Imagine 4 (v4.2-stable branch) is available for apps tied to Rails 4.2, but is no longer actively maintained.
 
@@ -19,7 +19,7 @@ Imagine 3 (v3.0-stable branch) is available for apps tied to Rails 3.x, but is n
 
 Unless you are already familiar with Imagine, this project is not suitable for wider use. Why? Well, the reason this version of Imagine is published on Github is to ensure that if something happens to Bigger Bird, our clients will not be left high and dry. However, this version was never intended to be used by the general public.
 
-Imagine 7 will be a clean break and a great time to try Imagine CMS. Depending on how smoothly development goes, it could end up being released before Imagine 6.
+Imagine 7 will be a clean break and a great time to try Imagine CMS.
 
 ## History and Roadmap
 
@@ -36,14 +36,14 @@ All that is now firmly in the past. By extracting Imagine functionality into a R
 * Imagine 5.0 (Rails 5.0, Ruby 2.2): [SKIPPED] Compatibility with Rails 5.0
 * Imagine 5.1 (Rails 5.1, Ruby 2.4): [SKIPPED] Compatibility with Rails 5.1
 * **Imagine 5.2 (Rails 5.2, Ruby 2.5/2.6): [CURRENT RELEASE] Compatibility with Rails 5.2**
-* Imagine 6 (Rails 6, Ruby 2.5/2.6): [FUTURE] Compatibility with Rails 6
-* Imagine 7: [IN PROGRESS] Rewrite in [Crystal](https://crystal-lang.org/) with [Apache CouchDB](http://couchdb.apache.org/) backend
+* Imagine 6 (Elixir/Phoenix + MySQL): Closed source internal release, stepping stone between Imagine 5 and 7
+* Imagine 7 (Elixir/Phoenix + CouchDB): [IN PROGRESS] Community-driven open source project
 
-Imagine 6 will continue to be Rails-based, but Imagine 7 is a complete, ground-up rewrite in Crystal. Development will begin in a new repository under an Imagine CMS organization, as a proper community-driven open source project (finally!). The core concepts will continue on, but not a single line of code will carry over.
+Imagine 6 is a complete, ground-up rewrite in Elixir, and Imagine 7 builds on that, while also replacing the original MySQL/MariaDB store with CouchDB for improved scaling, redundancy, and replication. Imagine 7 development will also be done in the open, in a new repository under the Imagine CMS organization, as a proper community-driven open source project (finally!). The core concepts will continue on, but not a single line of code will be preserved.
 
 ## Hosting
 
-Imagine 3.x-6.x can run on typical Rails hosting platforms (anything that uses Passenger, Unicorn, Puma, etc.). On hosts that don't allow writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (note: this mode of operation has not been fully tested).
+Imagine 3.x-5.x can run on typical Rails hosting platforms (anything that uses Passenger, Unicorn, Puma, etc.). On hosts that don't allow writing to the local filesystem (e.g. Heroku) you won't be able to use photo galleries or page caching, but other features should work (note: this mode of operation has not been fully tested).
 
 ## Getting Help
 
@@ -51,7 +51,7 @@ Get paid support and hosting for Imagine CMS straight from the people who made i
 
 ## Contributing
 
-Imagine 7 (Crystal) will be a true open source project with full community involvement, but this project (Ruby-based Imagine 3.x - 6.x) will remain mostly closed for the foreseeable future (source will continue to be made available on Github, but development will be driven by Bigger Bird only). If companies or individuals are willing to sponsor or co-develop new features, we can work something out.
+Imagine 7 (Elixir rewrite) will be a true open source project with full community involvement, but this project (Ruby-based Imagine 3.x - 5.x) will remain mostly closed for the foreseeable future (source will continue to be made available on Github, but development will be driven by Bigger Bird only). If companies or individuals are willing to sponsor or co-develop new features, we can work something out.
 
 ## Building Docker Image
 
