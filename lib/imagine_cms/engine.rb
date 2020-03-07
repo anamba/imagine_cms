@@ -51,6 +51,7 @@ module ImagineCms
     end
     
     initializer 'imagine_cms.load_helpers' do |app|
+      ActionController::Base.send :include, CmsCustomHelper
       ActionController::Base.send :include, CmsApplicationHelper
     end
     
