@@ -21,7 +21,7 @@
 <table id="dlg-page-properties">
   <col width="120"><col width="*"><col width="5">
 <%- if @pg.id != 1 -%>
-  <tr>
+  <tr id="cms_page-form-name-row">
     <td>Name (for URL):</td>
     <td>
       <%= text_field :pg, :name, class: 'form', style: 'margin-bottom: 0; width: 150px', onchange: (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = $('original_name').value; };") %><br/>
@@ -30,6 +30,15 @@
     </td>
   </tr>
 <%- end -%>
+  <tr id="cms_page-form-parent_id-row" style="display: none;">
+    <td>Parent Page ID:</td>
+    <td><%= text_field :pg, :parent_id, class: 'form', style: 'width: 100%;' %></td>
+  </tr>
+  <script>
+    let nameRow = document.getElementById("cms_page-form-name-row");
+    let parentIdRow = document.getElementById("cms_page-form-parent_id-row");
+    if (nameRow && parentIdRow) nameRow.addEventListener("click", (e) => { if (e.altKey) { parentIdRow.style.display = "table-row"; } });
+  </script>
   <tr>
     <td>Page Title:</td>
     <td><%= text_field :pg, :title, class: 'form', style: 'width: 100%;' %></td>
