@@ -1,4 +1,4 @@
-# Imagine CMS
+# Imagine 5 - Rails-powered CMS
 
 [![Version](https://img.shields.io/github/tag/anamba/imagine_cms.svg?maxAge=360)](https://github.com/anamba/imagine_cms/releases/latest)
 [![License](https://img.shields.io/github/license/anamba/imagine_cms.svg)](https://github.com/anamba/imagine_cms/blob/master/license.txt)
@@ -11,7 +11,9 @@ Thus, we created a CMS that is easy for clients to use, stays out of our way, an
 
 ## Current Status
 
-Imagine 5 is ready for production use (v5.2-stable branch), but is being wound down in favor of Imagine 6 and 7.
+[Imagine 6](https://github.com/ImagineCMS/imagine_cms) (Elixir-based) is use in production.
+
+Imagine 5 (this repo) is in use in production, but is being wound down in favor of Imagine 6.
 
 Imagine 4 (v4.2-stable branch) is available for apps tied to Rails 4.2, but is no longer actively maintained.
 
@@ -19,7 +21,7 @@ Imagine 3 (v3.0-stable branch) is available for apps tied to Rails 3.x, but is n
 
 Unless you are already familiar with Imagine, this project is not suitable for wider use. Why? Well, the reason this version of Imagine is published on Github is to ensure that if something happens to Bigger Bird, our clients will not be left high and dry. However, this version was never intended to be used by the general public.
 
-Imagine 7 will be a clean break and a great time to try Imagine CMS.
+Imagine 7 (planned) will be a clean break and a great time to try Imagine CMS.
 
 ## History and Roadmap
 
@@ -35,9 +37,9 @@ All that is now firmly in the past. By extracting Imagine functionality into a R
 * Imagine 4.2 (Rails 4.2, Ruby 2.2): [DONE, v4.2-stable] Compatibility with Rails 4.2, many minor fixes and UI improvements
 * Imagine 5.0 (Rails 5.0, Ruby 2.2): [SKIPPED] Compatibility with Rails 5.0
 * Imagine 5.1 (Rails 5.1, Ruby 2.4): [SKIPPED] Compatibility with Rails 5.1
-* **Imagine 5.2 (Rails 5.2, Ruby 2.5/2.6): [CURRENT RELEASE] Compatibility with Rails 5.2**
-* Imagine 6 (Elixir/Phoenix + MySQL): Closed source internal release, stepping stone between Imagine 5 and 7
-* Imagine 7 (Elixir/Phoenix + CouchDB): [IN PROGRESS] Community-driven open source project
+* **Imagine 5.2 (Rails 5.2, Ruby 2.5/2.6): [PRODUCTION] Compatibility with Rails 5.2**
+* **Imagine 6 (Elixir/Phoenix + MySQL): [PRODUCTION] Bridge between Imagine 5 and 7**
+* Imagine 7 (Elixir/Phoenix + CouchDB): [PLANNED] Community-driven open source project
 
 Imagine 6 is a complete, ground-up rewrite in Elixir, and Imagine 7 builds on that, while also replacing the original MySQL/MariaDB store with CouchDB for improved scaling, redundancy, and replication. Imagine 7 development will also be done in the open, in a new repository under the Imagine CMS organization, as a proper community-driven open source project (finally!). The core concepts will continue on, but not a single line of code will be preserved.
 
@@ -51,7 +53,7 @@ Get paid support and hosting for Imagine CMS straight from the people who made i
 
 ## Contributing
 
-Imagine 7 (Elixir rewrite) will be a true open source project with full community involvement, but this project (Ruby-based Imagine 3.x - 5.x) will remain mostly closed for the foreseeable future (source will continue to be made available on Github, but development will be driven by Bigger Bird only). If companies or individuals are willing to sponsor or co-develop new features, we can work something out.
+Imagine 6 (Elixir rewrite) is now open source and Imagine 7 (MySQL -> CouchDB) will be a true open source project with full community involvement, but this project (Ruby-based Imagine 3.x - 5.x) will remain mostly closed for the foreseeable future (source will continue to be made available on Github, but development will be driven by Bigger Bird only). If companies or individuals are willing to sponsor or co-develop new features, we can work something out.
 
 ## Building Docker Image
 
