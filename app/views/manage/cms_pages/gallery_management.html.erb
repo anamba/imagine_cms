@@ -95,7 +95,7 @@
         <td></td>
         <td>
           <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
-          <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('gallery_file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+          <%= submit_tag 'Next', class: 'form_button', style: 'width: 70px;', data: { disable_with: 'Uploading...' } %>
         </td>
       </tr>
     </table>

@@ -5,31 +5,71 @@
 certain your image is already web-ready. Otherwise, click "Next" to crop and
 resize your image before using it.</p>
 
-<%= form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg, :overwrite => 1 },
-                                  { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+<%= form_tag({ action: 'receive_image', id: @pg, overwrite: 1 }, { id: 'upload-image-form', multipart: true }) do %>
 <table>
   <tr>
     <td>File:</td>
     <td>
-      <%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+      <%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; min-width: 150px' %><br>
       <span style="color: #888888">Valid image types: jpeg, png, gif</span>
     </td>
   </tr>
   <tr>
     <td></td>
     <td>
-      <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
-      <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; $('next_clicked_upload').value = '1'; $('next_clicked').value = '1'; this.disabled = true; this.value = 'Uploading...';" %>
-      <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+      <%= submit_tag 'Next', id: 'upload-image-next-button', class: 'form_button', style: 'min-width: 70px' %>
+      <%= submit_tag 'Finish', id: 'upload-image-finish-button', class: 'form_button', style: 'min-width: 70px' %>
       <%= link_to_function "Cancel", "cancelSelectThumbnail()" %>
-      <%= text_field_tag 'next_clicked_upload', '0', :style => 'display: none' %>
     </td>
   </tr>
 </table>
 <%- end -%>
 
-<%= form_remote_tag(:update => 'select_thumbnail_dialog_content', :html => { :id => 'mainform' },
-                    :url => { :action => 'crop_thumb', :id => @pg }) do -%>
-  <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
-  <%= text_field_tag 'filename', '', :style => 'display: none' %>
+<%= form_remote_tag(update: 'select_thumbnail_dialog_content', html: { id: 'mainform' },
+                    url: { action: 'crop_thumb', id: @pg }) do %>
+  <%= text_field_tag 'next_clicked', '0', style: 'display: none' %>
+  <%= text_field_tag 'filename', '', style: 'display: none' %>
 <%- end -%>
+
+<script>
+  const uploadImageForm = document.getElementById("upload-image-form");
+  const nextButton = document.getElementById("upload-image-next-button");
+  const finishButton = document.getElementById("upload-image-finish-button");
+  const uploadFileField = document.getElementById("file_data");
+
+  nextButton.addEventListener("click", (e) => {
+    e.target.dataset.disableWith = "Uploading...";
+    document.getElementById("next_clicked").value = "1";
+  });
+  finishButton.addEventListener("click", (e) => {
+    e.target.dataset.disableWith = "Uploading...";
+  });
+
+  uploadImageForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (uploadFileField.value == "") {
+      setTimeout(() => {
+        nextButton.value = "Next";
+        finishButton.value = "Finish";
+        nextButton.dataset.disableWith = null;
+        finishButton.dataset.disableWith = null;
+        nextButton.disabled = false;
+        finishButton.disabled = false;
+      });
+      return;
+    }
+
+    let file = uploadFileField.files[0];
+    let formData = new FormData(uploadImageForm);
+
+    let resp = await fetch(uploadImageForm.action, {
+      method: 'POST',
+      body: formData
+    });
+    let data = await resp.json();
+
+    document.getElementById("filename").value = data.filename;
+    document.getElementById("mainform").onsubmit();
+  });
+</script>

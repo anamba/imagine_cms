@@ -1,7 +1,9 @@
 // fix for a Firefox 69 issue
 .dojoFloatingPane {
-	top: 50%; left: 50%;
-	transform: translate(-50%, -50%);
+	position: fixed !important;
+	top: 40px;
+	left: 50%;
+	margin-left: -25%;
 }
 
 .search-result {

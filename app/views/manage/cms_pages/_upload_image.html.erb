@@ -1,4 +1,8 @@
-<%= javascript_tag "try { $('insert_file_dialog_content').innerHTML = ''; } catch (e) {}" %>
+<script>
+  try {
+    document.getElementById("insert_file_dialog_content").innerHTML = "";
+  } catch (e) { }
+</script>
 
 <div id="save_errors" class="error"></div>
 <h3 style="margin-bottom: 10px;">Insert Image</h3>
@@ -10,12 +14,11 @@
   certain your image is already web-ready. Otherwise, click "Next" to crop and
   resize your image before using it.</p>
 
-  <%= form_tag_with_upload_progress({ :action => 'receive_image', :id => @pg },
-                                    { :finish => "if (arguments[0]) { $('filename').value = arguments[0]; $('mainform').onsubmit(); }" }) do -%>
+  <%= form_tag({ action: 'receive_image', id: @pg }, { id: 'upload-image-form', multipart: true }) do %>
   <table>
     <tr>
       <td width="70">Image file:</td>
-      <td><%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %></td>
+      <td><%= file_field 'file', 'data', class: 'form', style: 'margin-bottom: 0; min-width: 250px' %></td>
     </tr>
     <tr>
       <td></td>
@@ -24,50 +27,119 @@
     <tr>
       <td></td>
       <td>
-        <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
-        <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; $('next_clicked_upload').value = '1'; $('next_clicked').value = '1'; this.disabled = true; this.value = 'Uploading...';" %>
-        <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+        <%= submit_tag 'Next', id: 'upload-image-next-button', class: 'form_button', style: 'min-width: 70px' %>
+        <%= submit_tag 'Finish', id: 'upload-image-finish-button', class: 'form_button', style: 'min-width: 70px' %>
         <%= link_to_function "Cancel", "cancelInsertImage()" %>
-        <%= text_field_tag 'next_clicked_upload', '0', :style => 'display: none' %>
       </td>
     </tr>
   </table>
-  <%- end -%>
-</fieldset><br/>
+  <% end %>
+</fieldset><br>
 
 <fieldset>
   <legend>New Photo Gallery</legend>
 
   <p>Upload a zip file of images to create a photo gallery.</p>
 
-  <%= form_tag_with_upload_progress({ :action => 'receive_gallery', :id => @pg },
-                                    { :finish => "if (arguments[0]) { $('dirname').value = arguments[0]; $('mainform_gallery').onsubmit(); }" }) do -%>
+  <%= form_tag({ action: 'receive_gallery', id: @pg }, { id: 'upload-gallery-form', multipart: true }) do %>
   <table>
     <tr>
       <td width="70">Zip file:</td>
       <td>
-        <%= file_field 'gallery_file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+        <%= file_field 'gallery_file', 'data', class: 'form', style: 'margin-bottom: 0; min-width: 250px' %><br/>
       </td>
     </tr>
     <tr>
       <td></td>
       <td>
-        <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
-        <%= submit_tag 'Next', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('gallery_file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+        <%= submit_tag 'Next', id: 'upload-gallery-next-button', class: 'form_button', style: 'min-width: 70px' %>
         <%= link_to_function "Cancel", "cancelInsertImage()" %>
       </td>
     </tr>
   </table>
-  <%- end -%>
+  <% end %>
 </fieldset><br>
 
-<%= form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform' },
-                    :url => { :action => 'crop_image', :id => @pg }) do -%>
-  <%= text_field_tag 'next_clicked', '0', :style => 'display: none' %>
-  <%= text_field_tag 'filename', '', :style => 'display: none' %>
+<%= form_remote_tag(update: 'insert_image_dialog_content', html: { id: 'mainform' },
+                    url: { action: 'crop_image', id: @pg }) do %>
+  <%= text_field_tag 'next_clicked', '0', style: 'display: none' %>
+  <%= text_field_tag 'filename', '', style: 'display: none' %>
 <%- end -%>
 
-<%= form_remote_tag(:update => 'insert_image_dialog_content', :html => { :id => 'mainform_gallery' },
-                    :url => { :action => 'gallery_setup', :id => @pg }) do -%>
-  <%= text_field_tag :dirname, '', :style => 'display: none' %>
+<%= form_remote_tag(update: 'insert_image_dialog_content', html: { id: 'mainform_gallery' },
+                    url: { action: 'gallery_setup', id: @pg }) do %>
+  <%= text_field_tag :dirname, '', style: 'display: none' %>
 <%- end -%>
+
+<script>
+  const uploadImageForm = document.getElementById("upload-image-form");
+  const uploadGalleryForm = document.getElementById("upload-gallery-form");
+  const nextButton = document.getElementById("upload-image-next-button");
+  const finishButton = document.getElementById("upload-image-finish-button");
+  const uploadFileField = document.getElementById("file_data");
+  const galleryNextButton = document.getElementById("upload-gallery-next-button");
+
+  nextButton.addEventListener("click", (e) => {
+    e.target.dataset.disableWith = "Uploading...";
+    document.getElementById("next_clicked").value = "1";
+  });
+  finishButton.addEventListener("click", (e) => {
+    e.target.dataset.disableWith = "Uploading...";
+  });
+  galleryNextButton.addEventListener("click", (e) => {
+    e.target.dataset.disableWith = "Uploading...";
+  });
+
+  uploadImageForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (uploadFileField.value == "") {
+      setTimeout(() => {
+        nextButton.value = "Next";
+        finishButton.value = "Finish";
+        nextButton.dataset.disableWith = null;
+        finishButton.dataset.disableWith = null;
+        nextButton.disabled = false;
+        finishButton.disabled = false;
+      });
+      return;
+    }
+
+    let file = uploadFileField.files[0];
+    let formData = new FormData(uploadImageForm);
+
+    let resp = await fetch(uploadImageForm.action, {
+      method: 'POST',
+      body: formData
+    });
+    let data = await resp.json();
+
+    document.getElementById("filename").value = data.filename;
+    document.getElementById("mainform").onsubmit();
+  });
+
+  uploadGalleryForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (uploadFileField.value == "") {
+      setTimeout(() => {
+        galleryNextButton.value = "Next";
+        galleryNextButton.dataset.disableWith = null;
+        galleryNextButton.disabled = false;
+      });
+      return;
+    }
+
+    let file = uploadFileField.files[0];
+    let formData = new FormData(uploadImageForm);
+
+    let resp = await fetch(uploadImageForm.action, {
+      method: 'POST',
+      body: formData
+    });
+    let data = await resp.json();
+
+    document.getElementById("dirname").value = data.filename;
+    document.getElementById("mainform_gallery").onsubmit();
+  });
+</script>

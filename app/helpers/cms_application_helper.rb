@@ -1050,7 +1050,7 @@ EOF
   
   
   def cropper_image_tag(options)
-    ret = "<img id=\"testImage\" src=\"/assets/#{options[:url]}\" />".html_safe
+    ret = "<img id=\"testImage\" src=\"/assets/#{options[:url]}\" style=\"display: block; position: relative;\" />".html_safe
     ret += javascript_tag("cropper = new Cropper.Img('testImage', { minWidth: 0, minHeight: 0, captureKeys: false, onEndCrop: onEndCrop });")
   end
   

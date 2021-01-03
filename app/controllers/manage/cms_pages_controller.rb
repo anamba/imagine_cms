@@ -583,7 +583,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       FileUtils.cp(data.path(), localfile)
     end
     
-    finish_upload_status "'#{File.basename(localfile)}'"
+    render json: { filename: File.basename(localfile) }.to_json
   end
   
   def crop_image

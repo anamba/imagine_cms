@@ -197,7 +197,7 @@ Pressing "Save Thumbnail" will crop the thumbnail and set it as the new thumbnai
       </tr>
     </table>
     
-    <%= submit_tag 'Save Thumbnail', :class => 'form_button', :onclick => 'cropper.remove(); this.disabled = true; this.value = "Saving...";' %>
+    <%= submit_tag 'Save Thumbnail', class: 'form_button', data: { disable_with: 'Saving...' } %>
     <%= link_to_function "Cancel", "cancelSelectThumbnail()" %>
   <%- end -%>
 </center>

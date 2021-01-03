@@ -11,14 +11,14 @@
   <tr>
     <td>File:</td>
     <td>
-      <%= file_field 'file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %>
+      <%= file_field 'file', 'data', class: 'form', style: 'margin-bottom: 0; min-width: 150px' %>
     </td>
   </tr>
   <tr>
     <td></td>
     <td>
       <div id="upload_status_div" class="error"><%= upload_status_tag %></div>
-      <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "if ($('file_data').value == '') return false; this.disabled = true; this.value = 'Uploading...';" %>
+      <%= submit_tag 'Finish', class: 'form_button', style: 'width: 70px;', data: { disable_with: 'Uploading...' } %>
       <%= link_to_function "Cancel", "cancelInsertFile()" %>
     </td>
   </tr>
