@@ -61,7 +61,7 @@ Imagine 6 (Elixir rewrite) is now open source and Imagine 7 (MySQL -> CouchDB) w
 
 ```bash
 docker build -t anamba/imagine5-dev:latest .
-docker tag anamba/imagine5-dev:latest anamba/imagine5-dev:5.2.3
+docker tag anamba/imagine5-dev:latest anamba/imagine5-dev:5.2.4
 docker tag anamba/imagine5-dev:latest anamba/imagine5-dev:5.2
 docker push anamba/imagine5-dev
 ```

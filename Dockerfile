@@ -1,7 +1,7 @@
 ### Docker image for imagine5 ###
 
 # See https://hub.docker.com/r/anamba/rails-dev/tags/ for a list of tags
-FROM anamba/rails-dev:1.0
+FROM anamba/rails-dev:1.2.0
 LABEL maintainer="bbsoftware@biggerbird.com"
 
 # Update package list and upgrade pre-installed packages
@@ -9,7 +9,7 @@ RUN apt-get update
 RUN apt-get upgrade -y -o Dpkg::Options::="--force-confnew"
 
 # Install other packages we depend on
-RUN apt-get install -y mysql-client
+# RUN apt-get install -y mysql-client
 RUN apt-get install -y memcached
 RUN apt-get install -y libmagickcore-dev libmagickwand-dev  # for rmagick2 gem
 RUN apt-get install -y imagemagick                          # for mini-magick gem
