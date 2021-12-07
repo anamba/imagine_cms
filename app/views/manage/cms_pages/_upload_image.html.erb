@@ -77,6 +77,7 @@
   const nextButton = document.getElementById("upload-image-next-button");
   const finishButton = document.getElementById("upload-image-finish-button");
   const uploadFileField = document.getElementById("file_data");
+  const galleryFileField = document.getElementById("gallery_file_data");
   const galleryNextButton = document.getElementById("upload-gallery-next-button");
 
   nextButton.addEventListener("click", (e) => {
@@ -121,7 +122,7 @@
   uploadGalleryForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (uploadFileField.value == "") {
+    if (galleryFileField.value == "") {
       setTimeout(() => {
         galleryNextButton.value = "Next";
         galleryNextButton.dataset.disableWith = null;
@@ -130,10 +131,10 @@
       return;
     }
 
-    let file = uploadFileField.files[0];
-    let formData = new FormData(uploadImageForm);
+    let file = galleryFileField.files[0];
+    let formData = new FormData(uploadGalleryForm);
 
-    let resp = await fetch(uploadImageForm.action, {
+    let resp = await fetch(uploadGalleryForm.action, {
       method: 'POST',
       body: formData
     });

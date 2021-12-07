@@ -920,8 +920,8 @@ class Manage::CmsPagesController < Manage::ApplicationController
         end
       end
     end
-    
-    finish_upload_status "'#{File.basename(localdir)}'"
+
+    render json: { filename: File.basename(localdir) }.to_json
   end
   
   def gallery_setup

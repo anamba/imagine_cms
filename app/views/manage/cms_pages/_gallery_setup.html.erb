@@ -18,5 +18,5 @@
   Resize to be at most <%= text_field_tag :max_width, GalleryMaxWidth, :style => 'width: 40px' %> pixels wide and <%= text_field_tag :max_height, GalleryMaxHeight, :style => 'width: 40px' %> pixels high<br/>
   <%= text_field_tag 'dirname', params[:dirname], :style => 'display: none' %>
   
-  <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', :onclick => "this.disabled = true; this.value = 'Please wait...';" %>
+  <%= submit_tag 'Finish', :class => 'form_button', :style => 'width: 70px;', 'data-disable-with' => 'Please wait...' %>
 <%- end -%>
