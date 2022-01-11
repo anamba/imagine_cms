@@ -2,7 +2,7 @@
 
 <h2><%= params[:action].titlecase %> Snippet</h2>
 
-<%= form_with(model: ['manage', @cms_snippet], local: true) do |f| %>
+<%= form_with(model: [:manage, @cms_snippet], local: true) do |f| %>
   <%= f.text_field :name, placeholder: 'Snippet Name', :size => '50' %>
   <div class="codemirror-html-container">
     <%= f.text_area :content, class: 'codemirror-html autocomplete-off' %>
