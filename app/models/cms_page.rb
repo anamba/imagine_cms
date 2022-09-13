@@ -1,6 +1,16 @@
+module RestoreTemplateAfterRevert
+  def revert_to(*args)
+    tmp = template
+    ret = super(*args)
+    self.template = tmp
+    ret
+  end
+end
+
 class CmsPage < ActiveRecord::Base
   include ActiveModel::Dirty
   include ActsAsTree
+  include RestoreTemplateAfterRevert
   
   acts_as_versioned
   acts_as_tree order: 'path'
