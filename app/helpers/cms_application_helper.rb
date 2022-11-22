@@ -485,7 +485,7 @@ module CmsApplicationHelper
     
     # mangle anything inside of an insert_object so that it won't be caught (yet)
     temp.gsub!(/((?:insert_object|text_editor|texteditor|page_list|pagelist|snippet)\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
-      one, two, three = $1, $2, $3
+      one, two, three = $1 || '', $2 || '', $3 ||''
       one + two.gsub(/<#/, '<!#') + three
     end
     
