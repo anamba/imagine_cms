@@ -1,4 +1,4 @@
-require 'safe_yaml'
+# require 'safe_yaml'
 
 require 'rails-observers'
 require 'actionpack/action_caching'
