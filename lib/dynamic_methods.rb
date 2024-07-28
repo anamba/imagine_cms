@@ -46,7 +46,7 @@ module DynamicMethods
         val = args.shift
         @dynamic_fields_data[key] = val
         
-        logger.debug "DYNAMIC_METHOD: #{key} = #{val}"
+        Rails.logger.debug "DYNAMIC_METHOD: #{key} = #{val}"
         self.dynamic_fields = YAML::dump(self.dynamic_hash)
         return val
       end

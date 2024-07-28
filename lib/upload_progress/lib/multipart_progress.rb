@@ -73,7 +73,7 @@ class CGI #:nodoc:
           @last_save_time = now 
         end
       else
-        ActionController::Base.logger.debug("CGI::ProgressIO#read returns nothing when it should return nil if IO is finished: [#{args.inspect}], a cancelled upload or old FCGI bindings.  Resetting the upload progress")
+        Rails.logger.debug("CGI::ProgressIO#read returns nothing when it should return nil if IO is finished: [#{args.inspect}], a cancelled upload or old FCGI bindings.  Resetting the upload progress")
 
         progress.reset!
         save_progress
@@ -88,7 +88,7 @@ class CGI #:nodoc:
 
     def finish
       @session.update
-      ActionController::Base.logger.debug("Finished processing multipart upload in #{@progress.elapsed_seconds.to_s}s")
+      Rails.logger.debug("Finished processing multipart upload in #{@progress.elapsed_seconds.to_s}s")
     end
   end
 
@@ -143,9 +143,9 @@ class CGI #:nodoc:
           session[:uploads][upload_id] = upload_progress
 
           @stdin_with_progress = CGI::ProgressIO.new(stdinput_without_progress, upload_progress, session)
-          ActionController::Base.logger.debug("Multipart upload with progress (id: #{upload_id}, size: #{content_length})")
+          Rails.logger.debug("Multipart upload with progress (id: #{upload_id}, size: #{content_length})")
         rescue
-          ActionController::Base.logger.debug("Exception during setup of read_multipart_with_progress: #{$!}")
+          Rails.logger.debug("Exception during setup of read_multipart_with_progress: #{$!}")
         end
       ensure
         begin

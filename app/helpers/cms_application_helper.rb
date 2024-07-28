@@ -30,7 +30,7 @@ module CmsApplicationHelper
         res = Net::DNS::Resolver.new
         valid = valid && res.mx(host).size > 0
       rescue StandardError => e
-        logger.error(e)
+        Rails.logger.error(e)
       end
     end
     
@@ -43,7 +43,7 @@ module CmsApplicationHelper
   
   ### COMPAT - url_for_current
   def url_for_current
-    # logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
+    # Rails.logger.debug("DEPRECATION WARNING (Imagine CMS) WARNING: url_for_current called")
     request.fullpath
   end
   
@@ -338,7 +338,7 @@ module CmsApplicationHelper
     end
     
     folders.each do |f|
-      logger.debug "Expanding folder #{f.src} (expand_folders: #{f.expand_folders})"
+      Rails.logger.debug "Expanding folder #{f.src} (expand_folders: #{f.expand_folders})"
       begin
         if f.expand_folders && f.expand_folders == 'true'  # expand folders (i.e. specified path is prefix)
           if f.src == '/'
@@ -355,15 +355,15 @@ module CmsApplicationHelper
           f.src = f.src.slice(1...f.src.length) if f.src.slice(0,1) == '/'
           parent_page = CmsPage.find_by_path(f.src)
           if parent_page.children.size > 0
-            logger.debug " > Adding children of #{f.src}"
+            Rails.logger.debug " > Adding children of #{f.src}"
             pages.concat parent_page.children.includes(:tags).where([ conditions.join(' and ') ].concat(cond_vars)).to_a
           else
-            logger.debug " > Adding single page #{f.src}"
+            Rails.logger.debug " > Adding single page #{f.src}"
             single_pages << parent_page  # user specified a single page, not a folder
           end
         end
       rescue StandardError => e
-        logger.debug e
+        Rails.logger.debug e
       end
     end
     
@@ -426,7 +426,7 @@ module CmsApplicationHelper
       single_pages.reject! { |page| page == pg }
     end
     
-    logger.debug "Page List Offset: #{offset} / #{pages.size} #{pages.map(&:id)}"
+    Rails.logger.debug "Page List Offset: #{offset} / #{pages.size} #{pages.map(&:id)}"
     pages = pages[offset, pages.size] || []
     
     # since the user selected these pages individually, they expect them to be included (and prioritized!), no matter what
@@ -524,7 +524,7 @@ module CmsApplicationHelper
         when 'NilClass'
           val = ''
         else
-          # logger.error "#{attr} (#{val.class}): #{val}"
+          # Rails.logger.error "#{attr} (#{val.class}): #{val}"
         end
       rescue
         # val = '<!-- attribute not found -->'

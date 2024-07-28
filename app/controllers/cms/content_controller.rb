@@ -53,7 +53,7 @@ module Cms # :nodoc:
     
     # Renders app/views/errors/404.rhtml with http status 404 Not Found.
     def not_found
-      # logger.error "404 from #{request.referer}"
+      # Rails.logger.error "404 from #{request.referer}"
       # render :template => 'imagine_cms/errors/404', :status => 404
       
       # let Rails handle 404s natively (override if you want to handle manually)
@@ -61,8 +61,8 @@ module Cms # :nodoc:
     end
     
     def rendering_error(exception = nil)
-      logger.error "500 from #{request.referer} (exception: #{exception})"
-      logger.error exception.annoted_source_code if exception.class.name == 'ActionView::Template::Error'
+      Rails.logger.error "500 from #{request.referer} (exception: #{exception})"
+      Rails.logger.error exception.annotated_source_code if exception.class.name == 'ActionView::Template::Error'
       
       @exception = exception.message
       render template: 'imagine_cms/errors/500', status: 500, formats: [ :html ]
@@ -72,7 +72,7 @@ module Cms # :nodoc:
       @@cms_page_table_exists ||= CmsPage.table_exists?
       return unless @@cms_page_table_exists
       
-      logger.debug 'Rendering content from database'
+      Rails.logger.debug 'Rendering content from database'
       
       begin
         @content_levels = params[:content_path]
@@ -185,7 +185,7 @@ module Cms # :nodoc:
             
             template_content = render_cms_page_to_string(@pg)
             
-            # logger.debug @page_objects.map { |k,v| "#{k}: #{v}\n" }
+            # Rails.logger.debug @page_objects.map { |k,v| "#{k}: #{v}\n" }
             
             # this is kind of ugly, having this in the middle of my rendering code
             if @page_list_segment
@@ -207,7 +207,7 @@ module Cms # :nodoc:
       rescue ActionController::RoutingError
         # no need to log this
       rescue StandardError => e
-        logger.error "Error rendering from db: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
+        Rails.logger.error "Error rendering from db: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
         rendering_error(e) and return true
       end
       
@@ -252,7 +252,7 @@ module Cms # :nodoc:
       end
       @pages = @pages.first(100)
       
-      logger.debug "Search returned #{@pages.size} matching pages for terms #{@terms}"
+      Rails.logger.debug "Search returned #{@pages.size} matching pages for terms #{@terms}"
       
       @pg = CmsPage.new
       @pg.template = CmsTemplate.find_by_name('Search') || CmsTemplate.new

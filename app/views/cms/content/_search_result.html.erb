@@ -10,7 +10,7 @@
       end
     end
   rescue StandardError => e
-    logger.error "Error creating search index excerpt: #{e}"
+    Rails.logger.error "Error creating search index excerpt: #{e}"
   end
   
   summary ||= truncate(page.search_index, length: 300)

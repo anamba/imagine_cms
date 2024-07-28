@@ -76,13 +76,13 @@ module ActionControllerExtensions
         #   idx = k.to_s + '_expiration'
         #   if (exp = (session[idx] || session[idx.to_sym]).to_i) > 0
         #     if idle_time > exp
-        #       logger.debug "Expiring #{k} = #{v} (expiration #{exp} > idle time #{idle_time})"
+        #       Rails.logger.debug "Expiring #{k} = #{v} (expiration #{exp} > idle time #{idle_time})"
         #       session[k] = nil
         #     else
-        #       logger.debug "Retaining #{k} = #{v} (expiration #{exp} < idle time #{idle_time})"
+        #       Rails.logger.debug "Retaining #{k} = #{v} (expiration #{exp} < idle time #{idle_time})"
         #     end
         #   else
-        #     #logger.debug "Retaining #{k} = #{v} (does not expire)"
+        #     #Rails.logger.debug "Retaining #{k} = #{v} (does not expire)"
         #   end
         # end
       end

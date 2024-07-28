@@ -137,7 +137,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
         
       else
         # save failed, display errors
-        logger.error "Save failed: #{CmsPage.without_revision { @pg.save }} #{@pg.errors.full_messages.join('; ')}"
+        Rails.logger.error "Save failed: #{CmsPage.without_revision { @pg.save }} #{@pg.errors.full_messages.join('; ')}"
         render :update do |page|
           page.replace_html 'save_errors', @pg.errors.full_messages.join('<br>')
           page << "try { $('btn_next').disabled = false; } catch (e) {}"
@@ -272,7 +272,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
           if @page_objects["#{key}-sources-tag-count"].to_i > 0
             tags = []
             @page_objects["#{key}-sources-tag-count"].to_i.times do |i|
-              logger.debug "Adding tag: #{@page_objects["#{key}-sources-tag#{i}"]}"
+              Rails.logger.debug "Adding tag: #{@page_objects["#{key}-sources-tag#{i}"]}"
               tags << @page_objects["#{key}-sources-tag#{i}"]
             end
             tags.reject! { |tag| tag.blank? }
@@ -286,7 +286,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
           if @page_objects["#{key}-sources-folder-count"].to_i > 0
             folders = []
             @page_objects["#{key}-sources-folder-count"].to_i.times do |i|
-              logger.debug "Adding folder: #{@page_objects["#{key}-sources-folder#{i}"]}"
+              Rails.logger.debug "Adding folder: #{@page_objects["#{key}-sources-folder#{i}"]}"
               folders << @page_objects["#{key}-sources-folder#{i}"]
             end
             folders.reject! { |folder| folder.blank? }
@@ -445,7 +445,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       begin
         email.deliver_now
       rescue StandardError => e
-        logger.error(e)
+        Rails.logger.error(e)
       end
     end
 
@@ -457,7 +457,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
   #
   
   def insert_object(name, type = :text, options = {}, html_options = {})
-    extend ActionView::Helpers::FormHelper
+    extend ActionView::Helpers::FormTagHelper
     extend ActionView::Helpers::JavaScriptHelper
     extend ActionView::Helpers::PrototypeHelper
     extend ActionView::Helpers::TagHelper
@@ -475,10 +475,10 @@ class Manage::CmsPagesController < Manage::ApplicationController
       focusOnLoad = !defined?(@cms_text_editor_placed)
       @cms_text_editor_placed = true
       content = ''.html_safe
-      content << text_area(:page_objects, key,
-                           { dojoType: 'Editor2', toolbarGroup: 'main', isToolbarGroupLeader: 'false',
-                             focusOnLoad: focusOnLoad.to_s, style: 'border: 2px dashed gray; padding: 5px',
-                             minHeight: '100px' }.update(html_options))
+      content << text_area_tag("page_objects[#{key}]", @page_objects[key],
+                               { dojoType: 'Editor2', toolbarGroup: 'main', isToolbarGroupLeader: 'false',
+                                 focusOnLoad: focusOnLoad.to_s, style: 'border: 2px dashed gray; padding: 5px',
+                                 minHeight: '100px' }.update(html_options))
       content << content_tag(:div, '', id: "page_object_config_#{key}")
       script_tag = <<-EOT
         <script type="text/javascript">
@@ -642,7 +642,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     # crop if user selected something
     if params[:image][:width].to_i > 0
-      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
+      Rails.logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
       orig_im.crop "#{width}x#{height}+#{x1}+#{y1}"
       dirty = true
     end
@@ -650,7 +650,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     # resize if the resultant image is bigger than max dims
     if max_width > 0 && max_height > 0
       if orig_im[:width] > max_width || orig_im[:height] > max_height
-        logger.debug "resizing to max dims #{max_width} x #{max_height}"
+        Rails.logger.debug "resizing to max dims #{max_width} x #{max_height}"
         orig_im.resize "#{max_width}x#{max_height}"
         dirty = true
       end
@@ -763,7 +763,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     # crop if user selected something
     if params[:image][:width].to_i > 0
-      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
+      Rails.logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
       orig_im.crop("#{width}x#{height}+#{x1}+#{y1}")
       dirty = true
     end
@@ -771,7 +771,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     # resize if the resultant image is bigger than max dims
     if max_width > 0 && max_height > 0
       if orig_im[:width] > max_width || orig_im[:height] > max_height
-        logger.debug "resizing to max dims #{max_width} x #{max_height}"
+        Rails.logger.debug "resizing to max dims #{max_width} x #{max_height}"
         orig_im.resize("#{max_width}x#{max_height}>")
         dirty = true
       end
@@ -849,7 +849,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     
     # crop if user selected something
     if params[:image][:width].to_i > 0
-      logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
+      Rails.logger.debug "cropping @ (#{x1}, #{y1}) to size #{width} x #{height}"
       orig_im.crop("#{width}x#{height}+#{x1}+#{y1}")
       dirty = true
     end
@@ -857,7 +857,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
     # resize if the resultant image is bigger than max dims
     if max_width > 0 && max_height > 0
       if orig_im[:width] > max_width || orig_im[:height] > max_height
-        logger.debug "resizing to max dims #{max_width} x #{max_height}"
+        Rails.logger.debug "resizing to max dims #{max_width} x #{max_height}"
         orig_im.resize("#{max_width}x#{max_height}>")
         dirty = true
       end
@@ -916,7 +916,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
           File.unlink(localfile) if localfile != jpgfile
           
         rescue StandardError => e
-          logger.error(e)
+          Rails.logger.error(e)
         end
       end
     end
@@ -1182,12 +1182,12 @@ class Manage::CmsPagesController < Manage::ApplicationController
             zipentry.extract(localfile)
             last_id += 1
           rescue StandardError => e
-            logger.error(e)
+            Rails.logger.error(e)
           end
         end
       rescue StandardError => e
-        logger.debug params.inspect
-        logger.error(e)
+        Rails.logger.debug params.inspect
+        Rails.logger.error(e)
         finish_upload_status "''" and return
       end
       
@@ -1355,7 +1355,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       begin
         render_to_string inline: @pg.template.content
       rescue StandardError => e
-        logger.debug e
+        Rails.logger.debug e
       end
     end
     
@@ -1448,7 +1448,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       
       dest = File.join(dest, File.basename(src_file)) if File.directory?(dest)
       if !File.exist?(dest) || force
-        logger.debug "Reading source file #{src_file}"
+        Rails.logger.debug "Reading source file #{src_file}"
         im = Magick::Image::read(src_file)[0]
         im_overlay = Magick::Image::read(File.join(ImagineCms::Engine.root, 'app', 'assets', 'images', 'management', overlay))[0]
         
@@ -1494,7 +1494,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
           # some error handling here
           session[:broken_galleries] << File.basename(g)
           
-          logger.error(e)
+          Rails.logger.error(e)
         end
       end
     end
