@@ -19,10 +19,11 @@ class UtilController < ApplicationController # :nodoc:
       @event_days[e.start_date.mday] = e
     end
     
-    render :update do |page|
-      page.replace_html 'event_calendar_month_year', :partial => 'calendar_month_year'
-      page.replace_html 'event_calendar_days', :partial => 'calendar_days'
-    end
+    # render :update do |page|
+    #   page.replace_html 'event_calendar_month_year', :partial => 'calendar_month_year'
+    #   page.replace_html 'event_calendar_days', :partial => 'calendar_days'
+    # end
+    render js: "document.getElementById('event_calendar_month_year').innerHTML = '#{j render partial: 'calendar_month_year'}'; document.getElementById('event_calendar_days').innerHTML = '#{j render partial: 'calendar_days'}';"
   end
   
   def date_picker

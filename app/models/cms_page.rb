@@ -142,10 +142,14 @@ class CmsPage < ActiveRecord::Base
   end
   
   
-  def article_date_month ; article_date.strftime("%B")      ; end
-  def article_date_mon   ; article_date.strftime("%b")      ; end
-  def article_date_day   ; article_date.strftime("%d").to_i ; end
-  def article_date_year  ; article_date.strftime("%Y").to_i ; end
-  def article_date_yr    ; article_date.strftime("%y").to_i ; end
-    
+  def article_date_month   ; article_date.strftime("%B")      ; end
+  def article_date_mon     ; article_date.strftime("%b")      ; end
+  def article_date_m       ; article_date.strftime("%m").to_i ; end
+  def article_date_weekday ; article_date.strftime("%A")      ; end
+  def article_date_wday    ; article_date.strftime("%a")      ; end
+  def article_date_day     ; article_date.strftime("%d").to_i ; end
+  def article_date_d       ; article_date.strftime("%d").to_i ; end
+  def article_date_year    ; article_date.strftime("%Y").to_i ; end
+  def article_date_yr      ; article_date.strftime("%y").to_i ; end
+  def article_date_y       ; article_date.strftime("%Y").to_i ; end
 end

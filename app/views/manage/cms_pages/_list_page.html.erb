@@ -3,7 +3,7 @@
   <span><%= list_page.name %></span>
 </div>
 
-<script type="text/javascript">
+<script type="module">
   jQuery('#cb_item_<%= list_page.id %>').on('click', () => {
     jQuery('#view_link').prop('href', '<%= list_page.path.blank? ? '' : '/' + list_page.path %>/version/<%= list_page.published_version > 0 ? list_page.published_version : list_page.version %>');
     jQuery('#new_link').off('click');

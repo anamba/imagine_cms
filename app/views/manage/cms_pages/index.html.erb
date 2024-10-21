@@ -52,7 +52,12 @@
         <%- else -%>
           <%= render partial: 'list_pages' %>
         <%- end -%>
-        <%= javascript_tag "jQuery('#cb_item_#{@parent.id}').addClass('cb_item_selected')[0].scrollIntoView();" if @parent %>
+
+        <% if @parent %>
+        <script type="module">
+          jQuery('#cb_item_<%= @parent.id %>').addClass('cb_item_selected')[0].scrollIntoView();
+        </script>
+        <% end %>
       </div>
       <%- break if break_flag -%>
     <%- end -%>
@@ -61,7 +66,7 @@
 
 <%- list_page = @page -%>
 
-<script type="text/javascript">
+<script type="module">
   cbNumColumns = <%= @page_levels.size - 1 %>;
   jQuery('#columnBrowserLevel' + cbNumColumns)[0].scrollIntoView();
   jQuery('#view_link').prop('href', '<%= list_page.path.blank? ? '' : '/' + list_page.path %>/version/<%= list_page.published_version > 0 ? list_page.published_version : list_page.version %>');
@@ -70,7 +75,7 @@
   jQuery('#edit_content_link').prop('href', '<%=raw url_for action: 'edit_page_content', id: list_page, authenticity_token: form_authenticity_token.to_s %>');
   jQuery('#delete_link').prop('href', '<%=raw url_for action: 'delete_page', id: list_page.id %>');
 </script>
-<script type="text/javascript" defer>
+<script type="module">
   dojo.require("dojo.widget.*");
   dojo.require("dojo.widget.Dialog");
 </script>

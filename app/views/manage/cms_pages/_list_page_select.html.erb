@@ -5,7 +5,7 @@
   <span><%= list_page.name %></span>
 </div>
 
-<script type="text/javascript">
+<script type="module">
   jQuery('#cb_item_<%= list_page.id %>').on('click', () => {
     jQuery('#page_browser_selection').val('/<%= list_page.path %>');
     setTimeout(() => {

@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version     = '>= 3.1.0'
   spec.required_rubygems_version = '>= 3.0.0'
 
-  spec.files         = `git ls-files`.split("\n")
+  spec.files         = `git ls-files -- {app,assets,config,db,lib}/* license.txt Rakefile README.md`.split("\n")
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   spec.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   spec.require_paths = ["lib"]
@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   # spec.add_dependency "safe_yaml",           "~> 1.0"
 
   # on the way out, but still needed for now
-  # spec.add_dependency "prototype-rails",     "~> 4.2.0"
+  # spec.add_dependency "prototype-rails",     "~> 5.2.0"
   spec.add_dependency "codemirror-rails"
   spec.add_dependency "rmagick",             [ ">= 1.15.0", "< 6.0" ]
   spec.add_dependency "mini_magick",         [ ">= 3.3", "< 5.0" ]

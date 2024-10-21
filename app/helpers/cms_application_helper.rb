@@ -512,7 +512,10 @@ module CmsApplicationHelper
     
     # finally, toss in the rest of the generic class attributes
     (page.attributes.map { |c| c.first } +
-    [ 'article_date_month', 'article_date_mon', 'article_date_day', 'article_date_year', 'article_date_yr' ]).each do |attr|
+      [ 'article_date_month', 'article_date_mon', 'article_date_m',
+        'article_date_weekday', 'article_date_wday',
+        'article_date_day', 'article_date_d',
+        'article_date_year', 'article_date_yr', 'article_date_y' ]).each do |attr|
       begin
         val = page.send(attr.downcase.underscore)
         case val.class.to_s

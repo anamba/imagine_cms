@@ -1,0 +1,8 @@
+<%-
+  name = params[:name]
+  type = params[:type]
+  parent_key = params[:parent_key]
+  key = "obj-#{type}-#{name.gsub(/[^\w]/, '_')}"
+-%>
+
+document.getElementById('page_object_config_<%= parent_key %>').insertAdjacentHTML('beforeend', '<%=j render(partial: 'page_list', locals: { name:, key:})%>');

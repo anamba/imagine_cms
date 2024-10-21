@@ -356,10 +356,11 @@ module Cms # :nodoc:
         @event_days[index] = (@page_objects["#{@key}-header"] || '') + val + (@page_objects["#{@key}-footer"] || '')
       end
       
-      render :update do |page|
-        page.replace_html "page_list_calendar_#{@key}_month_year", :partial => 'page_list_calendar_month_year'
-        page.replace_html "page_list_calendar_#{@key}_days", :partial => 'page_list_calendar_days'
-      end
+      # render :update do |page|
+      #   page.replace_html "page_list_calendar_#{@key}_month_year", :partial => 'page_list_calendar_month_year'
+      #   page.replace_html "page_list_calendar_#{@key}_days", :partial => 'page_list_calendar_days'
+      # end
+      render js: "document.getElementById('page_list_calendar_#{@key}_month_year').innerHTML = '#{j render partial: 'page_list_calendar_month_year'}'; document.getElementById('page_list_calendar_#{@key}_days').innerHTML = '#{j render partial: 'page_list_calendar_days'}';"
     end
     
     
