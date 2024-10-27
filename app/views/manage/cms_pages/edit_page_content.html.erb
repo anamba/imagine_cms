@@ -14,4 +14,41 @@
   window.onbeforeunload = function () {
     return "This page is asking you to confirm that you want to leave - data you have entered may not be saved."
   };
+
+  function handleKeyDown(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      window.onbeforeunload = null;
+      document.getElementById('page_content_form').submit();
+    }
+  }
+
+  // Add event listener to the main document
+  document.addEventListener('keydown', handleKeyDown);
+
+  // Add event listeners to all iframes
+  function addIframeListeners() {
+    var iframes = document.getElementsByTagName('iframe');
+    for (var i = 0; i < iframes.length; i++) {
+      try {
+        iframes[i].contentDocument.addEventListener('keydown', handleKeyDown);
+      } catch (e) {
+        console.warn('Unable to add listener to iframe:', e);
+      }
+    }
+  }
+
+  // Call the function initially
+  addIframeListeners();
+
+  // Set up a MutationObserver to watch for new iframes
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList') {
+        addIframeListeners();
+      }
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 </script>
