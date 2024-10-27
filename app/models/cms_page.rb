@@ -72,6 +72,12 @@ class CmsPage < ActiveRecord::Base
   def tags_as_css_classes
     self.tags.map { |t| t.name.downcase.gsub(/[^\w]+/, '-') }.join(' ')
   end
+
+  def page_attributes
+    @page_attributes ||= self.custom_attributes.each_with_object({}) do |obj, hash|
+      hash[obj.name] = obj.content
+    end
+  end
   
   def self.index_all
     where('search_index is null').each(&:update_index!)
