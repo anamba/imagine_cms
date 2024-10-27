@@ -288,7 +288,7 @@ module Cms # :nodoc:
       
       unless @pages.empty?
         @most_recent_pub_date = @pages.first
-        @pages.each { |pg| most_recent_pub_date = pg if pg.published_date > @most_recent_pub_date.published_date }
+        @pages.each { |pg| @most_recent_pub_date = pg if pg.published_date > @most_recent_pub_date.published_date }
         
         if min_time && @most_recent_pub_date.published_date && @most_recent_pub_date.published_date <= min_time
           # use cached version

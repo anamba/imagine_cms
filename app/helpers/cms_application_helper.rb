@@ -385,7 +385,7 @@ module CmsApplicationHelper
     # set some reasonable defaults in case the sort keys are nil
     pages.each { |pg| pg.article_date ||= Time.now; pg.position ||= 0; pg.title ||= '' }
     pri_sort_key = first_non_empty(@page_objects["#{key}-sort-first-field"], options[:primary_sort_key], 'article_date')
-    pri_sort_dir = first_non_empty(@page_objects["#{key}-sort-first-direction"], options[:primary_sort_direction], 'asc')
+    pri_sort_dir = first_non_empty(@page_objects["#{key}-sort-first-direction"], options[:primary_sort_direction], 'desc')
     sec_sort_key = first_non_empty(@page_objects["#{key}-sort-second-field"], options[:secondary_sort_key], 'position')
     sec_sort_dir = first_non_empty(@page_objects["#{key}-sort-second-direction"], options[:secondary_sort_direction], 'asc')
     @page_objects["#{key}-sort-first-field"] ||= pri_sort_key
@@ -459,13 +459,13 @@ module CmsApplicationHelper
     # also make return value accessible to page list segments and rss feeds (so we don't have to do this all again)
     @page_list_pages ||= {}
     @page_list_pages[key] = pages
+
+    Rails.logger.debug "First 3 selected pages: #{@page_list_pages[key].first(3).map { |pg| [pg.id, pg.title].inspect }.join('; ')}"
     
     pages
   end
   
-  def substitute_placeholder(html, page, key, value)
-    val = value
-    
+  def substitute_placeholder(html, page, key, val)
     html.gsub(/<#\s*#{key}(\..*?)*\s*#>/) do |match|
       $1.to_s.scan(/\.([\w]+)(\(.*?\))?/).each do |func, args|
         case func
