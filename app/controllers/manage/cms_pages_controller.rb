@@ -519,6 +519,12 @@ class Manage::CmsPagesController < Manage::ApplicationController
   helper_method :snippet
 
 
+  def text_editor_has_content?(name)
+    true
+  end
+  helper_method :text_editor_has_content?
+
+
   def disable_caching ; end
   helper_method :disable_caching
 

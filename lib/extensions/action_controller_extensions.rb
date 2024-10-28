@@ -179,6 +179,14 @@ module ActionControllerExtensions
     def snippet(name, options = {}, html_options = {})
       insert_object(name, :snippet, options, html_options)
     end
+
+
+    def text_editor_has_content?(name)
+      value = @page_objects["obj-text-#{name.gsub(/[^\w]/, '_')}"]
+      return false if value.blank?
+
+      ActionView::Base.full_sanitizer.sanitize(value, :tags => ['img', 'video', 'iframe', 'object', 'embed', 'audio', 'source', 'track']).strip.length > 0
+    end
     
     
     def render_page_list_segment(name, pages, options = {}, html_options = {})
