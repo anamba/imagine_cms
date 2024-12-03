@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
 
   # on the way out, but still needed for now
   # spec.add_dependency "prototype-rails",     "~> 5.2.0"
-  spec.add_dependency "codemirror-rails"
+
   spec.add_dependency "rmagick",             [ ">= 1.15.0", "< 6.0" ]
   spec.add_dependency "mini_magick",         [ ">= 3.3", "< 5.0" ]
   spec.add_dependency "non-stupid-digest-assets", "~> 1.0"

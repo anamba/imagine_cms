@@ -1,5 +1,5 @@
 /*
- *= require codemirror
+ *= require codemirror5/codemirror
  *
  *= require imagine_controls
 */
@@ -133,5 +133,6 @@ table.imagine-management th { background-color: #dedede; text-transform: upperca
 
 
 .CodeMirror { border: 1px solid #ccc; font-size: 1em; width: 100%; height: 100%; }
-.codemirror-html-container { height: 520px; padding: 2px 10px 5px 0; }
+.codemirror-html-container { height: 80vh; min-height: 360px; padding: 2px 10px 5px 0; }
+.CodeMirror-scroll { height: 100%; background-color: #fff; }
 #preview_frame { width: 100%; height: 600px; border: 1px solid #ccc; display: none; }

@@ -20,7 +20,6 @@ require 'zip'
 require 'rails_rinku'
 require 'acts_as_tree'
 require 'net/dns'
-require 'codemirror-rails'
 require 'rmagick'
 require 'mini_magick'
 

@@ -8,13 +8,13 @@
 //= require builder
 //= require cropper
 //
-//= require codemirror
-//= require codemirror/modes/xml
-//= require codemirror/modes/javascript
-//= require codemirror/modes/css
-//= require codemirror/modes/ruby
-//= require codemirror/modes/htmlmixed
-// require codemirror/modes/htmlembedded
+//= require codemirror5/codemirror
+//= require codemirror5/mode/xml/xml
+//= require codemirror5/mode/javascript/javascript
+//= require codemirror5/mode/css/css
+//= require codemirror5/mode/ruby/ruby
+//= require codemirror5/mode/htmlmixed/htmlmixed
+//= require codemirror5/mode/htmlembedded/htmlembedded
 //= require codemirror/modes-custom/imagine_cms
 //
 //= require tag-it
