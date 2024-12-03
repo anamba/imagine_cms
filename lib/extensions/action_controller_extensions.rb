@@ -185,7 +185,7 @@ module ActionControllerExtensions
       value = @page_objects["obj-text-#{name.gsub(/[^\w]/, '_')}"]
       return false if value.blank?
 
-      ActionView::Base.full_sanitizer.sanitize(value, :tags => ['img', 'video', 'iframe', 'object', 'embed', 'audio', 'source', 'track']).strip.length > 0
+      Rails::Html::WhiteListSanitizer.new.sanitize(value, tags: ['a', 'img', 'video', 'iframe', 'object', 'embed', 'audio', 'source', 'track']).strip.length > 0
     end
     
     
