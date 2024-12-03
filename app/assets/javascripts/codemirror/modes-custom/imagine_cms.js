@@ -14,9 +14,10 @@
 CodeMirror.defineMode("imagine_cms", function(config, parserConfig) {
 
   //config settings
-  var scriptStartRegex = parserConfig.scriptStartRegex || /^<%/,
-      scriptEndRegex = parserConfig.scriptEndRegex || /^%>/;
+  var scriptStartRegex = parserConfig.scriptStartRegex || /^<%\-?/,
+      scriptEndRegex = parserConfig.scriptEndRegex || /^\-?%>/;
   var attributeRegex = /^<#.*?#>/;
+  var erbCommentRegex = /^<%#.*?%>/;
 
   //inner modes
   var scriptingMode, htmlMixedMode;
@@ -24,6 +25,9 @@ CodeMirror.defineMode("imagine_cms", function(config, parserConfig) {
   //tokenizer when in html mode
   function htmlDispatch(stream, state) {
       if (stream.match(attributeRegex, true)) {
+          return 'comment';
+          }
+      else if (stream.match(erbCommentRegex, true)) {
           return 'comment';
           }
       else if (stream.match(scriptStartRegex, false)) {
