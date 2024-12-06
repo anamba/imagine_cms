@@ -229,12 +229,12 @@ module Cms # :nodoc:
       unless @terms.empty?
         CmsPage.index_all
         
-        base_query = CmsPage.includes(:tags).references(:cms_page_tags).where('published_version >= 0').limit(100)
+        base_query = CmsPage.includes(:tags).references(:cms_page_tags).where('published_version >= 0').order('updated_on desc').limit(100)
         
         query = base_query.dup
         @terms.each do |term|
           term_variants = [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\|\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
-          query = query.where("(title regexp ?)", "[[:<:]](#{term_variants})[[:>:]]")
+          query = query.where("(title regexp ?)", "\\b(#{term_variants})\\b")
         end
         @pages.concat query.all
         
@@ -242,7 +242,7 @@ module Cms # :nodoc:
         @terms.each do |term|
           term_variants = [ term, term.singularize, term.pluralize ].uniq.map { |v| v.gsub(/[\[\]\|\:\>\(\)\?]/, '').gsub(/\+/, '\+') }.join('|')
           query = query.where("cms_page_tags.name regexp :regex or search_index regexp :regex",
-                              regex: "[[:<:]](#{term_variants})[[:>:]]")
+                              regex: "\\b(#{term_variants})\\b")
         end
         query.each { |pg| @pages << pg unless @pages.include?(pg) }
         

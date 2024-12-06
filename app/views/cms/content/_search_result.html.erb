@@ -25,5 +25,6 @@
 
 <div class="search-result">
   <div class="search-result-title"><a href="/<%= page.path %>"><%= title %></a></div>
+  <div class="search-result-date"><%= page.updated_on.strftime('%B %-d, %Y') %></div>
   <div class="search-result-summary"><%= summary %></div>
 </div>
