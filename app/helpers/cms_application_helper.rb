@@ -328,13 +328,11 @@ module CmsApplicationHelper
     end
     
     # exclude expired items if specified
-    if @page_objects["#{key}-include-expired"]
-      if @page_objects["#{key}-include-expired"] == 'false'
-        conditions << '(cms_pages.expires = ? OR (cms_pages.expires = ? AND cms_pages.expiration_date >= ?))'
-        cond_vars << false
-        cond_vars << true
-        cond_vars << Time.now
-      end
+    if options[:include_expired] === false || @page_objects["#{key}-include-expired"] == 'false'
+      conditions << '(cms_pages.expires = ? OR (cms_pages.expires = ? AND cms_pages.expiration_date >= ?))'
+      cond_vars << false
+      cond_vars << true
+      cond_vars << Time.now
     end
     
     folders.each do |f|

@@ -85,7 +85,7 @@
             <%= date_picker :pg, :article_date, default_value: (@pg.article_date || @pg.created_on || Time.zone.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %>
           </td>
           <td width="120">
-            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"'.html_safe %>>&ndash; <%= date_picker :pg, :article_end_date, default_value: (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %></div>
+            <div id="div_article_end_date"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? '' : 'style="display: none"'.html_safe %>>&ndash; <%= date_picker :pg, :article_end_date, default_value: (@pg.article_end_date || @pg.article_date || @pg.created_on || Time.zone.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %></div>
           </td>
           <td align="right" width="180">
             <input type="checkbox" id="use_article_date_range" name="use_article_date_range" value="1" onclick="$('div_article_end_date').toggle();"<%= @pg.article_end_date && @pg.article_date != @pg.article_end_date ? ' checked="checked"' : '' %> /><label for="use_article_date_range">Use date range</label>
@@ -107,7 +107,7 @@
     <td>
       <table border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <td width="120"><%= date_picker :pg, :published_date, default_value: (@pg.published_date || @pg.created_on || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 2.years.from_now %></td>
+          <td width="120"><%= date_picker :pg, :published_date, default_value: (@pg.published_date || @pg.created_on || Time.zone.now), start_date: Time.utc(2006, 1, 1), end_date: 2.years.from_now %></td>
           <td width="60">Position:</td>
           <td><%= text_field :pg, :position, class: 'form', style: 'width: 20px' %></td>
         </tr>
@@ -120,7 +120,7 @@
       <table border="0" cellpadding="0" cellspacing="0">
         <tr>
           <td width="100"><%= check_box :pg, :expires, {}, 'true', 'false' %><label>Expires on:</label></td>
-          <td width="120"><%= date_picker :pg, :expiration_date, default_value: (@pg.expiration_date || @pg.published_date || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 2.years.from_now %></td>
+          <td width="120"><%= date_picker :pg, :expiration_date, default_value: (@pg.expiration_date || @pg.published_date || Time.zone.now), start_date: Time.utc(2006, 1, 1), end_date: 2.years.from_now %></td>
         </tr>
       </table>
     </td>
