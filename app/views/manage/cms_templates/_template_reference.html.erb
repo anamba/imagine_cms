@@ -13,13 +13,13 @@
 &lt;%= text_editor('Content') %&gt;
 &lt;%= snippet('Top Nav') %&gt;
 &lt;%= page_list('My Page List',
-                  template: 'html', header: 'html', footer: 'html',
-                  folders: 'f1,f2', pages: 'p1,p2',
-                  include_tags: 't1,t2', exclude_tags: 't3,t4', require_tags: 't5,t6',
-                  include_expired: false,
-                  primary_sort_key: 'article_date', primary_sort_direction: 'asc',
-                  item_count: 5, item_offset: 1, use_pagination: 1,
-                  empty_message: 'Coming soon!') %&gt;
+              template: 'html', header: 'html', footer: 'html',
+              folders: 'f1,f2', pages: 'p1,p2',
+              include_tags: 't1,t2', exclude_tags: 't3,t4', require_tags: 't5,t6',
+              include_expired: false,
+              primary_sort_key: 'article_date', primary_sort_direction: 'asc',
+              item_count: 5, item_offset: 1, use_pagination: 1,
+              empty_message: 'Coming soon!') %&gt;
 </pre>
             </td>
             <td valign="top">
@@ -27,9 +27,9 @@
 &lt;%= template_option('Caption', :string) %&gt;
 
 &lt;%- if template_option('Use sidebar?', :checkbox) -%&gt;
-    ...
+  ...
 &lt;%- else -%&gt;
-    ...
+  ...
 &lt;%- end -%&gt;
 </pre>
             </td>

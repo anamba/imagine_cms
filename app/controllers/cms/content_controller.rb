@@ -304,7 +304,7 @@ module Cms # :nodoc:
       response.headers["Content-Type"] = "application/rss+xml"
       response.headers["Last-Modified"] = (@pages.first.published_date.httpdate rescue Time.now).to_s
       
-      render 'rss_feed.xml', :layout => false
+      render template: 'cms/content/rss_feed', formats: [:xml], layout: false
     end
     
     def preview_template
