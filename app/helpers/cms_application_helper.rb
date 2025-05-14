@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module CmsApplicationHelper
   
   # Returns true if a Member is logged in.

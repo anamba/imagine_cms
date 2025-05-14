@@ -1,3 +1,5 @@
+require 'ostruct'
+
 class Manage::CmsPagesController < Manage::ApplicationController
   include ActionController::Caching::Pages
   self.page_cache_directory = "#{Rails.root}/public"

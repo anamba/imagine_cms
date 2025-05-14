@@ -16,6 +16,12 @@ class AddCmsTables < ActiveRecord::Migration[4.2]
       t.datetime :updated_on
     end
     CmsTemplate.create_versioned_table  # => CmsTemplateVersions
+
+    CmsTemplate.create(
+      name: 'Default',
+      content: '',
+      options_yaml: '',
+    )
     
     create_table :cms_snippets do |t|
       t.string :name
@@ -61,6 +67,15 @@ class AddCmsTables < ActiveRecord::Migration[4.2]
       t.datetime :updated_on
     end
     CmsPage.create_versioned_table  # => CmsPageVersions
+
+    CmsPage.create(
+      cms_template_id: CmsTemplate.first.id,
+      name: 'Home',
+      title: 'Home',
+      path: '',
+      updated_by: User.first.id,
+      updated_by_username: User.first.username,
+    )
     
     create_table :cms_page_objects do |t|
       t.integer :cms_page_id, null: false

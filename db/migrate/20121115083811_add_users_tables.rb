@@ -17,7 +17,16 @@ class AddUsersTables < ActiveRecord::Migration[4.2]
       t.datetime :updated_on
     end
     add_index "users", ["username"], name: "UN_users_username", unique: true
-    
+
+    User.create(
+      username: 'admin',
+      password: 'admin1235',
+      password_confirmation: 'admin1235',
+      first_name: 'Admin',
+      last_name: 'User',
+      is_superuser: true,
+    )
+
     create_table :user_groups do |t|
       t.string :name
       

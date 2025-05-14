@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module Cms # :nodoc:
   class ContentController < ::ApplicationController # :nodoc:
     include ActionController::Caching::Actions

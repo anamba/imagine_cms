@@ -41,6 +41,10 @@ module ImagineCms
     middleware.use ::ActionDispatch::Static, "#{root}/public"
 
     initializer "imagine_cms.assets.precompile" do |app|
+      app.config.assets.paths << root.join('app', 'assets', 'images')
+      app.config.assets.paths << root.join('app', 'assets', 'stylesheets')
+      app.config.assets.paths << root.join('app', 'assets', 'javascripts')
+
       app.config.assets.precompile += %w( dojo/** management.css imagine_controls.css reset.css cropper/* interface/* management/* )
       app.config.assets.precompile += ["codemirror*", "codemirror/**/*"]
       # Rails.application.config.load_paths << File.dirname(__FILE__) + "/../app/helpers"
