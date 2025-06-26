@@ -227,7 +227,7 @@ module ActionControllerExtensions
       Rails.logger.info "Number of page list segments: #{num_segments}"
       if first_non_empty(options[:use_pagination], @page_objects["#{key}-use-pagination"], 0).to_i == 1 && num_segments > 1
         content << '<div class="imagine_cms-paginator">'
-        content << 'Page:&nbsp;'
+        content << '<span>Page:&nbsp;</span>'
         num_segments.times do |seg|
           start = seg * limit
           content << "<a id=\"#{key}-segment-#{seg}\" href=\"#\""
