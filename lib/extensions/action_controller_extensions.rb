@@ -243,11 +243,6 @@ module ActionControllerExtensions
 <script type="text/javascript">
   setTimeout(() => {
     jQuery('##{key}').css({ opacity: '1', cursor: 'default' });
-    jQuery('.imagine_cms-paginator-link').not('.imagine_cms-paginator-link-selected').mouseover(function () {
-      jQuery(this).addClass('imagine_cms-paginator-link-selected');
-    }).mouseout(function () {
-      jQuery(this).removeClass('imagine_cms-paginator-link-selected');
-    });
 EOT
         num_segments.times do |seg|
           start = seg * limit
