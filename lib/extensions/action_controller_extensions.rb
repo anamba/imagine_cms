@@ -182,6 +182,7 @@ module ActionControllerExtensions
 
 
     def text_editor_has_content?(name)
+      return false unless @page_objects
       value = @page_objects["obj-text-#{name.gsub(/[^\w]/, '_')}"]
       return false if value.blank?
 
@@ -190,6 +191,8 @@ module ActionControllerExtensions
     
     
     def render_page_list_segment(name, pages, options = {}, html_options = {})
+      return '' unless @pg
+
       extend ActionView::Helpers::TagHelper
       extend ActionView::Helpers::TextHelper
       extend ActionView::Helpers::JavaScriptHelper
