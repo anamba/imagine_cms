@@ -167,7 +167,10 @@ module Cms # :nodoc:
             
             # redirect if redirect enabled
             if @pg.respond_to?(:redirect_enabled) && @pg.redirect_enabled
-              redirect_to @pg.redirect_to and return true
+              # use redirect status if specified and valid, otherwise default to 302 Found
+              http_status = @pg.respond_to?(:redirect_status_code) && (301...400).include?(@pg.redirect_status_code.to_i) ? @pg.redirect_status_code : 302
+
+              redirect_to @pg.redirect_to, status: http_status, allow_other_host: true and return true
             end
             
             # load appropriate page version and associated objects

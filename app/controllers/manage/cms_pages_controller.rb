@@ -1314,7 +1314,8 @@ class Manage::CmsPagesController < Manage::ApplicationController
       params.require(:pg).permit(:cms_template_id, :cms_template_version, :parent_id, :published_version,
                                   :name, :title, :path, :html_head, :summary, :position,
                                   :article_date, :article_end_date, :published_date, :expiration_date, :expires,
-                                  :thumbnail_path, :feature_image_path, :redirect_enabled, :redirect_to)
+                                  :thumbnail_path, :feature_image_path,
+                                  :redirect_enabled, :redirect_to, :redirect_status_code)
     end
 
     def load_page_objects

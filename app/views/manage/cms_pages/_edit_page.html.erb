@@ -50,16 +50,17 @@
       <%= radio_button :pg, :redirect_enabled, false %> Normal
       <%= radio_button :pg, :redirect_enabled, true %> Redirect to:
       <%= text_field :pg, :redirect_to %>
+      <%= select :pg, :redirect_status_code, options_for_select([ [ '301 Moved Permanently', 301 ], [ '302 Found', 302 ] ], @pg.redirect_status_code), {}, style: 'margin-left: 10px; width: 55px;' %>
       <script type="text/javascript">
         jQuery('#pg_redirect_enabled_false').click(function () {
           jQuery('#pg_redirect_to').prop('disabled', true);
+          jQuery('#pg_redirect_status_code').hide()
           jQuery('#dlg-page-properties tr.page-field').show();
-          jQuery('#dlg-page-properties tr.redirect-field').hide();
         });
         jQuery('#pg_redirect_enabled_true').click(function () {
           jQuery('#pg_redirect_to').prop('disabled', false);
+          jQuery('#pg_redirect_status_code').show();
           jQuery('#dlg-page-properties tr.page-field').hide();
-          jQuery('#dlg-page-properties tr.redirect-field').show();
         });
         jQuery('#pg_redirect_enabled_<%= @pg.redirect_enabled == true %>').trigger('click');
       </script>
