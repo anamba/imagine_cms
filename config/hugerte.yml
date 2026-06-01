@@ -1,0 +1,15 @@
+default:
+  plugins:
+    - autoresize
+    - code
+    - fullscreen
+    - image
+    - link
+    - lists
+    - preview
+    - searchreplace
+    - table
+  toolbar:
+    - undo redo | blocks | bold italic underline strikethrough removeformat
+    - alignleft aligncenter alignright alignjustify | bullist numlist outdent indent
+    - link table cmsimage filelink code fullscreen

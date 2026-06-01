@@ -4,8 +4,14 @@ require 'rails-observers'
 require 'actionpack/action_caching'
 require 'actionpack/page_caching'
 
-require 'prototype-rails'
+begin
+  require 'prototype-rails'
+rescue LoadError
+  # Legacy management screens can still load prototype-rails from host apps
+  # during the transition; the HugeRTE editor path does not need it to boot.
+end
 require 'prototype_legacy_helper/lib/prototype_legacy_helper'
+require 'hugerte-rails'
 
 require 'non-stupid-digest-assets'
 

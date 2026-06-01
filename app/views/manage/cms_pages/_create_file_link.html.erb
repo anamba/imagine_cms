@@ -3,12 +3,6 @@
   ext = (ext.blank? ? 'generic' : ext.gsub(/\./, ''))
 -%>
 <%= javascript_tag <<-EOF
-var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
-var linkNode = dojo.withGlobal(curInst.window, "getAncestorElement", dojo.html.selection, ['a']);
-var html = '';
-
-curInst.restoreSelection();
-
 var removeInvalidTags = function(html) {
   var el = document.createElement('div');
   el.innerHTML = html;
@@ -18,17 +12,12 @@ var removeInvalidTags = function(html) {
   return el.innerHTML;
 };
 
-if (!linkNode) {
-    html = dojo.withGlobal(curInst.window, 'getSelectedHtml', dojo.html.selection);
-} else {
-    html = linkNode.innerHTML;
-    dojo.withGlobal(curInst.window, 'selectElement', dojo.html.selection, [linkNode]);
-}
+var html = ImagineCms.Editor.getSelectedHtml();
 
 html = removeInvalidTags(html).trim();
 if (html === '') html = "Link Text";
 
-curInst.execCommand('inserthtml', '<a href=\"#{page_file_path(@pg, @filename)}\" class=\"file-#{ext}\" target=\"_blank\">'+html+'</a>');
+ImagineCms.Editor.insertHtml('<a href=\"#{page_file_path(@pg, @filename)}\" class=\"file-#{ext}\" target=\"_blank\">'+html+'</a>');
 cancelInsertFile();
 EOF
 %>

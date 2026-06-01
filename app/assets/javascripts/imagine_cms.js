@@ -1,12 +1,5 @@
-//= require prototype
-//= require prototype_ujs
-//= require effects
-//= require dragdrop
-//= require controls
 //= require jquery_no_conflict
 //= require jquery-ui
-//= require builder
-//= require cropper
 //
 //= require codemirror5/codemirror
 //= require codemirror5/mode/xml/xml
@@ -20,3 +13,5 @@
 //= require tag-it
 //
 //= require imagine_cms/core
+//= require hugerte
+//= require imagine_cms/editor

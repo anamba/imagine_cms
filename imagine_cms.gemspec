@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rinku",               "~> 2.0"
   spec.add_dependency "net-dns",             "~> 0.7"
   spec.add_dependency "acts_as_tree",        "~> 2.7"
+  spec.add_dependency "hugerte-rails",       "~> 1.0"
   # spec.add_dependency "safe_yaml",           "~> 1.0"
 
   # on the way out, but still needed for now

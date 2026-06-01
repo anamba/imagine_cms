@@ -1,28 +1,36 @@
 <%- if params[:action] != 'preview_template' -%>
-  <style type="text/css">
-    #imagine_cms-toolbar { font-family: Arial; font-size: 12px; font-weight: normal; text-transform: none; line-height: 1.2; color: black; }
-    #imagine_cms-toolbar a { text-transform: none; font-weight: normal; color: black; }
-  </style>
-  <div id="imagine_cms-toolbar" style="display: none;">
-    <%- if [ 'cms/content', 'manage/cms_pages' ].include?(controller.controller_path) && params[:action] != 'preview_template' -%>
-      <%- if is_editing_page? -%>
-        <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="true" focusOnLoad="false"
-          toolbarTemplatePath="<%= url_for controller: '/manage/cms_pages', action: 'toolbar_edit', id: @pg, version: params[:version] %>"
-          toolbarTemplateCssPath="/assets/dojo/src/widget/templates/EditorToolbarFullFeature.css"
-          toolbarAlwaysVisible="true" style="height: 22px; vertical-align: middle" toolbarGroup="main">
-        </div>
-      <%- else -%>
-        <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="false" focusOnLoad="false"
-          toolbarTemplatePath="<%= url_for controller: '/manage/cms_pages', action: 'toolbar_preview', id: @pg, version: params[:version] %>"
-          toolbarTemplateCssPath="/assets/dojo/src/widget/templates/EditorToolbarFullFeature.css"
-          toolbarAlwaysVisible="true" style="height: 25px; vertical-align: middle">
-        </div>
+  <%- if ImagineCms.use_legacy_dojo_editor -%>
+    <style type="text/css">
+      #imagine_cms-toolbar { font-family: Arial; font-size: 12px; font-weight: normal; text-transform: none; line-height: 1.2; color: black; }
+      #imagine_cms-toolbar a { text-transform: none; font-weight: normal; color: black; }
+    </style>
+    <div id="imagine_cms-toolbar" style="display: none;">
+      <%- if [ 'cms/content', 'manage/cms_pages' ].include?(controller.controller_path) && params[:action] != 'preview_template' -%>
+        <%- if is_editing_page? -%>
+          <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="true" focusOnLoad="false"
+            toolbarTemplatePath="<%= url_for controller: '/manage/cms_pages', action: 'toolbar_edit', id: @pg, version: params[:version] %>"
+            toolbarTemplateCssPath="/assets/dojo/src/widget/templates/EditorToolbarFullFeature.css"
+            toolbarAlwaysVisible="true" style="height: 22px; vertical-align: middle" toolbarGroup="main">
+          </div>
+        <%- else -%>
+          <div dojoType="Editor2" widgetId="main_toolbar" useActiveX="false" htmlEditing="false" focusOnLoad="false"
+            toolbarTemplatePath="<%= url_for controller: '/manage/cms_pages', action: 'toolbar_preview', id: @pg, version: params[:version] %>"
+            toolbarTemplateCssPath="/assets/dojo/src/widget/templates/EditorToolbarFullFeature.css"
+            toolbarAlwaysVisible="true" style="height: 25px; vertical-align: middle">
+          </div>
+        <%- end -%>
       <%- end -%>
+    </div>
+    <script type="text/javascript">
+      if (loggedIn()) {
+        document.getElementById('imagine_cms-toolbar').style.display = 'block';
+      }
+    </script>
+  <%- elsif [ 'cms/content', 'manage/cms_pages' ].include?(controller.controller_path) && is_logged_in_user? -%>
+    <%- if is_editing_page? -%>
+      <%= render template: '/manage/cms_pages/toolbar_edit' %>
+    <%- else -%>
+      <%= render template: '/manage/cms_pages/toolbar_preview' %>
     <%- end -%>
-  </div>
-  <script type="text/javascript">
-    if (loggedIn()) {
-      document.getElementById('imagine_cms-toolbar').style.display = 'block';
-    }
-  </script>
+  <%- end -%>
 <%- end -%>

@@ -12,14 +12,6 @@ jQuery(document).ready(function () {
 
 
 
-/*
- * legacy prototype stuff only beyond this point
- */
-
-// Fixes gallery reordering (Scriptaculous Sortable)
-Position.includeScrollOffsets = true;
-
-
 /********************************
  * date picker functions        *
  ********************************/
@@ -121,7 +113,7 @@ function cbSelectItem(el, currentLevel, urlForNextLevel) {
 
     // display children
     cbAddColumn();
-    new Ajax.Updater('columnBrowserLevel' + (currentLevel+1), urlForNextLevel, {method: 'GET', asynchronous: true, evalScripts: true});
+    ajaxLoadInto('columnBrowserLevel' + (currentLevel+1), urlForNextLevel);
 
     // setScrollbarPosition(el.parentNode, coords);
 }
@@ -156,41 +148,122 @@ var attrlist = [];
 var taglist = [];
 
 var dialogStack = [];
+function setImagineDialogContent(target, html) {
+    target.innerHTML = html;
+    Array.prototype.slice.call(target.querySelectorAll('script')).forEach(function (oldScript) {
+        var newScript = document.createElement('script');
+        Array.prototype.slice.call(oldScript.attributes).forEach(function (attr) {
+            newScript.setAttribute(attr.name, attr.value);
+        });
+        newScript.appendChild(document.createTextNode(oldScript.textContent));
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+}
+
+function ajaxLoadInto(targetId, url, options) {
+    options = options || {};
+    var target = document.getElementById(targetId);
+    if (!target) return Promise.resolve(null);
+
+    target.innerHTML = options.loading || 'Loading...';
+
+    return fetch(url, { credentials: 'same-origin' })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+            setImagineDialogContent(target, html);
+            return target;
+        });
+}
+
 function showDojoDialog(id, titleText) {
-    // if (!is.ie) changeOverflowAutoToHidden();
-    
-    dlg = dojo.widget.byId(id);
-    if (!dlg) dlg = dojo.widget.createWidget(id);
-    if (!dlg) return false;
-    
-    dlg.closeWindow = function () { hideDojoDialog(id); };
-    dlg.show();
-    
-    if (typeof(titleText) != 'undefined') {
-        try {
-            document.getElementById('propertiesDialog').getElementsByTagName('div')[0].getElementsByTagName('div')[4].innerHTML = titleText;
-        } catch (e) {}
+    var dlg = document.getElementById(id);
+    if (!dlg && window.dojo && dojo.widget) {
+        dlg = dojo.widget.byId(id);
+        if (!dlg) dlg = dojo.widget.createWidget(id);
+        if (!dlg) return false;
+        dlg.closeWindow = function () { hideDojoDialog(id); };
+        dlg.show();
+        if (dialogStack.length > 0) dojo.widget.byId(dialogStack[dialogStack.length-1]).hide();
+        dialogStack.push(id);
+        return true;
     }
-    
-    if (dialogStack.length > 0) dojo.widget.byId(dialogStack[dialogStack.length-1]).hide();
+
+    if (!dlg) return false;
+    if (typeof(titleText) != 'undefined') {
+        var title = dlg.querySelector('[data-imagine-dialog-title]');
+        if (title) title.textContent = titleText;
+    }
+
+    if (dialogStack.length > 0) {
+        var previous = document.getElementById(dialogStack[dialogStack.length-1]);
+        if (previous) previous.hidden = true;
+    }
+    dlg.hidden = false;
+    document.documentElement.classList.add('imagine-cms-dialog-open');
     dialogStack.push(id);
 }
 
 function hideDojoDialog(id) {
     dialogStack.pop();
-    
-    dojo.widget.byId(id).hide();
-    // if (!is.ie) changeOverflowHiddenToAuto();
-    
+
+    if (window.dojo && dojo.widget && dojo.widget.byId(id)) {
+        dojo.widget.byId(id).hide();
+    } else {
+        var dlg = document.getElementById(id);
+        if (dlg) dlg.hidden = true;
+    }
+
     if (dialogStack.length > 0) {
-        dojo.widget.byId(dialogStack[dialogStack.length-1]).show();
+        if (window.dojo && dojo.widget && dojo.widget.byId(dialogStack[dialogStack.length-1])) {
+            dojo.widget.byId(dialogStack[dialogStack.length-1]).show();
+        } else {
+            var previous = document.getElementById(dialogStack[dialogStack.length-1]);
+            if (previous) previous.hidden = false;
+        }
+    } else {
+        document.documentElement.classList.remove('imagine-cms-dialog-open');
     }
 }
 
 function editProperties(url, titleText) {
-    $('properties_dialog_content').innerHTML = 'Loading...';
-    new Ajax.Updater('properties_dialog_content', url, {method:'get', asynchronous:true, evalScripts:true});
-    
+    ajaxLoadInto('properties_dialog_content', url).then(function (target) {
+        if (!target) return;
+        var form = target.querySelector('form');
+        if (!form) return;
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var submitButton = form.querySelector('[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.value = 'Saving...';
+            }
+
+            fetch(form.action, {
+                method: form.method || 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-Token': ImagineCms.Editor.csrfToken(),
+                    'Accept': 'text/javascript, text/html, */*'
+                },
+                body: new FormData(form)
+            })
+                .then(function (response) { return response.text(); })
+                .then(function (script) {
+                    if (script) (0, eval)(script);
+                })
+                .catch(function (error) {
+                    var errors = document.getElementById('save_errors');
+                    if (errors) errors.innerHTML = error.message;
+                })
+                .finally(function () {
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.value = 'Save';
+                    }
+                });
+        });
+    });
     showDojoDialog('properties_dialog', titleText);
 }
 
@@ -199,20 +272,22 @@ function cancelEditProperties() {
 }
 
 function insertImage(url) {
-    var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
-    imageNode = dojo.withGlobal(curInst.window, "getSelectedElement", dojo.html.selection);
-    if (!imageNode) {
-        imageNode = dojo.withGlobal(curInst.window, "getAncestorElement", dojo.html.selection, ['img']);
+    if (window.dojo && dojo.widget) {
+        var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
+        imageNode = dojo.withGlobal(curInst.window, "getSelectedElement", dojo.html.selection);
+        if (!imageNode) {
+            imageNode = dojo.withGlobal(curInst.window, "getAncestorElement", dojo.html.selection, ['img']);
+        }
+        if (imageNode) {
+            dojo.require("dojo.widget.Editor2Plugin.InsertImageDialog");
+            w = dojo.widget.createWidget("Editor2InsertImageDialog");
+            w.show();
+            return true;
+        }
     }
-    if (imageNode) {
-        dojo.require("dojo.widget.Editor2Plugin.InsertImageDialog");
-        w = dojo.widget.createWidget("Editor2InsertImageDialog");
-        w.show();
-    } else {
-        $('insert_image_dialog_content').innerHTML = 'Loading...';
-        new Ajax.Updater('insert_image_dialog_content', url, {method:'get', asynchronous:true, evalScripts:true});
-        showDojoDialog('insert_image_dialog');
-    }
+
+    ajaxLoadInto('insert_image_dialog_content', url);
+    showDojoDialog('insert_image_dialog');
     try { if (cropper) cropper.remove(); } catch (e) {}
 }
 
@@ -222,16 +297,21 @@ function cancelInsertImage() {
 }
 
 function insertFile(url) {
-    var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
-    curInst.saveSelection(); //save selection (none-activeX IE)
-    var html = dojo.withGlobal(curInst.window, "getSelectedText", dojo.html.selection);
+    var html = '';
+    if (window.dojo && dojo.widget) {
+        var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
+        curInst.saveSelection(); //save selection (none-activeX IE)
+        html = dojo.withGlobal(curInst.window, "getSelectedText", dojo.html.selection);
+    } else if (window.ImagineCms && ImagineCms.Editor) {
+        html = ImagineCms.Editor.getSelectedText();
+    }
+
     if (html == null || html.length == 0) {
         alert("Please select some text to create a file link.");
         return false; //do not show the dialog
     }
-    
-    $('insert_file_dialog_content').innerHTML = 'Loading...';
-    new Ajax.Updater('insert_file_dialog_content', url, {method:'get', asynchronous:true, evalScripts:true});
+
+    ajaxLoadInto('insert_file_dialog_content', url);
     showDojoDialog('insert_file_dialog');
 }
 
@@ -240,8 +320,7 @@ function cancelInsertFile() {
 }
 
 function selectThumbnail(url) {
-    $('select_thumbnail_dialog_content').innerHTML = 'Loading...';
-    new Ajax.Updater('select_thumbnail_dialog_content', url, {asynchronous:true, evalScripts:true});
+    ajaxLoadInto('select_thumbnail_dialog_content', url);
     showDojoDialog('select_thumbnail_dialog');
 }
 
@@ -253,49 +332,52 @@ if (!window.gallerySize) window.gallerySize = {};
 function changeGalleryImage(galleryName, index) {
     var target = galleryName + '_image_' + index;
     var caption = galleryName + '_caption_' + index;
-    if (!$(target)) return false;
-
-    var queue = Effect.Queues.get('global');
-    queue.each(function(e) { e.cancel() });
+    var targetElement = document.getElementById(target);
+    if (!targetElement) return false;
 
     for (var i = 0; i < gallerySize[galleryName]; i++) {
-        el = $(galleryName + '_image_' + i);
-        if (el.id != target && el.style.display != 'none') Effect.Fade(el, { duration: 0.6 });
+        var el = document.getElementById(galleryName + '_image_' + i);
+        if (el) {
+            el.style.display = el.id == target ? '' : 'none';
+        }
 
-        el = $(galleryName + '_thumb_' + i);
+        el = document.getElementById(galleryName + '_thumb_' + i);
         if (el) {
             if (i == index) {
                 el.oldOnmouseover = el.onmouseover;
                 el.oldOnmouseout = el.onmouseout;
                 el.onmouseover = null;
                 el.onmouseout = null;
-                el.addClassName('current');
+                el.classList.add('current');
             } else {
-                el.removeClassName('current');
+                el.classList.remove('current');
                 if (!el.onmouseover) el.onmouseover = el.oldOnmouseover;
                 if (!el.onmouseout) el.onmouseout = el.oldOnmouseout;
             }
         }
     }
 
-    Effect.Appear(target, { duration: 0.6 });
+    targetElement.style.display = '';
 
-    if($(caption).innerHTML != '') {
-        $(galleryName + '_caption').style.display = 'block';
-        $(galleryName + '_caption').innerHTML = $(caption).innerHTML;
+    var captionSource = document.getElementById(caption);
+    var captionTarget = document.getElementById(galleryName + '_caption');
+    if (!captionTarget) return true;
+    if(captionSource && captionSource.innerHTML != '') {
+        captionTarget.style.display = 'block';
+        captionTarget.innerHTML = captionSource.innerHTML;
     } else {
-        $(galleryName + '_caption').style.display = 'none';
+        captionTarget.style.display = 'none';
     }
 
     var prevIndex = index == 0 ? gallerySize[galleryName] - 1 : index-1;
     var nextIndex = index == gallerySize[galleryName] - 1 ? 0 : index+1;
-    $(galleryName + '_prev_button').onclick = function () { changeGalleryImage(galleryName, prevIndex) };
-    $(galleryName + '_next_button').onclick = function () { changeGalleryImage(galleryName, nextIndex) };
+    document.getElementById(galleryName + '_prev_button').onclick = function () { changeGalleryImage(galleryName, prevIndex) };
+    document.getElementById(galleryName + '_next_button').onclick = function () { changeGalleryImage(galleryName, nextIndex) };
 }
 
 var galleryTimeouts = [];
 function advanceGallerySlideshow(galleryName, delay) {
-    $(galleryName + '_next_button').onclick();
+    document.getElementById(galleryName + '_next_button').onclick();
     galleryTimeouts[galleryName] = setTimeout(function() { advanceGallerySlideshow(galleryName, delay); }, delay);
 }
 
@@ -303,7 +385,7 @@ function advanceGallerySlideshow(galleryName, delay) {
 var overflowAutoDivs = [];
 function changeOverflowAutoToHidden() {
     var divs = [];
-    $$('div').each(function (div) {
+    Array.prototype.forEach.call(document.querySelectorAll('div'), function (div) {
         if (div.style.overflow == 'auto') {
             divs.push(div);
             div.style.overflow = 'hidden';
@@ -313,7 +395,7 @@ function changeOverflowAutoToHidden() {
 }
 
 function changeOverflowHiddenToAuto() {
-    $A(overflowAutoDivs.pop).each(function (div) {
+    Array.prototype.forEach.call(overflowAutoDivs.pop() || [], function (div) {
         div.style.overflow = 'auto';
     });
 }
@@ -322,17 +404,16 @@ function changeOverflowHiddenToAuto() {
 var pageBrowserFieldID = null;
 function showPageBrowser(field_id) {
     pageBrowserFieldID = field_id;
-    path = $(field_id).value;
-    
-    $('page_browser').innerHTML = 'Loading...'
-    new Ajax.Updater('page_browser', '/manage/cms_pages/select_page?path=' + path, {asynchronous:true, evalScripts:true});
-    $('page_browser_selection').value = path;
+    path = document.getElementById(field_id).value;
+
+    ajaxLoadInto('page_browser', '/manage/cms_pages/select_page?path=' + encodeURIComponent(path));
+    document.getElementById('page_browser_selection').value = path;
     showDojoDialog('page_browser_dialog');
 }
 
 function closePageBrowser() {
     hideDojoDialog('page_browser_dialog');
-    $(pageBrowserFieldID).value = $('page_browser_selection').value;
+    document.getElementById(pageBrowserFieldID).value = document.getElementById('page_browser_selection').value;
 }
 
 // first level of this hash is parent_key below

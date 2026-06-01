@@ -1,109 +1,112 @@
-<div class="ccs-toolbar EditorToolbarDomNode EditorToolbarSmallBg" style="height: 25px; min-width: 900px;">
-  <table cellpadding="1" cellspacing="0" border="0">
-    <tbody>
-      <tr valign="top" align="left">
-      <% if @pg -%>
-        <td onclick="location.href = '<%= url_for controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg, version: params[:version] %>';">
-          <!-- save -->
-          <span class="iconContainer">
-            <span title="Edit" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
-          </span>
-        </td>
-        <td onclick="location.href = '<%= url_for controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg, version: params[:version] %>';" style="vertical-align: middle; cursor: pointer">
-          <span title="Edit" style="font-family: Arial">Edit</span>
-        </td>
-        
-        <td onclick="editProperties('<%= url_for :action => 'edit_page', :id => @pg, :mode => 'ajax_edit', :return_to => 'preview' %>');">
-          <!-- save -->
-          <span class="iconContainer" style="margin: 0 0 0 10px;">
-            <span title="Edit" class="dojoE2TBIcon dojoE2TBIcon_Save">&nbsp;</span>
-          </span>
-        </td>
-        <td onclick="editProperties('<%= url_for :action => 'edit_page', :id => @pg, :mode => 'ajax_edit', :return_to => 'preview' %>');" style="vertical-align: middle; cursor: pointer">
-          <span title="Edit" style="font-family: Arial">Properties</span>
-        </td>
-        
-        <td isSpacer="true">
-          <!-- spacer -->
-          <span class="iconContainer">
-            <span class="dojoE2TBIcon dojoE2TBIcon_Sep" style="width: 5px; min-width: 5px;"></span>
-          </span>
-        </td>
-        
-        <td onclick="location.href = '<%= url_for controller: '/manage/cms_pages', action: 'index', path: (@pg ? @pg.path : nil) %>';" style="vertical-align: middle; cursor: pointer">
-          <a href="<%= url_for controller: '/manage/cms_pages', action: 'index', path: (@pg ? @pg.path : nil) %>" style="text-decoration: none"><span title="Manage Pages" style="font-family: Arial; color: #3c3c3c;">Pages</span></a>
-        </td>
-        
-        <td isSpacer="true">
-          <!-- spacer -->
-          <span class="iconContainer">
-            <span class="dojoE2TBIcon dojoE2TBIcon_Sep" style="width: 5px; min-width: 5px;"></span>
-          </span>
-        </td>
-        
-        <td style="vertical-align: middle;">
-          <span style="font-family: Arial">Preview Version:</span>
-        </td>
-        <td style="vertical-align: middle;">
-          <%= form_tag('/' + @pg.path, { :method => 'get' }) do -%>
-          <div style="border: 2px solid #EBEBEB">
-           <select name="version" style="font-size: 8pt; width: 210px" onchange="location.href = this.value;">
-            <!-- FIXME: using "p" here inserts a paragraph in most cases! -->
-            <%- @pg.versions.reverse.each do |pg| -%>
-              <option value="<%= "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{pg.version}" %>"<%= (params[:version] || @pg.published_version).to_i == pg.version ? ' selected="selected"' : '' %>>
-                <%= "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{ " by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }" + (pg.version == @pg.published_version ? ' [PUBLISHED]' : '') %>
-              </option>
+<div id="imagine_cms-toolbar" class="imagine-cms-toolbar imagine-cms-toolbar--preview">
+  <div class="imagine-cms-toolbar__inner">
+    <% if @pg -%>
+      <a class="imagine-cms-toolbar__button imagine-cms-toolbar__button--primary" href="<%= url_for controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg, version: params[:version] %>">
+        Edit
+      </a>
+      <button type="button" class="imagine-cms-toolbar__button" data-imagine-properties="<%= url_for controller: '/manage/cms_pages', action: 'edit_page', id: @pg, mode: 'ajax_edit', return_to: 'preview' %>">
+        Properties
+      </button>
+      <a class="imagine-cms-toolbar__button" href="<%= url_for controller: '/manage/cms_pages', action: 'index', path: (@pg ? @pg.path : nil) %>">
+        Pages
+      </a>
+
+      <span class="imagine-cms-toolbar__divider"></span>
+
+      <label class="imagine-cms-toolbar__field">
+        <span>Preview</span>
+        <select data-imagine-display-version>
+          <%- @pg.versions.reverse.each do |pg| -%>
+            <option value="<%= "#{@pg.path.blank? ? '' : '/' + @pg.path}/version/#{pg.version}" %>"<%= (params[:version] || @pg.published_version).to_i == pg.version ? ' selected="selected"' : '' %>>
+              <%= "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{ " by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }" + (pg.version == @pg.published_version ? ' [PUBLISHED]' : '') %>
+            </option>
+          <%- end -%>
+        </select>
+      </label>
+
+      <%- if !UseCmsAccessLevels || user_has_permission?(:manage_cms_publishing) -%>
+        <label class="imagine-cms-toolbar__field">
+          <span>Publish</span>
+          <select data-imagine-published-version data-url="<%= url_for controller: '/manage/cms_pages', action: 'set_page_version', id: @pg %>">
+            <%- [ @pg.path == '' ? nil : [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].compact.concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }).each do |label, version| %>
+              <option value="<%= version %>"<%= (@pg && @pg.published_version == version.to_i) ? ' selected="selected"' : '' %>><%= label %></option>
             <%- end -%>
           </select>
-          </div>
-          <%- end -%>
-        </td>
-        
-        <td style="vertical-align: middle;">
-          <span style="font-family: Arial; margin-left: 10px;">Publish Version:</span>
-        </td>
-        
-        <td style="vertical-align: middle;">
-          <%- if !UseCmsAccessLevels || user_has_permission?(:manage_cms_publishing) -%>
-            <%= form_remote_tag(:url => { :controller => '/manage/cms_pages', :action => 'set_page_version', :id => @pg },
-                               :loading => "$('set_page_version_loading').show();",
-                               :complete => "$('set_page_version_loading').hide();" + (@pg ? "$('pg_published_version_container').style.borderColor = ($('pg_published_version').value == '0' || $('pg_published_version').value == '#{@pg.versions.last.version}') ? '#EBEBEB' : 'red';" : '')) do -%>
-              <div id="pg_published_version_container" style="border-color: <%= @pg && (@pg.published_version == 0 || @pg.published_version == @pg.versions.last.version) ? '#EBEBEB' : 'red' %>; border-style: solid; border-width: 2px;">
-              <select name="pg[published_version]" id="pg_published_version" style="font-size: 8pt; width: 210px;" onchange="this.form.onsubmit();">
-                <%- [ @pg.path == '' ? nil : [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].compact.concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }).each do |label, version| %>
-                <option value="<%= version %>"<%= (@pg && @pg.published_version == version.to_i) ? ' selected="selected"' : '' %>><%= label %></option>
-                <%- end -%>
-              </select>
-              </div>
-            <% end %>
-          <%- else -%>
-            <%- if params[:version] && params[:version].to_i != @pg.published_version && !(@pg.published_version == 0 && params[:version].to_i == @pg.versions.count) -%>
-              <%= form_remote_tag(:url => { :controller => '/manage/cms_pages', :action => 'request_review', :id => @pg, :version => (params[:version] || @pg.published_version) },
-                                 :loading => "$('set_page_version_loading').show();",
-                                 :complete => "$('set_page_version_loading').hide();") do -%>
-                <%= submit_tag "Submit Version #{(params[:version])} for Review" %>
-              <% end %>
-            <%- else -%>
-              [ version <%= @pg.version %> is the published version ]
-            <%- end -%>
-          <%- end -%>
-        </td>
-        <td width="20">
-          <div id="set_page_version_loading" style="display: none"><%= image_tag "interface/form_loading.gif" %></div>
-        </td>
-      <% end -%>
-        
-        <td isSpacer="true">
-          <!-- spacer -->
-          <span class="iconContainer">
-            <span class="dojoE2TBIcon dojoE2TBIcon_Sep" style="width: 5px; min-width: 5px;"></span>
-          </span>
-        </td>
-        
-        <td onclick="location.href = '<%= url_for :controller => '/management/user', :action => 'logout', :redirect => (@pg ? @pg.path : '') %>';" style="vertical-align: middle; cursor: pointer">
-          <a href="<%= url_for :controller => '/management/user', :action => 'logout', :redirect => (@pg ? "/#{@pg.path}" : '') %>" style="text-decoration: none"><span title="Log out" style="font-family: Arial; color: #3c3c3c;">Logout</span></a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </label>
+        <span class="imagine-cms-toolbar__spinner" data-imagine-publish-spinner hidden><%= image_tag "interface/form_loading.gif" %></span>
+      <%- elsif params[:version] && params[:version].to_i != @pg.published_version && !(@pg.published_version == 0 && params[:version].to_i == @pg.versions.count) -%>
+        <form class="imagine-cms-toolbar__inline-form" data-imagine-review-form action="<%= url_for controller: '/manage/cms_pages', action: 'request_review', id: @pg, version: (params[:version] || @pg.published_version) %>" method="post">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          <button type="submit" class="imagine-cms-toolbar__button">Submit Version <%= params[:version] %> for Review</button>
+        </form>
+      <%- else -%>
+        <span class="imagine-cms-toolbar__note">Version <%= @pg.version %> is published</span>
+      <%- end -%>
+    <% end -%>
+
+    <a class="imagine-cms-toolbar__button imagine-cms-toolbar__button--quiet imagine-cms-toolbar__logout" href="<%= url_for controller: '/management/user', action: 'logout', redirect: (@pg ? "/#{@pg.path}" : '') %>">
+      Logout
+    </a>
+  </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var toolbar = document.getElementById("imagine_cms-toolbar");
+    if (!toolbar) return;
+
+    var propertiesButton = toolbar.querySelector("[data-imagine-properties]");
+    var displayVersionSelect = toolbar.querySelector("[data-imagine-display-version]");
+    var publishedVersionSelect = toolbar.querySelector("[data-imagine-published-version]");
+    var reviewForm = toolbar.querySelector("[data-imagine-review-form]");
+    var spinner = toolbar.querySelector("[data-imagine-publish-spinner]");
+    var csrfToken = function () {
+      if (window.ImagineCms && ImagineCms.Editor && ImagineCms.Editor.csrfToken) {
+        return ImagineCms.Editor.csrfToken();
+      }
+
+      var meta = document.querySelector("meta[name='csrf-token']");
+      return meta ? meta.getAttribute("content") : "";
+    };
+
+    if (propertiesButton) {
+      propertiesButton.addEventListener("click", function () {
+        editProperties(propertiesButton.dataset.imagineProperties, "Page Properties");
+      });
+    }
+    if (displayVersionSelect) {
+      displayVersionSelect.addEventListener("change", function () {
+        window.location.href = displayVersionSelect.value;
+      });
+    }
+    if (publishedVersionSelect) {
+      publishedVersionSelect.addEventListener("change", async function () {
+        if (spinner) spinner.hidden = false;
+        var formData = new FormData();
+        formData.append("authenticity_token", csrfToken());
+        formData.append("pg[published_version]", publishedVersionSelect.value);
+
+        await fetch(publishedVersionSelect.dataset.url, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "X-CSRF-Token": csrfToken() },
+          body: formData
+        });
+        publishedVersionSelect.classList.toggle("old-version", publishedVersionSelect.value !== "0" && publishedVersionSelect.selectedIndex > 1);
+        if (spinner) spinner.hidden = true;
+      });
+    }
+    if (reviewForm) {
+      reviewForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var response = await fetch(reviewForm.action, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "X-CSRF-Token": csrfToken() },
+          body: new FormData(reviewForm)
+        });
+        if (response.ok) reviewForm.querySelector("button").textContent = "Submitted";
+      });
+    }
+  });
+</script>

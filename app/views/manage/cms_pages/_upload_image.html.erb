@@ -29,7 +29,7 @@
       <td>
         <%= submit_tag 'Next', id: 'upload-image-next-button', class: 'form_button', style: 'min-width: 70px' %>
         <%= submit_tag 'Finish', id: 'upload-image-finish-button', class: 'form_button', style: 'min-width: 70px' %>
-        <%= link_to_function "Cancel", "cancelInsertImage()" %>
+        <button type="button" class="form_button" onclick="cancelInsertImage()">Cancel</button>
       </td>
     </tr>
   </table>
@@ -53,21 +53,19 @@
       <td></td>
       <td>
         <%= submit_tag 'Next', id: 'upload-gallery-next-button', class: 'form_button', style: 'min-width: 70px' %>
-        <%= link_to_function "Cancel", "cancelInsertImage()" %>
+        <button type="button" class="form_button" onclick="cancelInsertImage()">Cancel</button>
       </td>
     </tr>
   </table>
   <% end %>
 </fieldset><br>
 
-<%= form_remote_tag(update: 'insert_image_dialog_content', html: { id: 'mainform' },
-                    url: { action: 'crop_image', id: @pg }) do %>
+<%= form_tag({ action: 'crop_image', id: @pg }, { id: 'mainform' }) do %>
   <%= text_field_tag 'next_clicked', '0', style: 'display: none' %>
   <%= text_field_tag 'filename', '', style: 'display: none' %>
 <%- end -%>
 
-<%= form_remote_tag(update: 'insert_image_dialog_content', html: { id: 'mainform_gallery' },
-                    url: { action: 'gallery_setup', id: @pg }) do %>
+<%= form_tag({ action: 'gallery_setup', id: @pg }, { id: 'mainform_gallery' }) do %>
   <%= text_field_tag :dirname, '', style: 'display: none' %>
 <%- end -%>
 
@@ -116,7 +114,14 @@
     let data = await resp.json();
 
     document.getElementById("filename").value = data.filename;
-    document.getElementById("mainform").onsubmit();
+    fetch(document.getElementById("mainform").action, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "X-CSRF-Token": ImagineCms.Editor.csrfToken() },
+      body: new FormData(document.getElementById("mainform"))
+    })
+      .then((response) => response.text())
+      .then((html) => setImagineDialogContent(document.getElementById("insert_image_dialog_content"), html));
   });
 
   uploadGalleryForm.addEventListener("submit", async (e) => {
@@ -141,6 +146,13 @@
     let data = await resp.json();
 
     document.getElementById("dirname").value = data.filename;
-    document.getElementById("mainform_gallery").onsubmit();
+    fetch(document.getElementById("mainform_gallery").action, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "X-CSRF-Token": ImagineCms.Editor.csrfToken() },
+      body: new FormData(document.getElementById("mainform_gallery"))
+    })
+      .then((response) => response.text())
+      .then((html) => setImagineDialogContent(document.getElementById("insert_image_dialog_content"), html));
   });
 </script>

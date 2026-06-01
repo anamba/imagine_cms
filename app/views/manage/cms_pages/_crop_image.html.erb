@@ -154,8 +154,7 @@ Pressing "Save Image" will crop the image and insert it into the page.
 <br/>
 
 <center>
-  <%= form_remote_tag :update => 'insert_image_dialog_content',
-                      :url => { :action => "save_crop", :id => @pg, :filename => @image_file } do -%>
+  <%= form_tag({ action: "save_crop", id: @pg, filename: @image_file }, { id: "save-crop-form" }) do -%>
     <table cellpadding="10">
       <tr>
         <td>
@@ -179,13 +178,13 @@ Pressing "Save Image" will crop the image and insert it into the page.
 
             <%= text_field :image, :max_width, :size => 3, :value => @width, :onchange => "deselectAllPresets(); recalculateHeight();" %>
              x <%= text_field :image, :max_height, :size => 3, :value => @height, :onchange => "deselectAllPresets(); recalculateWidth();" %>
-            <%= javascript_tag "$('image_max_width').onkeydown = disableEnterKey; $('image_max_height').onkeydown = disableEnterKey;" %>
+            <%= javascript_tag "document.getElementById('image_max_width').onkeydown = disableEnterKey; document.getElementById('image_max_height').onkeydown = disableEnterKey;" %>
 
             <%= image_tag('management/icon_unlocked.png', :id => 'icon_unlocked', :onclick => "deselectAllPresets(); lockImageSize();") %>
             <%= image_tag('management/icon_locked.png', :id => 'icon_locked', :onclick => "deselectAllPresets(); unlockImageSize();", :style => 'display: none;') %>
 
-            <%= link_to_function "Apply", "resizeCropperScaled();" %> |
-            <%= link_to_function "Reset", "cropper.reset(); resize_ratio = 1.0;" %>
+            <button type="button" class="form_button" onclick="resizeCropperScaled();">Apply</button>
+            <button type="button" class="form_button" onclick="cropper.reset(); resize_ratio = 1.0;">Reset</button>
 
             <span id="aspect_ratio" style="display: none;"><%= sprintf("%.3f", @aspect_ratio) %></span><br/>
             <%= text_field :image, :x1, :style => "display: none" %>
@@ -200,6 +199,19 @@ Pressing "Save Image" will crop the image and insert it into the page.
     </table>
 
     <%= submit_tag 'Save Image', class: 'form_button', style: 'width: 90px;', data: { disable_with: 'Saving...' } %>
-    <%= link_to_function "Cancel", "cancelInsertImage();" %>
+    <button type="button" class="form_button" onclick="cancelInsertImage();">Cancel</button>
   <%- end -%>
 </center>
+
+<script>
+  document.getElementById("save-crop-form").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    var response = await fetch(event.currentTarget.action, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "X-CSRF-Token": ImagineCms.Editor.csrfToken() },
+      body: new FormData(event.currentTarget)
+    });
+    setImagineDialogContent(document.getElementById("insert_image_dialog_content"), await response.text());
+  });
+</script>
