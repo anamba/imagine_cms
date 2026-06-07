@@ -82,6 +82,8 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes styles, ".imagine-cms-rte-source[hidden]"
     assert_includes styles, "border: 3px dashed"
     assert_includes styles, "scroll-margin-top: 78px"
+    assert_includes styles, ".imagine-cms-toolbar-shell"
+    refute_includes styles, ".print\\:hidden { display: contents; }"
   end
 
   def test_media_insert_callbacks_target_the_imagine_editor_adapter

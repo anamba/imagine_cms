@@ -3,9 +3,13 @@
   Page List: <%= name %><br/>
   <button class="form_button" onclick="showDojoDialog('page_list_<%= key %>'); return false;">Configure</button>
 </div>
-<div dojoType="ModalFloatingPane" id="page_list_<%= key %>" title="Page List: <%= name %>"
-     hasShadow="true" resizable="true" followScroll="false" displayCloseAction="true" appendToBody="false"
-     style="width: 620px; height: 600px; display: none">
+<div id="page_list_<%= key %>" class="imagine-cms-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="page_list_<%= key %>_title">
+  <div class="imagine-cms-dialog__panel" style="width: min(620px, 100%); max-height: calc(100vh - 72px);">
+    <div class="imagine-cms-dialog__header">
+      <h2 id="page_list_<%= key %>_title" data-imagine-dialog-title>Page List: <%= name %></h2>
+      <button type="button" class="imagine-cms-dialog__close" onclick="hideDojoDialog('page_list_<%= key %>');" aria-label="Close">×</button>
+    </div>
+    <div class="imagine-cms-dialog__content" style="max-height: calc(100vh - 132px); overflow: auto;">
   <div class="ccs-page-list-form">
     <fieldset>
       <legend>Sources</legend>
@@ -29,8 +33,40 @@
       
       <table>
         <tr>
-          <td><%= button_to_function('Add Page/Folder', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms_pages/page_list_add_folder?key=#{key}&i=' + $('page_objects_#{key}-sources-folder-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-folder-count').value++;", class: 'form_button') %></td>
-          <td><%= button_to_function('Add Tag', "new Ajax.Updater('page_list_#{key}-source-list', '/manage/cms_pages/page_list_add_tag?key=#{key}&i=' + $('page_objects_#{key}-sources-tag-count').value, {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); $('page_objects_#{key}-sources-tag-count').value++;", class: 'form_button') %></td>
+          <td>
+            <button type="button" class="form_button" onclick="
+              var count = jQuery('#page_objects_<%= key %>-sources-folder-count').val();
+              var token = jQuery('meta[name=csrf-token]').attr('content');
+              jQuery.ajax({
+                url: '/manage/cms_pages/page_list_add_folder',
+                type: 'POST',
+                data: { key: '<%= key %>', i: count },
+                headers: { 'X-CSRF-Token': token },
+                success: function(html) {
+                  jQuery('#page_list_<%= key %>-source-list').append(html);
+                  jQuery('#page_objects_<%= key %>-sources-folder-count').val(parseInt(count) + 1);
+                }
+              });
+              return false;
+            ">Add Page/Folder</button>
+          </td>
+          <td>
+            <button type="button" class="form_button" onclick="
+              var count = jQuery('#page_objects_<%= key %>-sources-tag-count').val();
+              var token = jQuery('meta[name=csrf-token]').attr('content');
+              jQuery.ajax({
+                url: '/manage/cms_pages/page_list_add_tag',
+                type: 'POST',
+                data: { key: '<%= key %>', i: count },
+                headers: { 'X-CSRF-Token': token },
+                success: function(html) {
+                  jQuery('#page_list_<%= key %>-source-list').append(html);
+                  jQuery('#page_objects_<%= key %>-sources-tag-count').val(parseInt(count) + 1);
+                }
+              });
+              return false;
+            ">Add Tag</button>
+          </td>
           <td>
             <%= check_box :page_objects, "#{key}-include-expired", { class: 'form', style: '' }, 'true', 'false' %>
             <label for="page_objects_<%= key %>-include-expired">Include expired items</label>
@@ -97,13 +133,25 @@
           <td>
             <%-
               @page_objects["#{key}-date-range"] ||= 'all'
+              start_val = @page_objects["#{key}-date-range-custom-start"]
+              end_val = @page_objects["#{key}-date-range-custom-end"]
+              start_date = if start_val.is_a?(String)
+                             Date.parse(start_val) rescue Date.today
+                           else
+                             start_val || Date.today
+                           end
+              end_date = if end_val.is_a?(String)
+                           Date.parse(end_val) rescue Date.today
+                         else
+                           end_val || Date.today
+                         end
             -%>
             <%= radio_button :page_objects, "#{key}-date-range", 'all' %><label for="page_objects_<%= key %>-date-range_all">All Dates</label>&nbsp;
             <%= radio_button :page_objects, "#{key}-date-range", 'past' %><label for="page_objects_<%= key %>-date-range_past">Past</label>&nbsp;
             <%= radio_button :page_objects, "#{key}-date-range", 'future' %><label for="page_objects_<%= key %>-date-range_future">Future</label>&nbsp;
             <%= radio_button :page_objects, "#{key}-date-range", 'custom' %><label for="page_objects_<%= key %>-date-range_custom">Range:</label>
-            <%= date_picker :page_objects, "#{key}-date-range-custom-start", default_value: (@page_objects["#{key}-date-range-custom-start"] || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %> &ndash;
-            <%= date_picker :page_objects, "#{key}-date-range-custom-end", default_value: (@page_objects["#{key}-date-range-custom-end"] || Time.now), start_date: Time.utc(2006, 1, 1), end_date: 5.years.from_now %>
+            <%= text_field_tag "page_objects[#{key}-date-range-custom-start]", start_date.strftime('%Y-%m-%d'), class: 'form', style: 'margin: 0; padding: 2px;', type: 'date' %> &ndash;
+            <%= text_field_tag "page_objects[#{key}-date-range-custom-end]", end_date.strftime('%Y-%m-%d'), class: 'form', style: 'margin: 0; padding: 2px;', type: 'date' %>
           </td>
         </tr>
       </table>
@@ -132,7 +180,7 @@
             system_attrs[attr] ||= attr.titleize
           end
         -%>
-        <select class="form" style="width: 150px;" onchange="insertAtCaret($('page_objects_<%= key %>-template'), '<# ' + this.value + ' #>'); this.value = '';">
+        <select class="form" style="width: 150px;" onchange="insertAtCaret(document.getElementById('page_objects_<%= key %>-template'), '<# ' + this.value + ' #>'); this.value = '';">
           <option value="">-- Insert Attribute --</option>
           <%- system_attrs.sort.each do |attr, label| -%>
             <option value="<%= attr %>"><%= label %></option>
@@ -174,10 +222,11 @@
     
     <center><button class="form_button" onclick="hideDojoDialog('page_list_<%= key %>'); return false;">Close</button></center>
   </div>
+    </div>
+  </div>
 </div>
 
 <script type="text/javascript">
-  // reattach to a safe place in the DOM (away from styled regions)
   window.addEventListener('DOMContentLoaded', (event) => {
     var displayAsList = jQuery('#page_objects_<%= key %>-style-display-as_list').checked;
     jQuery('.page_list_<%= key %>_list_option').toggle(displayAsList);

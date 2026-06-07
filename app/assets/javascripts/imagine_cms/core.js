@@ -425,13 +425,16 @@ function scanForPageObjects(page_id, parent_key, version) {
   var found = {};
   if (!cmsPageObjects[parent_key]) cmsPageObjects[parent_key] = {};
 
-  var regex = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
+  // Match both raw ERB (<%=) and HTML-escaped form (&lt;%=) from textarea values
+  var lAngle = '(?:&lt;|<)';
+  var rAngle = '(?:&gt;|>)';
+
+  var regex = new RegExp(lAngle + '%=\\s*insert_object\\(?\\s*[\'"]([-\\w\\s\\d]+)[\'"],\\s*:(\\w+)\\s*(.*?)\\)?\\s*%' + rAngle, 'gm');
   var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
   if (matches) {
     jQuery.each(matches, function (index) {
       var match = this;
-      // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
-      var regex2 = /<%=\s*insert_object\(?\s*['"]([-\w\s\d]+)['"],\s*:(\w+)\s*(.*?)\)?\s*%>/gm;
+      var regex2 = new RegExp(lAngle + '%=\\s*insert_object\\(?\\s*[\'"]([-\\w\\s\\d]+)[\'"],\\s*:(\\w+)\\s*(.*?)\\)?\\s*%' + rAngle, 'gm');
       if (regex2.test(match)) {
         key = match.replace(regex2, "$1");
         val = match.replace(regex2, "$2");
@@ -440,13 +443,12 @@ function scanForPageObjects(page_id, parent_key, version) {
     });
   }
 
-  var regex = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
+  var regex = new RegExp(lAngle + '%=\\s*(?:page_list|pagelist)\\(?\\s*[\'"]([-\\w\\s\\d]+)[\'"](.*?)\\)?\\s*%' + rAngle, 'gm');
   var matches = jQuery('#page_objects_' + parent_key).val().match(regex);
   if (matches) {
     jQuery.each(matches, function (index) {
       var match = this;
-      // regex2 should be exactly the same as regex. Global regexes have a lastIndex which is not reset.
-      var regex2 = /<%=\s*(?:page_list|pagelist)\(?\s*['"]([-\w\s\d]+)['"](.*?)\)?\s*%>/gm;
+      var regex2 = new RegExp(lAngle + '%=\\s*(?:page_list|pagelist)\\(?\\s*[\'"]([-\\w\\s\\d]+)[\'"](.*?)\\)?\\s*%' + rAngle, 'gm');
       if (regex2.test(match)) {
         key = match.replace(regex2, "$1");
         val = 'page_list'
@@ -470,7 +472,7 @@ function scanForPageObjects(page_id, parent_key, version) {
   jQuery.each(found, function (key, val) {
     if (!cmsPageObjects[parent_key][key]) {
       cmsPageObjects[parent_key][key] = val;
-      jQuery.get('/manage/cms_pages/' + page_id + '/insert_page_object_config?version= ' + version +
+      jQuery.get('/manage/cms_pages/' + page_id + '/insert_page_object_config?version=' + version +
                  '&name=' + key + '&type=' + val + '&parent_key=' + parent_key);
     }
   });

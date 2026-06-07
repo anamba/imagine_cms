@@ -7,14 +7,18 @@
       Cancel
     </button>
 
-    <span class="imagine-cms-toolbar__divider"></span>
-
-    <button type="button" class="imagine-cms-toolbar__button" data-imagine-insert-image="<%= url_for action: 'upload_image', id: @pg.id %>">
-      Image
-    </button>
-    <button type="button" class="imagine-cms-toolbar__button" data-imagine-insert-file="<%= url_for action: 'upload_file', id: @pg.id %>">
-      File
-    </button>
+    <span class="imagine-cms-toolbar__page-info">
+      <span class="imagine-cms-toolbar__page-name"><%= @pg.title %></span>
+      <span class="imagine-cms-toolbar__page-path">/<%= @pg.path %></span>
+      <span class="imagine-cms-toolbar__divider"></span>
+      <span class="imagine-cms-toolbar__page-version">v<%= @pg.version %></span>
+      <%- if @pg.updated_by_username.present? -%>
+        <span class="imagine-cms-toolbar__page-author">by <%= @pg.updated_by_username %></span>
+      <%- end -%>
+      <%- if @pg.updated_on.present? -%>
+        <span class="imagine-cms-toolbar__page-date"><%= date_to_str(@pg.updated_on) %> <%= time_to_str(@pg.updated_on) %></span>
+      <%- end -%>
+    </span>
   </div>
 </div>
 
@@ -25,8 +29,6 @@
 
     var saveButton = toolbar.querySelector("[data-imagine-save]");
     var cancelButton = toolbar.querySelector("[data-imagine-cancel]");
-    var imageButton = toolbar.querySelector("[data-imagine-insert-image]");
-    var fileButton = toolbar.querySelector("[data-imagine-insert-file]");
 
     if (saveButton) {
       saveButton.addEventListener("click", function () {
@@ -36,16 +38,6 @@
     if (cancelButton) {
       cancelButton.addEventListener("click", function () {
         ImagineCms.Editor.cancelEdit(cancelButton.dataset.imagineCancel);
-      });
-    }
-    if (imageButton) {
-      imageButton.addEventListener("click", function () {
-        insertImage(imageButton.dataset.imagineInsertImage);
-      });
-    }
-    if (fileButton) {
-      fileButton.addEventListener("click", function () {
-        insertFile(fileButton.dataset.imagineInsertFile);
       });
     }
   });
