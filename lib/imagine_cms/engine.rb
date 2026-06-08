@@ -49,6 +49,10 @@ module ImagineCms
       # Rails.application.config.load_paths << File.dirname(__FILE__) + "/../app/helpers"
     end
 
+    initializer 'imagine_cms.hugerte' do |app|
+      app.config.hugerte.install = :copy
+    end
+
     initializer 'imagine_cms.legacy_support' do |app|
       ActionController::Base.send(:include, UploadProgress)
       ActionView::Base.send(:include, UploadProgress::UploadProgressHelper)
