@@ -144,7 +144,10 @@
         editor.on("change input undo redo setcontent", function () {
           setDirty(true);
           var textarea = document.getElementById(editor.getElement().dataset.textareaId);
-          if (textarea) textarea.value = editor.getContent();
+          if (textarea) {
+            textarea.value = editor.getContent();
+            textarea.dispatchEvent(new CustomEvent("imagine-cms:content-change", { bubbles: true }));
+          }
         });
         editor.ui.registry.addButton("cmsimage", {
           text: "Image",

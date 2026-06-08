@@ -16,15 +16,14 @@
 
 <div id="save_errors" class="error"></div>
 
-<%= form_remote_tag url: { action: 'edit_page', id: @pg },
-                    loading: "$('btn_save').disabled = true; $('btn_save').value = 'Saving...';" do %>
+<%= form_tag({ action: 'edit_page', id: @pg }) do %>
 <table id="dlg-page-properties" class="imagine-cms-properties-form">
   <col width="120"><col width="*"><col width="5">
 <%- if @pg.id != 1 -%>
   <tr id="cms_page-form-name-row">
     <td class="imagine-cms-properties-form__label">Name (for URL):</td>
     <td>
-      <%= text_field :pg, :name, class: 'form', style: 'margin-bottom: 0; width: 150px', onchange: (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = $('original_name').value; };") %><br/>
+      <%= text_field :pg, :name, class: 'form', style: 'margin-bottom: 0; width: 150px', onchange: (@pg.new_record? ? '' : "if (!confirm('Are you sure you want to change the name of this page? Any bookmarks or links to this page will no longer work if you proceed with this change.')) { this.value = document.getElementById('original_name').value; };") %><br/>
       <%= text_field_tag :original_name, @pg.name, style: 'display: none' %>
       <%= text_field :pg, :parent_id, style: 'display: none' %>
     </td>
@@ -155,11 +154,9 @@
         A thumbnail cannot be added until you save this page.
       <%- else -%>
         <div id="thumbnail_preview" style="width: 100%; height: 120px; background: url('<%= @pg.thumbnail_path %>') left top no-repeat; background-size: contain;" onclick="jQuery('#pg_thumbnail_path').toggle();"></div>
-        <%= button_to_function "Select Thumbnail...",
-                               "selectThumbnail('#{url_for action: 'upload_thumb', id: @pg}');",
-                               class: 'imagine-cms-dialog__button' %>
+        <button type="button" class="imagine-cms-dialog__button" onclick="selectThumbnail('<%= url_for action: 'upload_thumb', id: @pg %>');">Select Thumbnail...</button>
         <%- if @pg.thumbnail_path.present? -%>
-          <%= button_to_function "Remove", "jQuery('#thumbnail_preview').css({ 'background-image': 'none' }); jQuery('#pg_thumbnail_path').val(''); jQuery(this).remove();", class: 'imagine-cms-dialog__button' %>
+          <button type="button" class="imagine-cms-dialog__button" onclick="jQuery('#thumbnail_preview').css({ 'background-image': 'none' }); jQuery('#pg_thumbnail_path').val(''); jQuery(this).remove();">Remove</button>
         <%- end -%>
         <%= text_field :pg, :thumbnail_path, class: 'form', style: 'width: 100%; display: none;' %>
       <%- end -%>
@@ -173,11 +170,9 @@
         A feature image cannot be added until you save this page.
       <%- else -%>
         <div id="feature_image_preview" style="width: 100%; height: 120px; background: url('<%= @pg.feature_image_path %>') left top no-repeat; background-size: contain;" onclick="jQuery('#pg_feature_image_path').toggle();"></div>
-        <%= button_to_function "Select Feature Image...",
-                               "selectThumbnail('#{url_for action: 'upload_feature_image', id: @pg}');",
-                               class: 'imagine-cms-dialog__button' %>
+        <button type="button" class="imagine-cms-dialog__button" onclick="selectThumbnail('<%= url_for action: 'upload_feature_image', id: @pg %>');">Select Feature Image...</button>
         <%- if @pg.feature_image_path.present? -%>
-          <%= button_to_function "Remove", "jQuery('#feature_image_preview')..css({ 'background-image': 'none' }); jQuery('#pg_feature_image_path').val(''); jQuery(this).remove();", class: 'imagine-cms-dialog__button' %>
+          <button type="button" class="imagine-cms-dialog__button" onclick="jQuery('#feature_image_preview').css({ 'background-image': 'none' }); jQuery('#pg_feature_image_path').val(''); jQuery(this).remove();">Remove</button>
         <%- end -%>
         <%= text_field :pg, :feature_image_path, class: 'form', style: 'width: 100%; display: none;' %>
       <%- end -%>
@@ -202,12 +197,12 @@
               <div id="custom_attribute_name_auto_complete" class="auto_complete" style="display: none;"></div>
               <script type="text/javascript">
                 window.addEventListener('DOMContentLoaded', (event) => {
-                  $('custom_attribute_name').onkeydown = disableEnterKey;
-                  new Autocompleter.Local('custom_attribute_name', 'custom_attribute_name_auto_complete', attrlist, { frequency: 0.1, minChars: 1 });
+                  document.getElementById('custom_attribute_name').onkeydown = disableEnterKey;
+                  jQuery('#custom_attribute_name').autocomplete({ source: attrlist, minLength: 1, delay: 100 });
                 });
               </script>
 
-              <%= button_to_function 'Add', "new Ajax.Updater('custom_attributes', '#{url_for(controller: '/manage/cms_pages', action: 'page_attribute')}?name=' + $('custom_attribute_name').value, {asynchronous:true, method:'get', evalScripts:true, insertion:Insertion.Bottom}); $('custom_attribute_name').value = ''; return false;", class: 'imagine-cms-dialog__button', style: 'margin-bottom: 5px;' %>
+              <button type="button" class="imagine-cms-dialog__button" style="margin-bottom: 5px;" onclick="imagineCmsRemoteRequest('<%= url_for(controller: '/manage/cms_pages', action: 'page_attribute') %>?name=' + encodeURIComponent(document.getElementById('custom_attribute_name').value), { insertion: 'bottom', update: 'custom_attributes' }); document.getElementById('custom_attribute_name').value = ''; return false;">Add</button>
             </div>
           </td>
         </tr>
@@ -223,7 +218,7 @@
     <td></td>
     <td class="imagine-cms-dialog__actions">
       <%= submit_tag 'Save', id: 'btn_save', class: 'imagine-cms-dialog__button imagine-cms-dialog__button--primary' %>
-      <%= link_to_function 'Cancel', "cancelEditProperties();", class: 'imagine-cms-dialog__button imagine-cms-dialog__button--secondary' %>
+      <button type="button" class="imagine-cms-dialog__button imagine-cms-dialog__button--secondary" onclick="cancelEditProperties();">Cancel</button>
       <%= hidden_field_tag 'return_to', params[:return_to] %>
     </td>
   </tr>

@@ -2,6 +2,7 @@
     var resize_ratio = 1.0;
     var aspect_ratio = <%= @width %>.0 / <%= @height %>;
     var imageSizeLocked = false;
+    var cropField = function (id) { return document.getElementById(id); };
     
     try {
         if (cropper) cropper.remove();
@@ -15,17 +16,17 @@
         if (dimensions.width > 0 && dimensions.height > 0) {
             var size_changed = false;
             
-            $('image_x1').value = coords.x1;
-            $('image_y1').value = coords.y1;
-            $('image_x2').value = coords.x2;
-            $('image_y2').value = coords.y2;
+            cropField('image_x1').value = coords.x1;
+            cropField('image_y1').value = coords.y1;
+            cropField('image_x2').value = coords.x2;
+            cropField('image_y2').value = coords.y2;
             
-            if (dimensions.width != $('image_width').value) {
-                $('image_width').value = dimensions.width;
+            if (dimensions.width != cropField('image_width').value) {
+                cropField('image_width').value = dimensions.width;
                 size_changed = true;
             }
-            if (dimensions.height != $('image_height').value) {
-                $('image_height').value = dimensions.height;
+            if (dimensions.height != cropField('image_height').value) {
+                cropField('image_height').value = dimensions.height;
                 size_changed = true;
             }
             
@@ -33,27 +34,27 @@
                 setResizeRatio();
                 aspect_ratio = 1.0 * dimensions.width / dimensions.height;
                 
-                $('selection_x2').value = dimensions.width;
-                $('selection_y2').value = dimensions.height;
+                cropField('selection_x2').value = dimensions.width;
+                cropField('selection_y2').value = dimensions.height;
                 
                 if (!imageSizeLocked) {
                     if (resize_ratio) {
-                        $('image_max_width').value = Math.round(dimensions.width * resize_ratio);
-                        $('image_max_height').value = Math.round(dimensions.height * resize_ratio);
+                        cropField('image_max_width').value = Math.round(dimensions.width * resize_ratio);
+                        cropField('image_max_height').value = Math.round(dimensions.height * resize_ratio);
                     } else {
-                        $('image_max_width').value = dimensions.width;
-                        $('image_max_height').value = dimensions.height;
+                        cropField('image_max_width').value = dimensions.width;
+                        cropField('image_max_height').value = dimensions.height;
                     }
                 }
                 
-                $('aspect_ratio').innerHTML = setPrecision(dimensions.width/dimensions.height, 3);
+                cropField('aspect_ratio').innerHTML = setPrecision(dimensions.width/dimensions.height, 3);
             }
         }
     }
     
     resizeCropper = function () {
-        width = $('selection_x2').value;
-        height = $('selection_y2').value;
+        width = cropField('selection_x2').value;
+        height = cropField('selection_y2').value;
         end_x = parseInt(width) + parseInt(cropper.areaCoords.x1);
         end_y = parseInt(height) + parseInt(cropper.areaCoords.y1);
         cropper.setAreaCoords(cropper.cloneCoords({ x1:parseInt(cropper.areaCoords.x1),
@@ -69,25 +70,25 @@
     
     resizeCropperScaled = function () {
         if (imageSizeLocked) {
-            width = parseInt($('image_max_width').value);
-            height = parseInt($('image_max_height').value);
+            width = parseInt(cropField('image_max_width').value);
+            height = parseInt(cropField('image_max_height').value);
             if (width > 10 && height > 10) {
                 cropper.options.ratioDim = { x: width, y: height };
                 reloadCropper();
             }
         } else {
-            $('selection_x2').value = Math.round($('image_max_width').value / resize_ratio);
-            $('selection_y2').value = Math.round($('image_max_height').value / resize_ratio);
+            cropField('selection_x2').value = Math.round(cropField('image_max_width').value / resize_ratio);
+            cropField('selection_y2').value = Math.round(cropField('image_max_height').value / resize_ratio);
             resizeCropper();
         }
     }
     
     setResizeRatio = function () {
-        crop_width = parseInt($('image_max_width').value);
-        selection_width = parseInt($('selection_x2').value); // this is correct... x2 is the sel width
+        crop_width = parseInt(cropField('image_max_width').value);
+        selection_width = parseInt(cropField('selection_x2').value); // this is correct... x2 is the sel width
         
         if (crop_width > 10 && selection_width > 10) {
-            resize_ratio = 1.0 * $('image_max_width').value / $('selection_x2').value;
+            resize_ratio = 1.0 * cropField('image_max_width').value / cropField('selection_x2').value;
         } else {
             resize_ratio = 1.0;
         }
@@ -95,12 +96,12 @@
     
     lockImageSize = function () {
         imageSizeLocked = true;
-        cropper.options.ratioDim = { x: parseInt($('image_max_width').value),
-                                     y: parseInt($('image_max_height').value) };
+        cropper.options.ratioDim = { x: parseInt(cropField('image_max_width').value),
+                                     y: parseInt(cropField('image_max_height').value) };
         reloadCropper();
         
-        $('icon_unlocked').hide();
-        $('icon_locked').show();
+        jQuery('#icon_unlocked').hide();
+        jQuery('#icon_locked').show();
     }
     
     unlockImageSize = function () {
@@ -108,34 +109,34 @@
         cropper.options.ratioDim = { x: 0, y: 0 };
         reloadCropper();
         
-        $('icon_locked').hide();
-        $('icon_unlocked').show();
+        jQuery('#icon_locked').hide();
+        jQuery('#icon_unlocked').show();
     }
     
     reloadCropper = function () {
         oldOptions = cropper.options;
         oldOptions.displayOnInit = 1;
-        if (($('image_x1').value == $('image_x2').value) && ($('image_y1').value == $('image_y2').value)) {
-            $('image_x1').value = '0';
-            $('image_x2').value = $('image_max_width').value;
-            $('image_y1').value = '0';
-            $('image_y2').value = $('image_max_height').value;
+        if ((cropField('image_x1').value == cropField('image_x2').value) && (cropField('image_y1').value == cropField('image_y2').value)) {
+            cropField('image_x1').value = '0';
+            cropField('image_x2').value = cropField('image_max_width').value;
+            cropField('image_y1').value = '0';
+            cropField('image_y2').value = cropField('image_max_height').value;
         }
-        oldOptions.onloadCoords = { x1: $('image_x1').value, y1: $('image_y1').value,
-                                    x2: $('image_x2').value, y2: $('image_y2').value };
+        oldOptions.onloadCoords = { x1: cropField('image_x1').value, y1: cropField('image_y1').value,
+                                    x2: cropField('image_x2').value, y2: cropField('image_y2').value };
         cropper.remove();
         cropper = new Cropper.Img('testImage', oldOptions);
     }
     
     recalculateWidth = function () {
         if (imageSizeLocked) {
-            $('image_max_width').value = Math.round(parseInt($('image_max_height').value) / aspect_ratio);
+            cropField('image_max_width').value = Math.round(parseInt(cropField('image_max_height').value) / aspect_ratio);
         }
     }
     
     recalculateHeight = function () {
         if (imageSizeLocked) {
-            $('image_max_height').value = Math.round(parseInt($('image_max_width').value) / aspect_ratio);
+            cropField('image_max_height').value = Math.round(parseInt(cropField('image_max_width').value) / aspect_ratio);
         }
     }
 </script>
@@ -152,8 +153,7 @@ Pressing "Save Thumbnail" will crop the thumbnail and set it as the new thumbnai
 <br/>
 
 <center>
-  <%= form_remote_tag :update => 'select_thumbnail_dialog_content',
-                      :url => { :action => "save_crop_thumb", :id => @pg, :filename => @image_file } do -%>
+  <%= form_tag({ action: "save_crop_thumb", id: @pg, filename: @image_file }, data: { remote: true, update: 'select_thumbnail_dialog_content' }) do -%>
     <table cellpadding="10">
       <tr>
         <td>
@@ -177,13 +177,13 @@ Pressing "Save Thumbnail" will crop the thumbnail and set it as the new thumbnai
 
             <%= text_field :image, :max_width, :size => 3, :value => @width, :onchange => "deselectAllPresets(); recalculateHeight();" %>
              x <%= text_field :image, :max_height, :size => 3, :value => @height, :onchange => "deselectAllPresets(); recalculateWidth();" %>
-            <%= javascript_tag "$('image_max_width').onkeydown = disableEnterKey; $('image_max_height').onkeydown = disableEnterKey;" %>
+            <%= javascript_tag "document.getElementById('image_max_width').onkeydown = disableEnterKey; document.getElementById('image_max_height').onkeydown = disableEnterKey;" %>
             
             <%= image_tag('management/icon_unlocked.png', :id => 'icon_unlocked', :onclick => "deselectAllPresets(); lockImageSize();") %>
             <%= image_tag('management/icon_locked.png', :id => 'icon_locked', :onclick => "deselectAllPresets(); unlockImageSize();", :style => 'display: none;') %>
             
-            <%= link_to_function "Apply", "resizeCropperScaled();" %> |
-            <%= link_to_function "Reset", "cropper.reset(); resize_ratio = 1.0;" %>
+            <button type="button" class="form_button" onclick="resizeCropperScaled();">Apply</button>
+            <button type="button" class="form_button" onclick="cropper.reset(); resize_ratio = 1.0;">Reset</button>
             
             <span id="aspect_ratio" style="display: none;"><%= sprintf("%.3f", @aspect_ratio) %></span><br/>
             <%= text_field :image, :x1, :style => "display: none" %>
@@ -198,6 +198,6 @@ Pressing "Save Thumbnail" will crop the thumbnail and set it as the new thumbnai
     </table>
     
     <%= submit_tag 'Save Thumbnail', class: 'form_button', data: { disable_with: 'Saving...' } %>
-    <%= link_to_function "Cancel", "cancelSelectThumbnail()" %>
+    <button type="button" class="form_button" onclick="cancelSelectThumbnail();">Cancel</button>
   <%- end -%>
 </center>

@@ -47,7 +47,6 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
       refute_includes source, "//= require dragdrop"
       refute_includes source, "//= require controls"
       refute_includes source, "//= require builder"
-      refute_includes source, "//= require cropper"
     end
   end
 

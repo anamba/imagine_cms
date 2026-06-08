@@ -1,0 +1,145 @@
+/* CMS Dialog Styles - extracted from management.css.scss for use in CMS dialogs */
+/* All styles are scoped to .imagine-cms-dialog to avoid affecting website styles */
+
+.imagine-cms-dialog, .page_list_dialog {
+  /* Basic text styles */
+  body, & {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    line-height: 17px;
+    color: #000000;
+  }
+
+  p {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0px 0px 12px 0px;
+  }
+
+  table {
+    padding: 0;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  td {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    line-height: 17px;
+  }
+
+  h1 {
+    margin: 0px 0px 10px 0px;
+    color: #000000;
+    font-size: 20px;
+    line-height: 25px;
+    font-weight: bold;
+    position: relative;
+  }
+
+  h2 {
+    margin: 0px 0px 8px 0px;
+    color: #506D91;
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: bold;
+  }
+
+  h3 {
+    margin: 0px 0px 8px 0px;
+    color: #666666;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: normal;
+  }
+
+  .alert {
+    font-size: 12px;
+    line-height: 14px;
+    margin-bottom: 20px;
+  }
+
+  .error {
+    color: #E10E12;
+  }
+
+  .notice {
+    color: #3131FF;
+  }
+
+  a {
+    font-weight: bold;
+  }
+
+  a:link {
+    text-decoration: underline;
+    color: #506D91;
+  }
+
+  a:active {
+    text-decoration: underline;
+    color: #506D91;
+  }
+
+  a:visited {
+    text-decoration: underline;
+    color: #506D91;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    color: #000000;
+  }
+
+  img {
+    display: inline;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .clearer {
+    clear: both;
+    line-height: 0;
+    height: 0;
+  }
+
+  /* Form styles */
+  .form {
+    font-size: 12px;
+    line-height: 14px;
+    color: #000;
+    text-decoration: none;
+    text-indent: 0;
+    background-color: #ffffff;
+    margin: 0px;
+    padding: 3px 2px 3px 3px;
+    border: solid 1px #A4A4A4;
+  }
+
+  select.form {
+    padding: 3px 3px 3px 3px;
+  }
+
+  .form_button {
+    margin: 0;
+    font-size: 12px;
+    line-height: 14px;
+    color: #ffffff;
+    text-decoration: none;
+    text-indent: 0;
+    background-color: #333;
+  }
+
+  /* Fieldset styles */
+  fieldset {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  legend {
+    font-weight: bold;
+    padding: 0 5px;
+  }
+}

@@ -483,6 +483,13 @@ module CmsApplicationHelper
     
     temp = html.dup
     
+    # normalize HTML-encoded angle brackets so our patterns match regardless of editor encoding
+    temp.gsub!('&lt;', '<')
+    temp.gsub!('&gt;', '>')
+    temp.gsub!('&amp;', '&')
+    temp.gsub!('&apos;', "'")
+    temp.gsub!('&quot;', '"')
+    
     # mangle anything inside of an insert_object so that it won't be caught (yet)
     temp.gsub!(/((?:insert_object|text_editor|texteditor|page_list|pagelist|snippet)\()((?:\(.*?\)|[^()]*?)*)(\))/) do |match|
       one, two, three = $1 || '', $2 || '', $3 ||''
@@ -731,14 +738,12 @@ module CmsApplicationHelper
   # Similar to submit_to_remote, but takes a url for a button image as its
   # first argument.
   def image_submit_to_remote(source, options = {})
-    options[:with] ||= 'Form.serialize(this.form)'
-    
-    options[:html] ||= {}
-    options[:html][:type] = 'image'
-    options[:html][:onclick] = "#{remote_function(options)}; return false;"
-    options[:html][:src] = image_path(source)
-    
-    tag("input", options[:html], false)
+    html_options = options[:html] || {}
+    html_options[:type] = 'image'
+    html_options[:src] = image_path(source)
+    html_options[:onclick] = "imagineCmsRemoteFormSubmit(this.form); return false;"
+
+    tag("input", html_options, false)
   end
   
   # Creates a mailto: link that is encoded to prevent most harvesting attempts.
@@ -805,15 +810,15 @@ module CmsApplicationHelper
     default_value ||= start_date
     
     draw_calendar = <<-EOT
-      new Ajax.Updater('date_picker_#{object}_#{method_prefix}_days',
-                       '#{date_picker_url}?month=' + $('#{object}_#{method_prefix}_month_sel').value +
-                       '&year=' + $('#{object}_#{method_prefix}_year_sel').value +
-                       '&min_time=' + #{start_date.to_i} +
-                       '&max_time=' + #{end_date.to_i} +
-                       '&exclude_days=#{exclude_days.join(',')}' +
-                       '&onchange=#{escape_javascript(options[:onchange])}' +
-                       '&object=#{object}' +
-                       '&method_prefix=#{method_prefix}', {method:'get', asynchronous:true, evalScripts:true});
+      ajaxLoadInto('date_picker_#{object}_#{method_prefix}_days',
+                   '#{date_picker_url}?month=' + document.getElementById('#{object}_#{method_prefix}_month_sel').value +
+                   '&year=' + document.getElementById('#{object}_#{method_prefix}_year_sel').value +
+                   '&min_time=' + #{start_date.to_i} +
+                   '&max_time=' + #{end_date.to_i} +
+                   '&exclude_days=#{exclude_days.join(',')}' +
+                   '&onchange=#{escape_javascript(options[:onchange])}' +
+                   '&object=#{object}' +
+                   '&method_prefix=#{method_prefix}');
       EOT
 
     ret = <<-EOT
@@ -843,7 +848,7 @@ module CmsApplicationHelper
 EOT
     ret += <<-EOT
       <script type="text/javascript">
-        if (typeof(Ajax) == 'undefined') {
+        if (document.readyState == 'loading') {
           window.addEventListener('DOMContentLoaded', (event) => {
             #{draw_calendar}
           });
@@ -879,15 +884,13 @@ EOT
     css_prefix = options[:css_prefix] || 'calendar_'
     popout_direction = options[:popout_direction] || :right
     
-    draw_calendar = "var ta = $('event_calendar_events_' + " +
-                    "$('event_calendar_month_sel').value + '_' + $('event_calendar_year_sel').value); " +
-                    "new Ajax.Request(" +
-                    "'#{url_for :controller => "/util", :action => "calendar" }?" +
-                    "month=' + $('event_calendar_month_sel').value + " +
-                    "'&year=' + $('event_calendar_year_sel').value + " +
+    draw_calendar = "ajaxLoadInto('event_calendar_days', " +
+                    "'#{url_for controller: "/util", action: "calendar" }?" +
+                    "month=' + document.getElementById('event_calendar_month_sel').value + " +
+                    "'&year=' + document.getElementById('event_calendar_year_sel').value + " +
                     "'&min_time=#{start_date.to_i}&max_time=#{end_date.to_i}" +
                     "&calendar_id=#{calendar_id}&css_prefix=#{css_prefix}" +
-                    "&popout_direction=#{popout_direction.to_s}', {method:'get', asynchronous:true, evalScripts:true})"
+                    "&popout_direction=#{popout_direction.to_s}')"
     
     # keep all this junk in sync with what's in UtilController
     @month = Time.now.month
@@ -960,7 +963,7 @@ EOF
     object_name = 'Select' if (object_name || '') == ''
     
     ret = <<EOF
-  <a href="#" onclick="if (cbBrowserVisible) { cbHideBrowser(); } else { cbShowBrowser('#{object}', '#{method}', #{options[:offset_x] || 0}, #{options[:offset_y] || 0}); #{remote_function(:update => 'columnBrowserLevel0', :url => { :controller => '/management/bcom/products', :action => 'list_departments', :mode => 'select' })}; } return false;"><span id="#{object}_#{method}_link">#{object_name}</span></a>
+  <a href="#" onclick="if (cbBrowserVisible) { cbHideBrowser(); } else { cbShowBrowser('#{object}', '#{method}', #{options[:offset_x] || 0}, #{options[:offset_y] || 0}); ajaxLoadInto('columnBrowserLevel0', '#{url_for(controller: '/management/bcom/products', action: 'list_departments', mode: 'select')}'); } return false;"><span id="#{object}_#{method}_link">#{object_name}</span></a>
   <div id="#{object}_#{method}_container" style="display: none"></div>
   <div style="display: none">
     #{text_field object, method + '_object_name'}

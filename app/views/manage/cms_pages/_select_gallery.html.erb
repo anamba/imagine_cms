@@ -6,10 +6,9 @@
       <p><b>The following galleries have problems and require fixing:</b></p>
       <ul style="padding: 0; margin: 0 0 0 15px; list-style-type: disc;">
         <%- session[:broken_galleries].sort.each do |g| -%>
-        <li><%= g.titleize %> (<%= link_to_remote "delete",
-                                                  :url => { :action => 'delete_gallery', :id => params[:id], :gallery_id => g },
-                                                  :update => 'delete_gallery_container',
-                                                  :confirm => "This action cannot be undone. Continue?" %>)</li>
+        <li><%= g.titleize %> (<%= link_to "delete",
+                                          { action: 'delete_gallery', id: params[:id], gallery_id: g },
+                                          data: { remote: true, update: 'delete_gallery_container', confirm: "This action cannot be undone. Continue?" } %>)</li>
         <%- end -%>
       </ul>
     </div>
@@ -26,9 +25,10 @@
           all_images.each { |img| images << img unless File.basename(img).include?('thumb') }
     -%>
       <div id="<%= File.basename(gallery) %>" style="float: left; width: 130px; margin: 0 20px 20px 0; text-align: center;">
-        <%= link_to_remote "<img src='#{File.join('/assets/content', @pg.path, File.basename(gallery), 'management', 'preview.jpg')}' />".html_safe,
-                           :url => { :action => 'select_gallery', :id => @pg, :gallery_id => File.basename(gallery) },
-                           :update => 'select_gallery_container' %><br/>
+        <%= link_to "<img src='#{File.join('/assets/content', @pg.path, File.basename(gallery), 'management', 'preview.jpg')}' />".html_safe,
+                    { action: 'select_gallery', id: @pg, gallery_id: File.basename(gallery) },
+                    method: :post,
+                    data: { remote: true, update: 'select_gallery_container' } %><br/>
         <strong><%= File.basename(gallery).titleize %></strong><br/>
         <span style="font-size: 10px; color: #555"><%= images.size %> photos</span>
       </div>

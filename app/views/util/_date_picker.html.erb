@@ -41,7 +41,7 @@
     <%- end -%>
     <%- if d >= earliest && d <= latest && !@exclude_days.include?(d.wday) -%>
     <td align="center" bgcolor="<%= d >= first_of_month && d <= last_of_month ? "#ffffff" : "#cccccc" %>">
-      <a href="#" onclick="<%= params[:onchange].to_s.gsub('<', '&lt;') %>; $('date_picker_<%= "#{@object}_#{@method_prefix}" %>_value').innerHTML = '<%= d.strftime('%a %m/%d/%y') %>'; $('<%= "#{@object}_#{@method_prefix}_year" %>').value = <%= d.year %>; $('<%= "#{@object}_#{@method_prefix}_month" %>').value = <%= d.month %>; $('<%= "#{@object}_#{@method_prefix}_day" %>').value = <%= d.mday %>; hideDatePicker('<%= @object %>', '<%= @method_prefix %>'); return false;"><%= d.mday %></a>
+      <a href="#" onclick="<%= params[:onchange].to_s.gsub('<', '&lt;') %>; document.getElementById('date_picker_<%= "#{@object}_#{@method_prefix}" %>_value').innerHTML = '<%= d.strftime('%a %m/%d/%y') %>'; document.getElementById('<%= "#{@object}_#{@method_prefix}_year" %>').value = <%= d.year %>; document.getElementById('<%= "#{@object}_#{@method_prefix}_month" %>').value = <%= d.month %>; document.getElementById('<%= "#{@object}_#{@method_prefix}_day" %>').value = <%= d.mday %>; hideDatePicker('<%= @object %>', '<%= @method_prefix %>'); return false;"><%= d.mday %></a>
     <%- else -%>
     <td align="center" bgcolor="<%= d >= first_of_month && d <= last_of_month ? "#eeeeee" : "#cccccc" %>">
       <s><%= d.mday %></s>
@@ -53,4 +53,4 @@
     <%- d += 1.day -%>
   <%- end -%>
 </table>
-<%= javascript_tag "$('#{@object}_#{@method_prefix}_month_sel').value = '#{@month}'; $('#{@object}_#{@method_prefix}_year_sel').value = '#{@year}';"%>
+<%= javascript_tag "document.getElementById('#{@object}_#{@method_prefix}_month_sel').value = '#{@month}'; document.getElementById('#{@object}_#{@method_prefix}_year_sel').value = '#{@year}';"%>

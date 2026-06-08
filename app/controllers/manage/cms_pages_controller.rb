@@ -139,9 +139,9 @@ class Manage::CmsPagesController < Manage::ApplicationController
       Rails.logger.error "Save failed: #{CmsPage.without_revision { @pg.save }} #{@pg.errors.full_messages.join('; ')}"
       # render :update do |page|
       #   page.replace_html 'save_errors', @pg.errors.full_messages.join('<br>')
-      #   page << "try { $('btn_next').disabled = false; } catch (e) {}"
-      #   page << "try { $('btn_finish').disabled = false; } catch (e) {}"
-      #   page << "try { $('btn_save').disabled = false; $('btn_save').value = 'Save'; } catch (e) {}"
+      #   page << "try { document.getElementById('btn_next').disabled = false; } catch (e) {}"
+      #   page << "try { document.getElementById('btn_finish').disabled = false; } catch (e) {}"
+      #   page << "try { document.getElementById('btn_save').disabled = false; document.getElementById('btn_save').value = 'Save'; } catch (e) {}"
       # end
       render js: "document.getElementById('save_errors').innerHTML = '#{j @pg.errors.full_messages.join('<br>')}'; try { document.getElementById('btn_next').disabled = false; } catch (e) {}; try { document.getElementById('btn_finish').disabled = false; } catch (e) {}; try { document.getElementById('btn_save').disabled = false; document.getElementById('btn_save').value = 'Save'; } catch (e) {};"
     end
@@ -447,7 +447,6 @@ class Manage::CmsPagesController < Manage::ApplicationController
   def insert_object(name, type = :text, options = {}, html_options = {})
     extend ActionView::Helpers::FormTagHelper
     extend ActionView::Helpers::JavaScriptHelper
-    extend ActionView::Helpers::PrototypeHelper
     extend ActionView::Helpers::TagHelper
     extend ActionView::Helpers::TextHelper
 
@@ -496,11 +495,44 @@ class Manage::CmsPagesController < Manage::ApplicationController
       content << content_tag(:div, '', id: "page_object_config_#{key}")
       script_tag = <<-EOT
         <script type="text/javascript">
-          window.addEventListener('load', (event) => {
-            setInterval(function() {
+          (function () {
+            var scanTimer = null;
+            var textareaId = 'page_objects_#{key}';
+            var editorId = 'page_objects_#{key}_editor';
+
+            function runScan() {
+              scanTimer = null;
               scanForPageObjects(#{@pg.id}, '#{key}', #{@pg.version});
-            }, 1000);
-          });
+            }
+
+            function scheduleScan() {
+              window.clearTimeout(scanTimer);
+              scanTimer = window.setTimeout(runScan, 150);
+            }
+
+            function bindPageObjectScanner() {
+              var textarea = document.getElementById(textareaId);
+              var editor = document.getElementById(editorId);
+
+              runScan();
+              if (textarea) {
+                textarea.addEventListener('input', scheduleScan);
+                textarea.addEventListener('change', scheduleScan);
+                textarea.addEventListener('imagine-cms:content-change', scheduleScan);
+              }
+              if (editor) {
+                editor.addEventListener('input', scheduleScan);
+                editor.addEventListener('keyup', scheduleScan);
+                editor.addEventListener('paste', scheduleScan);
+              }
+            }
+
+            if (document.readyState == 'loading') {
+              document.addEventListener('DOMContentLoaded', bindPageObjectScanner);
+            } else {
+              bindPageObjectScanner();
+            }
+          })();
         </script>
         EOT
       content << script_tag.html_safe
@@ -1056,7 +1088,15 @@ class Manage::CmsPagesController < Manage::ApplicationController
 
     if request.post?
       unless params[:gallery_id].downcase == "new"
-        redirect_to :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id]
+        # For AJAX requests, render gallery_management directly instead of redirecting
+        if request.xhr?
+          @gallery = load_gallery_settings_from_file(params[:gallery_id])
+          gallery_dir = File.join(@target_dir, params[:gallery_id].to_s)
+          @images = Dir.glob("#{gallery_dir}/*.{jpg,jpeg,png,gif}").reject { |img| img.include?('thumb') }.map { |img| File.basename(img).split('.').first.to_i }.sort
+          render :template => 'manage/cms_pages/gallery_management', :layout => false
+        else
+          redirect_to :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id]
+        end
       else
         render :partial => 'upload_image'
       end

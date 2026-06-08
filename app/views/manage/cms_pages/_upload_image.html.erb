@@ -70,13 +70,18 @@
 <%- end -%>
 
 <script>
-  const uploadImageForm = document.getElementById("upload-image-form");
-  const uploadGalleryForm = document.getElementById("upload-gallery-form");
-  const nextButton = document.getElementById("upload-image-next-button");
-  const finishButton = document.getElementById("upload-image-finish-button");
-  const uploadFileField = document.getElementById("file_data");
-  const galleryFileField = document.getElementById("gallery_file_data");
-  const galleryNextButton = document.getElementById("upload-gallery-next-button");
+  (function () {
+  var uploadImageForm = document.getElementById("upload-image-form");
+  var uploadGalleryForm = document.getElementById("upload-gallery-form");
+  var nextButton = document.getElementById("upload-image-next-button");
+  var finishButton = document.getElementById("upload-image-finish-button");
+  var uploadFileField = document.getElementById("file_data");
+  var galleryFileField = document.getElementById("gallery_file_data");
+  var galleryNextButton = document.getElementById("upload-gallery-next-button");
+
+  if (!uploadImageForm || uploadImageForm.dataset.imagineCmsBound) return;
+  uploadImageForm.dataset.imagineCmsBound = "true";
+  if (uploadGalleryForm) uploadGalleryForm.dataset.imagineCmsBound = "true";
 
   nextButton.addEventListener("click", (e) => {
     e.target.dataset.disableWith = "Uploading...";
@@ -104,14 +109,14 @@
       return;
     }
 
-    let file = uploadFileField.files[0];
-    let formData = new FormData(uploadImageForm);
+    var file = uploadFileField.files[0];
+    var formData = new FormData(uploadImageForm);
 
-    let resp = await fetch(uploadImageForm.action, {
+    var resp = await fetch(uploadImageForm.action, {
       method: 'POST',
       body: formData
     });
-    let data = await resp.json();
+    var data = await resp.json();
 
     document.getElementById("filename").value = data.filename;
     fetch(document.getElementById("mainform").action, {
@@ -136,14 +141,14 @@
       return;
     }
 
-    let file = galleryFileField.files[0];
-    let formData = new FormData(uploadGalleryForm);
+    var file = galleryFileField.files[0];
+    var formData = new FormData(uploadGalleryForm);
 
-    let resp = await fetch(uploadGalleryForm.action, {
+    var resp = await fetch(uploadGalleryForm.action, {
       method: 'POST',
       body: formData
     });
-    let data = await resp.json();
+    var data = await resp.json();
 
     document.getElementById("dirname").value = data.filename;
     fetch(document.getElementById("mainform_gallery").action, {
@@ -155,4 +160,5 @@
       .then((response) => response.text())
       .then((html) => setImagineDialogContent(document.getElementById("insert_image_dialog_content"), html));
   });
+  })();
 </script>

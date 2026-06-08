@@ -36,35 +36,39 @@ function getElementPosition(sourceObj) {
 
 function showDatePicker(object, method_prefix) {
     // anchor picker to the icon
-    var coords = getElementPosition($('date_picker_' + object + '_' + method_prefix + 'icon'));
-    var el = $('date_picker_' + object + '_' + method_prefix + 'main');
-    el.hide();
+    var coords = getElementPosition(document.getElementById('date_picker_' + object + '_' + method_prefix + 'icon'));
+    var el = document.getElementById('date_picker_' + object + '_' + method_prefix + 'main');
+    jQuery(el).hide();
     el.style.position = 'absolute';
-    el.show();
+    jQuery(el).show();
 }
 
 function hideDatePicker(object, method_prefix) {
-    $('date_picker_' + object + '_' + method_prefix + 'main').hide();
+    jQuery('#date_picker_' + object + '_' + method_prefix + 'main').hide();
 }
 
 function dpPrevMonth(object, method_prefix, min_year) {
     try {
-        if ($(object + '_' + method_prefix + '_month_sel').value > 1) {
-            $(object + '_' + method_prefix + '_month_sel').value--;
-        } else if ($(object + '_' + method_prefix + '_year_sel').value > min_year) {
-            $(object + '_' + method_prefix + '_month_sel').value = 12;
-            $(object + '_' + method_prefix + '_year_sel').value--;
+        var month = document.getElementById(object + '_' + method_prefix + '_month_sel');
+        var year = document.getElementById(object + '_' + method_prefix + '_year_sel');
+        if (month.value > 1) {
+            month.value--;
+        } else if (year.value > min_year) {
+            month.value = 12;
+            year.value--;
         }
     } catch (e) {}
 }
 
 function dpNextMonth(object, method_prefix, max_year) {
     try {
-        if ($(object + '_' + method_prefix + '_month_sel').value < 12) {
-            $(object + '_' + method_prefix + '_month_sel').value++;
-        } else if ($(object + '_' + method_prefix + '_year_sel').value < max_year) {
-            $(object + '_' + method_prefix + '_month_sel').value = 1;
-            $(object + '_' + method_prefix + '_year_sel').value++;
+        var month = document.getElementById(object + '_' + method_prefix + '_month_sel');
+        var year = document.getElementById(object + '_' + method_prefix + '_year_sel');
+        if (month.value < 12) {
+            month.value++;
+        } else if (year.value < max_year) {
+            month.value = 1;
+            year.value++;
         }
     } catch (e) {}
 }
@@ -86,12 +90,12 @@ function cbAddColumn() {
 }
 
 function getScrollbarPosition(el) {
-    el = $(el);
+    el = typeof(el) == 'string' ? document.getElementById(el) : el;
     return { x: el.scrollLeft, y: el.scrollTop };
 }
 
 function setScrollbarPosition(el, coords) {
-    el = $(el);
+    el = typeof(el) == 'string' ? document.getElementById(el) : el;
     el.scrollLeft = coords.x;
     el.scrollTop = coords.y;
 }
@@ -174,6 +178,118 @@ function ajaxLoadInto(targetId, url, options) {
             return target;
         });
 }
+
+function imagineCmsCsrfToken() {
+    var token = document.querySelector('meta[name="csrf-token"]');
+    return token ? token.getAttribute('content') : '';
+}
+
+function imagineCmsSetButtonState(button, disabledText) {
+    if (!button) return;
+    if (!button.dataset.originalValue) button.dataset.originalValue = button.value || button.textContent;
+    button.disabled = true;
+    if (disabledText) {
+        if (button.value != null) button.value = disabledText;
+        else button.textContent = disabledText;
+    }
+}
+
+function imagineCmsResetButtonState(button) {
+    if (!button || !button.dataset.originalValue) return;
+    button.disabled = false;
+    if (button.value != null) button.value = button.dataset.originalValue;
+    else button.textContent = button.dataset.originalValue;
+}
+
+function imagineCmsRemoteRequest(url, options) {
+    options = options || {};
+    if (options.confirm && !window.confirm(options.confirm)) return Promise.resolve(null);
+    if (options.loading) (0, eval)(options.loading);
+
+    var fetchOptions = {
+        method: options.method || 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-Token': imagineCmsCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'text/javascript, text/html, */*'
+        }
+    };
+
+    if (options.body) fetchOptions.body = options.body;
+
+    return fetch(url, fetchOptions)
+        .then(function (response) {
+            return response.text().then(function (text) {
+                if (!response.ok) throw new Error(text || response.statusText);
+                return text;
+            });
+        })
+        .then(function (html) {
+            if (options.update) {
+                var target = document.getElementById(options.update);
+                if (target) {
+                    if (options.insertion == 'bottom') target.insertAdjacentHTML('beforeend', html);
+                    else setImagineDialogContent(target, html);
+                }
+            } else if (html && options.evalScripts !== false) {
+                (0, eval)(html);
+            }
+            if (options.success) (0, eval)(options.success);
+            return html;
+        })
+        .catch(function (error) {
+            if (options.failure) (0, eval)(options.failure);
+            else throw error;
+        })
+        .finally(function () {
+            if (options.complete) (0, eval)(options.complete);
+        });
+}
+
+function imagineCmsRemoteFormSubmit(form) {
+    var submitter = form._imagineCmsSubmitter || form.querySelector('[type="submit"]');
+    imagineCmsSetButtonState(submitter, submitter && submitter.dataset.disableWith);
+
+    return imagineCmsRemoteRequest(form.action, {
+        method: (form.method || 'POST').toUpperCase(),
+        body: new FormData(form),
+        update: form.dataset.update,
+        loading: form.dataset.loading,
+        complete: form.dataset.complete,
+        success: form.dataset.success,
+        failure: form.dataset.failure,
+        confirm: form.dataset.confirm
+    }).finally(function () {
+        imagineCmsResetButtonState(submitter);
+        form._imagineCmsSubmitter = null;
+    });
+}
+
+document.addEventListener('click', function (event) {
+    var submitter = event.target.closest('form[data-remote] [type="submit"]');
+    if (submitter) submitter.form._imagineCmsSubmitter = submitter;
+
+    var link = event.target.closest('a[data-remote]');
+    if (!link) return;
+    event.preventDefault();
+    imagineCmsRemoteRequest(link.href, {
+        method: link.dataset.method || 'GET',
+        update: link.dataset.update,
+        insertion: link.dataset.insertion,
+        loading: link.dataset.loading,
+        complete: link.dataset.complete,
+        success: link.dataset.success,
+        failure: link.dataset.failure,
+        confirm: link.dataset.confirm
+    });
+});
+
+document.addEventListener('submit', function (event) {
+    if (!event.target.matches('form[data-remote]')) return;
+    event.preventDefault();
+    imagineCmsRemoteFormSubmit(event.target);
+});
 
 function showDojoDialog(id, titleText) {
     var dlg = document.getElementById(id);
@@ -481,12 +597,13 @@ function scanForPageObjects(page_id, parent_key, version) {
 
 function blockUserInput() {
     var dims = { width: document.body.scrollWidth, height: document.body.scrollHeight };
-    $('preview_cover').show();
-    $('preview_cover').style.position = 'absolute';
-    $('preview_cover').style.left = '0px';
-    $('preview_cover').style.top = '0px';
-    $('preview_cover').style.width = dims.width + 'px';
-    $('preview_cover').style.height = dims.height + 'px';
+    var cover = document.getElementById('preview_cover');
+    jQuery(cover).show();
+    cover.style.position = 'absolute';
+    cover.style.left = '0px';
+    cover.style.top = '0px';
+    cover.style.width = dims.width + 'px';
+    cover.style.height = dims.height + 'px';
 }
 
 

@@ -5,11 +5,21 @@
   <br style="clear: both;" />
 </div>
 
-<%= sortable_element('images', :url => { :action => 'sort_images', :id => @pg, :gallery_id => params[:gallery_id] }, :tag => 'div', :constraint => '') %>
+<script>
+  jQuery('#images').sortable({
+    items: 'div[id^="image_"]',
+    update: function () {
+      var params = new URLSearchParams();
+      jQuery('#images div[id^="image_"]').each(function () {
+        params.append('images[]', this.id.replace(/^image_/, ''));
+      });
+      imagineCmsRemoteRequest('<%= url_for(action: 'sort_images', id: @pg, gallery_id: params[:gallery_id]) %>', { method: 'POST', body: params });
+    }
+  });
+</script>
 
-<%= form_remote_tag(:update => 'gallery_container',
-                    :url => { :action => 'sort_images_save', :id => @pg, :gallery_id => params[:gallery_id] }) do -%>
-  <%= submit_tag "Save order" %> or <%= link_to_remote "cancel",
-                                                       :url => { :action => 'gallery_management', :id => @pg, :gallery_id => params[:gallery_id] },
-                                                       :update => 'gallery_container' %>
+<%= form_tag({ action: 'sort_images_save', id: @pg, gallery_id: params[:gallery_id] }, data: { remote: true, update: 'gallery_container' }) do -%>
+  <%= submit_tag "Save order" %> or <%= link_to "cancel",
+                                             { action: 'gallery_management', id: @pg, gallery_id: params[:gallery_id] },
+                                             data: { remote: true, update: 'gallery_container' } %>
 <%- end -%>

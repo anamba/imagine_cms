@@ -12,6 +12,7 @@
 //
 //= require tag-it
 //
+//= require cropper
 //= require imagine_cms/core
 //= require hugerte
 //= require imagine_cms/editor

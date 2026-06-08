@@ -196,7 +196,6 @@ module ActionControllerExtensions
       extend ActionView::Helpers::TagHelper
       extend ActionView::Helpers::TextHelper
       extend ActionView::Helpers::JavaScriptHelper
-      extend ActionView::Helpers::PrototypeHelper
       
       key = "obj-page_list-#{name.gsub(/[^\w]/, '_')}"
       

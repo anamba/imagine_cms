@@ -69,4 +69,4 @@
     <% d += 1.day -%>
   <% end -%>
 </table>
-<%= javascript_tag "$('#{@object}_#{@method_prefix}_month_sel').value = '#{@month}'; $('#{@object}_#{@method_prefix}_year_sel').value = '#{@year}';"%>
+<%= javascript_tag "document.getElementById('#{@object}_#{@method_prefix}_month_sel').value = '#{@month}'; document.getElementById('#{@object}_#{@method_prefix}_year_sel').value = '#{@year}';"%>

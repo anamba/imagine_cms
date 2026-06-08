@@ -53,10 +53,10 @@
         <td id="<%= name %>_prev_button" class="imagine_cms-gallery-nav-button" align="right" onclick="changeGalleryImage('<%= name %>', <%= images.size-1 %>);">
           <img src="/assets/interface/photo_prev.gif" alt="prev" style="float: right; padding-right: 6px;" />
         </td>
-        <td id="<%= name %>_play_button" class="imagine_cms-gallery-nav-button" style="<%= autoplay ? ' display: none' : '' %>" align="left" onclick="clearTimeout(galleryTimeouts['<%= name %>']); setTimeout(function () { advanceGallerySlideshow('<%= name %>', <%= timeout*1000 %>); }, <%= timeout*1000 %>); $('<%= name %>_play_button').hide(); $('<%= name %>_pause_button').show();">
+        <td id="<%= name %>_play_button" class="imagine_cms-gallery-nav-button" style="<%= autoplay ? ' display: none' : '' %>" align="left" onclick="clearTimeout(galleryTimeouts['<%= name %>']); setTimeout(function () { advanceGallerySlideshow('<%= name %>', <%= timeout*1000 %>); }, <%= timeout*1000 %>); jQuery('#<%= name %>_play_button').hide(); jQuery('#<%= name %>_pause_button').show();">
           <img src="/assets/interface/photo_play.gif" alt="play" style="float: left" />
         </td>
-        <td id="<%= name %>_pause_button" class="imagine_cms-gallery-nav-button" style="<%= autoplay ? '' : ' display: none' %>" align="left" onclick="clearTimeout(galleryTimeouts['<%= name %>']); $('<%= name %>_pause_button').hide(); $('<%= name %>_play_button').show();">
+        <td id="<%= name %>_pause_button" class="imagine_cms-gallery-nav-button" style="<%= autoplay ? '' : ' display: none' %>" align="left" onclick="clearTimeout(galleryTimeouts['<%= name %>']); jQuery('#<%= name %>_pause_button').hide(); jQuery('#<%= name %>_play_button').show();">
           <img src="/assets/interface/photo_pause.gif" alt="pause" style="float: left;" />
         </td>
         <td id="<%= name %>_next_button" class="imagine_cms-gallery-nav-button" align="left" onclick="changeGalleryImage('<%= name %>', 1);">
@@ -69,7 +69,7 @@
   <%- unless settings.show_thumbs == 'false' -%>
   <div class="imagine_cms-gallery-thumbs">
     <%- thumbs.each_with_index do |thumb, index| -%>
-      <div id="<%= name %>_thumb_<%= index %>" class="<%= name %>_thumb imagine_cms-gallery-thumb<%= index == 0 ? ' current' : '' %>" onmouseover="$(this).addClassName('current');" onmouseout="$(this).removeClassName('current');" onclick="changeGalleryImage('<%= name %>', <%= index %>);">
+      <div id="<%= name %>_thumb_<%= index %>" class="<%= name %>_thumb imagine_cms-gallery-thumb<%= index == 0 ? ' current' : '' %>" onmouseover="this.classList.add('current');" onmouseout="this.classList.remove('current');" onclick="changeGalleryImage('<%= name %>', <%= index %>);">
         <%= image_tag "/#{thumb}?#{File.mtime(File.join(Rails.root, 'public', thumb)).to_i}", size: '39x39', style: 'float: left;' %>
       </div>
     <%- end -%>
@@ -79,4 +79,4 @@
   
 </div>
 
-<%= javascript_tag("$('#{name}_play_button').onclick();") if autoplay %>
+<%= javascript_tag("document.getElementById('#{name}_play_button').onclick();") if autoplay %>

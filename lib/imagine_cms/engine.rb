@@ -4,13 +4,6 @@ require 'rails-observers'
 require 'actionpack/action_caching'
 require 'actionpack/page_caching'
 
-begin
-  require 'prototype-rails'
-rescue LoadError
-  # Legacy management screens can still load prototype-rails from host apps
-  # during the transition; the HugeRTE editor path does not need it to boot.
-end
-require 'prototype_legacy_helper/lib/prototype_legacy_helper'
 require 'hugerte-rails'
 
 require 'non-stupid-digest-assets'
@@ -51,15 +44,12 @@ module ImagineCms
       app.config.assets.paths << root.join('app', 'assets', 'stylesheets')
       app.config.assets.paths << root.join('app', 'assets', 'javascripts')
 
-      app.config.assets.precompile += %w( dojo/** management.css imagine_controls.css reset.css cropper/* interface/* management/* )
+      app.config.assets.precompile += %w( dojo/** management.css cms_dialog.css imagine_controls.css reset.css cropper/* interface/* management/* )
       app.config.assets.precompile += ["codemirror*", "codemirror/**/*"]
       # Rails.application.config.load_paths << File.dirname(__FILE__) + "/../app/helpers"
     end
 
     initializer 'imagine_cms.legacy_support' do |app|
-      ActionController::Base.send :include, PrototypeHelper
-      ActionController::Base.send :helper, PrototypeHelper
-
       ActionController::Base.send(:include, UploadProgress)
       ActionView::Base.send(:include, UploadProgress::UploadProgressHelper)
     end

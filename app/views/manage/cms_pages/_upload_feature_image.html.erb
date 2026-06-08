@@ -25,17 +25,20 @@ resize your image before using it.</p>
 </table>
 <%- end -%>
 
-<%= form_remote_tag(update: 'select_thumbnail_dialog_content', html: { id: 'mainform' },
-                    url: { action: 'crop_feature_image', id: @pg }) do %>
+<%= form_tag({ action: 'crop_feature_image', id: @pg }, id: 'mainform', data: { remote: true, update: 'select_thumbnail_dialog_content' }) do %>
   <%= text_field_tag 'next_clicked', '0', style: 'display: none' %>
   <%= text_field_tag 'filename', '', style: 'display: none' %>
 <%- end -%>
 
 <script>
-  const uploadImageForm = document.getElementById("upload-image-form");
-  const nextButton = document.getElementById("upload-image-next-button");
-  const finishButton = document.getElementById("upload-image-finish-button");
-  const uploadFileField = document.getElementById("file_data");
+  (function () {
+  var uploadImageForm = document.getElementById("upload-image-form");
+  var nextButton = document.getElementById("upload-image-next-button");
+  var finishButton = document.getElementById("upload-image-finish-button");
+  var uploadFileField = document.getElementById("file_data");
+
+  if (!uploadImageForm || uploadImageForm.dataset.imagineCmsBound) return;
+  uploadImageForm.dataset.imagineCmsBound = "true";
 
   nextButton.addEventListener("click", (e) => {
     e.target.dataset.disableWith = "Uploading...";
@@ -60,16 +63,17 @@ resize your image before using it.</p>
       return;
     }
 
-    let file = uploadFileField.files[0];
-    let formData = new FormData(uploadImageForm);
+    var file = uploadFileField.files[0];
+    var formData = new FormData(uploadImageForm);
 
-    let resp = await fetch(uploadImageForm.action, {
+    var resp = await fetch(uploadImageForm.action, {
       method: 'POST',
       body: formData
     });
-    let data = await resp.json();
+    var data = await resp.json();
 
     document.getElementById("filename").value = data.filename;
-    document.getElementById("mainform").onsubmit();
+    imagineCmsRemoteFormSubmit(document.getElementById("mainform"));
   });
+  })();
 </script>
