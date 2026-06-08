@@ -37,6 +37,13 @@
 
 <%= stylesheet_link_tag "cms_dialog", media: "screen" %>
 
+<script>
+  window.ImagineCmsConfig = {
+    toolbarStickyOffset: <%= ImagineCms.toolbar_sticky_offset %>,
+    toolbarStickyOffsetMobile: <%= ImagineCms.toolbar_sticky_offset_mobile || 'null' %>
+  };
+</script>
+
 <%- for feed in [].concat(@rss_feeds || []) -%>
   <%= auto_discovery_link_tag(:rss, { controller: '/cms/content', action: 'rss_feed', page_id: @pg.id, page_list_name: feed }, title: feed) if @pg && @pg.id %>
 <%- end -%>

@@ -115,6 +115,15 @@
       if (!region.id) region.id = "imagine-cms-rte-" + Math.random().toString(36).slice(2);
     });
 
+    // Read sticky offset from config, fall back to default
+    var config = window.ImagineCmsConfig || {};
+    var stickyOffset = config.toolbarStickyOffset || 52;
+    
+    // Apply mobile offset if configured and on mobile viewport
+    if (config.toolbarStickyOffsetMobile && window.innerWidth < 768) {
+      stickyOffset = config.toolbarStickyOffsetMobile;
+    }
+
     hugerte.init({
       selector: ".imagine-cms-rte",
       inline: true,
@@ -124,7 +133,7 @@
       menubar: false,
       toolbar_mode: "sliding",
       toolbar_sticky: true,
-      toolbar_sticky_offset: 52,
+      toolbar_sticky_offset: stickyOffset,
       plugins: "autolink code image link lists quickbars searchreplace table",
       toolbar: buildToolbar(),
       quickbars_selection_toolbar: "bold italic underline | link | blocks | bullist numlist",
