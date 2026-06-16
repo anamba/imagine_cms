@@ -70,9 +70,11 @@ class AddCmsTables < ActiveRecord::Migration[4.2]
 
     CmsPage.create(
       cms_template_id: CmsTemplate.first.id,
+      cms_template_version: CmsTemplate.first.version,
       name: 'Home',
       title: 'Home',
       path: '',
+      published_date: Time.current,
       updated_by: User.first.id,
       updated_by_username: User.first.username,
     )

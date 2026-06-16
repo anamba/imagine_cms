@@ -37,6 +37,15 @@ module ImagineCms
     # isolate_namespace ImagineCms
 
     config.app_root = root
+    initializer "imagine_cms.ignore_legacy_lib", before: :set_autoload_paths do
+      Rails.autoloaders.main.ignore(
+        root.join("lib/acts_as_versioned"),
+        root.join("lib/extensions"),
+        root.join("lib/imagine_cms/version.rb"),
+        root.join("lib/upload_progress")
+      )
+    end
+
     middleware.use ::ActionDispatch::Static, "#{root}/public"
 
     initializer "imagine_cms.assets.precompile" do |app|
@@ -86,6 +95,6 @@ module ImagineCms
       end
     end
 
-    config.to_prepare &method(:activate).to_proc
+    config.to_prepare { ImagineCms::Engine.activate }
   end
 end

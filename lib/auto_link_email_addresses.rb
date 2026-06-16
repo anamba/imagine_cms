@@ -1,3 +1,6 @@
+module AutoLinkEmailAddresses
+end
+
 module ActionView::Helpers::TextHelper
   
   # Turns all email addresses into clickable links.  If a block is given,

@@ -74,7 +74,7 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, 'selector: ".imagine-cms-rte"'
     assert_includes source, "inline: true"
     refute_match(/^\s*ui_mode:\s*["']split["']/, source)
-    assert_includes source, "toolbar_sticky_offset: 52"
+    assert_includes source, "toolbar_sticky_offset: stickyOffset"
     assert_includes source, 'window.dispatchEvent(new Event("resize"))'
     assert_includes source, 'addEventListener("scroll", nudgeToolbarLayout, { passive: true })'
     assert_includes source, "textarea.value = editor ? editor.getContent() : element.innerHTML"

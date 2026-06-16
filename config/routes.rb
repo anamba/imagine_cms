@@ -10,8 +10,12 @@ Rails.application.routes.draw do
 
     resources :cms_pages do
       collection do
-        get :list_pages, :select_page, :list_pages_select
-        post :list_pages, :select_page, :list_pages_select
+        get :list_pages
+        get :select_page
+        get :list_pages_select
+        post :list_pages
+        post :select_page
+        post :list_pages_select
         get :toolbar_preview
         get :page_attribute
         
@@ -20,40 +24,82 @@ Rails.application.routes.draw do
         post :edit_page
 
         # page list dialog functions
-        post :page_list_add_folder, :page_list_add_tag
+        post :page_list_add_folder
+        post :page_list_add_tag
       end
       member do
-        get :toolbar_preview, :toolbar_edit
-        post :set_page_version, :request_review
+        get :toolbar_preview
+        get :toolbar_edit
+        post :set_page_version
+        post :request_review
 
-        get :edit_page, :show_template_options
+        get :edit_page
+        get :show_template_options
         post :edit_page
         post :delete_page
 
-        get :edit_page_content, :insert_page_object_config
+        get :edit_page_content
+        get :insert_page_object_config
         post :edit_page_content
 
-        get :create_file_link, :upload_file, :receive_file
-        post :create_file_link, :upload_file, :receive_file
+        get :create_file_link
+        get :upload_file
+        get :receive_file
+        post :create_file_link
+        post :upload_file
+        post :receive_file
         
-        get :upload_image, :receive_image, :crop_image, :save_crop, :upload_status
-        post :upload_image, :receive_image, :crop_image, :save_crop, :upload_status
-        get :upload_thumb, :crop_thumb, :save_crop_thumb
-        post :upload_thumb, :crop_thumb, :save_crop_thumb
-        get :upload_feature_image, :crop_feature_image, :save_crop_feature_image
-        post :upload_feature_image, :crop_feature_image, :save_crop_feature_image
+        get :upload_image
+        get :receive_image
+        get :crop_image
+        get :save_crop
+        get :upload_status
+        post :upload_image
+        post :receive_image
+        post :crop_image
+        post :save_crop
+        post :upload_status
+        get :upload_thumb
+        get :crop_thumb
+        get :save_crop_thumb
+        post :upload_thumb
+        post :crop_thumb
+        post :save_crop_thumb
+        get :upload_feature_image
+        get :crop_feature_image
+        get :save_crop_feature_image
+        post :upload_feature_image
+        post :crop_feature_image
+        post :save_crop_feature_image
 
         
-        get :receive_gallery, :complete_gallery, :gallery_setup, :add_to_gallery
-        post :receive_gallery, :complete_gallery, :gallery_setup, :add_to_gallery
-        get :gallery_management, :select_gallery, :set_gallery_order, :save_gallery_settings
-        post :gallery_management, :select_gallery, :set_gallery_order, :save_gallery_settings
-        get :sort_images, :sort_images_save
-        post :sort_images, :sort_images_save
-        get :image_details, :update_caption
-        post :image_details, :update_caption
+        get :receive_gallery
+        get :complete_gallery
+        get :gallery_setup
+        get :add_to_gallery
+        post :receive_gallery
+        post :complete_gallery
+        post :gallery_setup
+        post :add_to_gallery
+        get :gallery_management
+        get :select_gallery
+        get :set_gallery_order
+        get :save_gallery_settings
+        post :gallery_management
+        post :select_gallery
+        post :set_gallery_order
+        post :save_gallery_settings
+        get :sort_images
+        get :sort_images_save
+        post :sort_images
+        post :sort_images_save
+        get :image_details
+        get :update_caption
+        post :image_details
+        post :update_caption
         # get :delete_photo, :delete_gallery
-        post :delete_photo, :delete_gallery
+        post :delete_photo
+        post :delete_gallery
       end
     end
     resources :cms_templates
@@ -62,7 +108,8 @@ Rails.application.routes.draw do
 
   resources :users, path: 'manage/users', controller: 'management/users' do
     member do
-      post :enable, :disable
+      post :enable
+      post :disable
     end
   end
   
