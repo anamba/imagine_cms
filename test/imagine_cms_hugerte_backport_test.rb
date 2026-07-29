@@ -50,6 +50,17 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     end
   end
 
+  def test_authenticated_cms_controls_are_loaded_without_the_legacy_editor
+    source = read_engine_file("app/views/imagine_cms/_header.html.erb")
+    controls_link = source.index('document.writeln(\'<link href="/assets/imagine_controls.css"')
+    legacy_editor_guard = source.index("<%- if ImagineCms.use_legacy_dojo_editor -%>")
+
+    assert controls_link
+    assert legacy_editor_guard
+    assert_operator controls_link, :<, legacy_editor_guard
+    assert_includes source, "var load_imagine_controls = loggedIn() ||"
+  end
+
   def test_compat_manifest_does_not_load_scriptaculous_dependent_legacy_scripts
     source = read_engine_file("app/assets/javascripts/imagine_cms_compat.js")
 
@@ -117,6 +128,7 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, "date_field :pg, :expiration_date"
     assert_includes source, "class=\"imagine-cms-properties-form\""
     assert_includes source, "imagine-cms-dialog__button--primary"
+    assert_includes source, "appendTo: '#properties_dialog'"
     assert_includes styles, ".imagine-cms-properties-form"
     assert_includes styles, "color: #ffffff !important;"
   end

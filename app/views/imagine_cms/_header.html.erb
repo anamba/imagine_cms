@@ -14,6 +14,12 @@
     function loggedIn() {
         return readCookie('user_auth_status') == 'authenticated';
     }
+
+    var load_imagine_controls = loggedIn() || <%= ImagineCms.use_legacy_dojo_editor && @load_dojo ? 'true' : 'false' %>;
+
+    if (load_imagine_controls) {
+        document.writeln('<link href="/assets/imagine_controls.css" media="screen" rel="stylesheet" type="text/css" />')
+    }
 </script>
 <%- if ImagineCms.use_legacy_dojo_editor -%>
   <script defer type="text/javascript">
@@ -24,7 +30,6 @@
 
       if (loggedIn() || load_dojo) {
           document.writeln('<scr' + 'ipt src="/assets/dojo/dojo.js" type="text/javascript"></scr' + 'ipt>');
-          document.writeln('<link href="/assets/imagine_controls.css" media="screen" rel="stylesheet" type="text/css" />')
       }
   </script>
   <script defer type="text/javascript">

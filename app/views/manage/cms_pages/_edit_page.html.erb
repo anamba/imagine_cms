@@ -10,7 +10,7 @@
   <%- end -%>
   
   jQuery(document).ready(function () {
-    jQuery('#tags').tagit({ availableTags: taglist, allowSpaces: true, caseSensitive: false, removeConfirmation: true, autocomplete: { delay: 0, minLength: 0 } });
+    jQuery('#tags').tagit({ availableTags: taglist, allowSpaces: true, caseSensitive: false, removeConfirmation: true, autocomplete: { appendTo: '#properties_dialog', delay: 0, minLength: 0 } });
   });
 </script>
 
