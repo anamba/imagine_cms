@@ -88,6 +88,14 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, "toolbar_sticky_offset: stickyOffset"
     assert_includes source, 'window.dispatchEvent(new Event("resize"))'
     assert_includes source, 'addEventListener("scroll", nudgeToolbarLayout, { passive: true })'
+    assert_includes source, "function alignActiveToolbar()"
+    assert_match(
+      /function nudgeToolbarLayout\(\).*?alignActiveToolbar\(\);\s*window\.dispatchEvent\(new Event\("resize"\)\)/m,
+      source
+    )
+    assert_includes source, '"--imagine-cms-rte-toolbar-width"'
+    assert_includes source, 'toolbar.classList.add("imagine-cms-rte-toolbar")'
+    assert_includes source, '"imagine-cms-rte-toolbar--right"'
     assert_includes source, "textarea.value = editor ? editor.getContent() : element.innerHTML"
     assert_includes source, "protect: cmsProtectedPatterns()"
     assert_includes source, '/<#[\\s\\S]*?#>/g'
@@ -105,6 +113,12 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes styles, "border: 3px dashed"
     assert_includes styles, "scroll-margin-top: 78px"
     assert_includes styles, ".imagine-cms-toolbar-shell"
+    assert_includes styles, ".tox.imagine-cms-rte-toolbar"
+    assert_includes styles, "width: var(--imagine-cms-rte-toolbar-width) !important"
+    assert_includes styles, ".tox.imagine-cms-rte-toolbar .tox-editor-header"
+    assert_includes styles, "max-width: none"
+    assert_includes styles, ".tox.imagine-cms-rte-toolbar--right .tox-toolbar__primary"
+    assert_includes styles, "justify-content: flex-end"
     refute_includes styles, ".print\\:hidden { display: contents; }"
   end
 

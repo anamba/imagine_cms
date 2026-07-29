@@ -443,9 +443,24 @@ body.imagine-editor header.sticky {
 }
 
 .tox.tox-tinymce-inline,
+.tox.tox-hugerte-inline,
 .tox.tox-silver-sink,
 .tox .tox-menu {
   z-index: 10010 !important;
+}
+
+.tox.imagine-cms-rte-toolbar {
+  left: var(--imagine-cms-rte-toolbar-left) !important;
+  width: var(--imagine-cms-rte-toolbar-width) !important;
+}
+
+.tox.imagine-cms-rte-toolbar .tox-editor-header {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.tox.imagine-cms-rte-toolbar--right .tox-toolbar__primary {
+  justify-content: flex-end;
 }
 
 /* column browser (used in page browser and page list source selection) */

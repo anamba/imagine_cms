@@ -70,10 +70,67 @@
     return true;
   }
 
+  function visibleInlineToolbar() {
+    var toolbars = document.querySelectorAll(
+      ".tox.tox-hugerte-inline, .tox.tox-tinymce-inline"
+    );
+
+    return Array.prototype.find.call(toolbars, function (toolbar) {
+      var style = window.getComputedStyle(toolbar);
+      var bounds = toolbar.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && bounds.width > 0;
+    });
+  }
+
+  function alignActiveToolbar() {
+    if (!activeEditor) return;
+
+    var toolbar = visibleInlineToolbar();
+    var activeElement = activeEditor.getElement();
+    if (!toolbar || !activeElement) return;
+
+    var regions = Array.prototype.map.call(
+      document.querySelectorAll(".imagine-cms-rte"),
+      function (region) { return region.getBoundingClientRect(); }
+    ).filter(function (bounds) {
+      return bounds.width > 0 && bounds.height > 0;
+    });
+    if (regions.length === 0) return;
+
+    var left = Math.min.apply(null, regions.map(function (bounds) { return bounds.left; }));
+    var right = Math.max.apply(null, regions.map(function (bounds) { return bounds.right; }));
+    var activeBounds = activeElement.getBoundingClientRect();
+    var toolbarPosition = window.getComputedStyle(toolbar).position;
+    var documentOffset = toolbarPosition === "fixed" ? 0 : window.scrollX;
+
+    toolbar.style.setProperty(
+      "--imagine-cms-rte-toolbar-left",
+      Math.round(left + documentOffset) + "px"
+    );
+    toolbar.style.setProperty(
+      "--imagine-cms-rte-toolbar-width",
+      Math.round(right - left) + "px"
+    );
+    toolbar.classList.add("imagine-cms-rte-toolbar");
+    toolbar.classList.toggle(
+      "imagine-cms-rte-toolbar--right",
+      activeBounds.left > left + ((right - left) / 2)
+    );
+  }
+
   function nudgeToolbarLayout() {
     window.clearTimeout(resizeNudgeTimer);
     resizeNudgeTimer = window.setTimeout(function () {
+      // HugeRTE decides which toolbar groups fit when it handles resize.
+      // Apply our cross-column width first so the initial focus is measured
+      // against the final toolbar size rather than the editor column width.
+      alignActiveToolbar();
       window.dispatchEvent(new Event("resize"));
+      window.requestAnimationFrame(function () {
+        alignActiveToolbar();
+        window.dispatchEvent(new Event("resize"));
+        window.requestAnimationFrame(alignActiveToolbar);
+      });
     }, 30);
   }
 
@@ -96,6 +153,9 @@
     if (!document.documentElement.dataset.imagineCmsResizeNudge) {
       document.documentElement.dataset.imagineCmsResizeNudge = "true";
       window.addEventListener("scroll", nudgeToolbarLayout, { passive: true });
+      window.addEventListener("resize", function () {
+        window.requestAnimationFrame(alignActiveToolbar);
+      });
     }
   }
 
