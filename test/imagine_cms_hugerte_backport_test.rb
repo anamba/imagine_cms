@@ -89,6 +89,11 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, 'window.dispatchEvent(new Event("resize"))'
     assert_includes source, 'addEventListener("scroll", nudgeToolbarLayout, { passive: true })'
     assert_includes source, "textarea.value = editor ? editor.getContent() : element.innerHTML"
+    assert_includes source, "protect: cmsProtectedPatterns()"
+    assert_includes source, '/<#[\\s\\S]*?#>/g'
+    assert_includes source, '/<%[\\s\\S]*?%>/g'
+    assert_includes source, "editor.setContent(textarea.value)"
+    assert_includes source, "if (hydrating) return"
     assert_includes styles, ".imagine-cms-rte-source[hidden]"
     assert_includes styles, "border: 3px dashed"
     assert_includes styles, "scroll-margin-top: 78px"

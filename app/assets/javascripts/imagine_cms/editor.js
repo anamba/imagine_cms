@@ -107,6 +107,13 @@
     return base;
   }
 
+  function cmsProtectedPatterns() {
+    return [
+      /<#[\s\S]*?#>/g,
+      /<%[\s\S]*?%>/g
+    ];
+  }
+
   function initEditors() {
     var regions = Array.prototype.slice.call(document.querySelectorAll(".imagine-cms-rte"));
     if (regions.length === 0 || !window.hugerte) return;
@@ -142,15 +149,32 @@
       valid_children: "+body[style|script],+div[style|script]",
       convert_urls: false,
       entity_encoding: "raw",
+      protect: cmsProtectedPatterns(),
       setup: function (editor) {
+        // HugeRTE emits SetContent for the browser-parsed inline DOM before
+        // Init. Keep the hidden textarea authoritative until raw CMS source
+        // has been loaded through the protected parser.
+        var hydrating = true;
+
         editor.on("focus", function () {
           activeEditor = editor;
           nudgeToolbarLayout();
         });
         editor.on("init", function () {
           bindScrollNudges(editor.getElement());
+
+          // Inline mode starts from browser-parsed DOM, which has already escaped
+          // CMS placeholders and ERB. Rehydrate from the textarea's canonical
+          // source so HugeRTE can protect those tokens before parsing them.
+          var textarea = document.getElementById(editor.getElement().dataset.textareaId);
+          if (textarea) {
+            editor.setContent(textarea.value);
+          }
+          hydrating = false;
         });
         editor.on("change input undo redo setcontent", function () {
+          if (hydrating) return;
+
           setDirty(true);
           var textarea = document.getElementById(editor.getElement().dataset.textareaId);
           if (textarea) {
