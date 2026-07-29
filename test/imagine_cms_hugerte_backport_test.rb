@@ -94,6 +94,12 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, '/<%[\\s\\S]*?%>/g'
     assert_includes source, "editor.setContent(textarea.value)"
     assert_includes source, "if (hydrating) return"
+    assert_includes source, '"cmslink table cmsimage filelink code"'
+    assert_includes source, 'tooltip: "Insert/edit link"'
+    assert_includes source, '{ name: "linkClass", type: "input", label: "Class" }'
+    assert_includes source, '{ name: "linkStyle", type: "input", label: "Style" }'
+    assert_includes source, "editor.dom.setAttribs(anchor, attributes)"
+    assert_includes source, "editor.execCommand(\"mceInsertLink\", false, attributes)"
     assert_includes styles, ".imagine-cms-rte-source[hidden]"
     assert_includes styles, "border: 3px dashed"
     assert_includes styles, "scroll-margin-top: 78px"

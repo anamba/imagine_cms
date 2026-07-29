@@ -102,9 +102,109 @@
   function buildToolbar(pageId) {
     var base = "undo redo | blocks | bold italic underline strikethrough removeformat | " +
       "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | " +
-      "link table cmsimage filelink code";
+      "cmslink table cmsimage filelink code";
 
     return base;
+  }
+
+  function selectedLink(editor) {
+    return editor.dom.getParent(editor.selection.getStart(), "a[href]", editor.getBody());
+  }
+
+  function optionalAttribute(element, name) {
+    return element ? (element.getAttribute(name) || "") : "";
+  }
+
+  function linkRelForTarget(existingRel, target) {
+    var rels = (existingRel || "").split(/\s+/).filter(Boolean);
+    var noopenerIndex = rels.indexOf("noopener");
+
+    if (target === "_blank" && noopenerIndex === -1) rels.push("noopener");
+    if (target !== "_blank" && noopenerIndex !== -1) rels.splice(noopenerIndex, 1);
+
+    return rels.join(" ");
+  }
+
+  function openLinkDialog(editor) {
+    var anchor = selectedLink(editor);
+    var selectedText = editor.selection.getContent({ format: "text" });
+    var initialText = anchor ? (anchor.textContent || "") : selectedText;
+    var initialHref = optionalAttribute(anchor, "data-mce-href") ||
+      optionalAttribute(anchor, "href");
+
+    editor.windowManager.open({
+      title: "Insert/Edit Link",
+      size: "normal",
+      body: {
+        type: "panel",
+        items: [
+          { name: "url", type: "urlinput", filetype: "file", label: "URL" },
+          { name: "text", type: "input", label: "Text to display" },
+          { name: "title", type: "input", label: "Title" },
+          {
+            name: "target",
+            type: "selectbox",
+            label: "Open link in...",
+            items: [
+              { text: "Current window", value: "" },
+              { text: "New window", value: "_blank" }
+            ]
+          },
+          { name: "linkClass", type: "input", label: "Class" },
+          { name: "linkStyle", type: "input", label: "Style" }
+        ]
+      },
+      buttons: [
+        { type: "cancel", name: "cancel", text: "Cancel" },
+        { type: "submit", name: "save", text: "Save", primary: true }
+      ],
+      initialData: {
+        url: { value: initialHref, meta: { original: { value: initialHref } } },
+        text: initialText,
+        title: optionalAttribute(anchor, "title"),
+        target: optionalAttribute(anchor, "target"),
+        linkClass: optionalAttribute(anchor, "class"),
+        linkStyle: optionalAttribute(anchor, "style")
+      },
+      onSubmit: function (dialog) {
+        var data = dialog.getData();
+        var href = data.url && data.url.value ? data.url.value : "";
+
+        editor.undoManager.transact(function () {
+          if (!href) {
+            if (anchor) {
+              editor.selection.select(anchor);
+              editor.execCommand("unlink");
+            }
+            return;
+          }
+
+          var attributes = {
+            href: href,
+            title: data.title || null,
+            target: data.target || null,
+            rel: linkRelForTarget(optionalAttribute(anchor, "rel"), data.target) || null,
+            class: data.linkClass.trim() || null,
+            style: data.linkStyle.trim() || null
+          };
+
+          if (anchor) {
+            if (data.text !== initialText) anchor.textContent = data.text || href;
+            editor.dom.setAttribs(anchor, attributes);
+            editor.selection.select(anchor);
+          } else if (data.text !== initialText || editor.selection.isCollapsed()) {
+            editor.insertContent(
+              editor.dom.createHTML("a", attributes, editor.dom.encode(data.text || href))
+            );
+          } else {
+            editor.execCommand("mceInsertLink", false, attributes);
+          }
+        });
+
+        editor.focus();
+        dialog.close();
+      }
+    });
   }
 
   function cmsProtectedPatterns() {
@@ -143,7 +243,7 @@
       toolbar_sticky_offset: stickyOffset,
       plugins: "autolink code image link lists quickbars searchreplace table",
       toolbar: buildToolbar(),
-      quickbars_selection_toolbar: "bold italic underline | link | blocks | bullist numlist",
+      quickbars_selection_toolbar: "bold italic underline | cmslink | blocks | bullist numlist",
       quickbars_insert_toolbar: "cmsimage filelink table",
       extended_valid_elements: "*[*]",
       valid_children: "+body[style|script],+div[style|script]",
@@ -194,6 +294,25 @@
           tooltip: "Create download link",
           onAction: function () {
             if (window.insertFile) window.insertFile(editor.getElement().dataset.uploadFileUrl);
+          }
+        });
+        editor.ui.registry.addToggleButton("cmslink", {
+          icon: "link",
+          tooltip: "Insert/edit link",
+          onAction: function () {
+            openLinkDialog(editor);
+          },
+          onSetup: function (button) {
+            function updateState() {
+              button.setActive(!!selectedLink(editor));
+              button.setEnabled(editor.selection.isEditable());
+            }
+
+            editor.on("NodeChange", updateState);
+            updateState();
+            return function () {
+              editor.off("NodeChange", updateState);
+            };
           }
         });
       }
