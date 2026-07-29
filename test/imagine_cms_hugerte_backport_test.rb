@@ -100,6 +100,7 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, '{ name: "linkStyle", type: "input", label: "Style" }'
     assert_includes source, "editor.dom.setAttribs(anchor, attributes)"
     assert_includes source, "editor.execCommand(\"mceInsertLink\", false, attributes)"
+    assert_includes source, "quickbars_selection_toolbar: false"
     assert_includes styles, ".imagine-cms-rte-source[hidden]"
     assert_includes styles, "border: 3px dashed"
     assert_includes styles, "scroll-margin-top: 78px"

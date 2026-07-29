@@ -243,7 +243,7 @@
       toolbar_sticky_offset: stickyOffset,
       plugins: "autolink code image link lists quickbars searchreplace table",
       toolbar: buildToolbar(),
-      quickbars_selection_toolbar: "bold italic underline | cmslink | blocks | bullist numlist",
+      quickbars_selection_toolbar: false,
       quickbars_insert_toolbar: "cmsimage filelink table",
       extended_valid_elements: "*[*]",
       valid_children: "+body[style|script],+div[style|script]",
