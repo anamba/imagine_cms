@@ -121,6 +121,8 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes styles, ".imagine-cms-protected-token"
     assert_includes styles, "border: 3px dashed"
     assert_includes styles, "scroll-margin-top: 78px"
+    assert_match(/\.imagine-cms-rte \{.*?background: transparent;/m, styles)
+    assert_match(/\.imagine-cms-rte\.mce-edit-focus \{.*?background: transparent;/m, styles)
     assert_includes styles, ".imagine-cms-toolbar-shell"
     assert_includes styles, ".tox.imagine-cms-rte-toolbar"
     assert_includes styles, "width: var(--imagine-cms-rte-toolbar-width) !important"

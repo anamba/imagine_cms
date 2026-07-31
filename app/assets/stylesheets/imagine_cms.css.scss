@@ -483,7 +483,7 @@ body.imagine-editor header.sticky {
   margin: 14px 0;
   padding: 12px;
   color: inherit;
-  background: rgba(255, 255, 255, 0.78);
+  background: transparent;
   border: 3px dashed #7b8c9c;
   border-radius: 4px;
   outline: none;
@@ -492,7 +492,7 @@ body.imagine-editor header.sticky {
 
 .imagine-cms-rte:focus,
 .imagine-cms-rte.mce-edit-focus {
-  background: #ffffff;
+  background: transparent;
   border-color: #1f6feb;
   box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.16);
 }
