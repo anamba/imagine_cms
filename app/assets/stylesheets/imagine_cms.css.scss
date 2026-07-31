@@ -442,6 +442,27 @@ body.imagine-editor header.sticky {
   box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.16);
 }
 
+.imagine-cms-protected-token {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0.25rem 0;
+  padding: 0.3rem 0.5rem;
+  overflow-wrap: anywhere;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px dashed #9ca3af;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  cursor: default;
+}
+
+div.imagine-cms-protected-token {
+  display: block;
+  width: fit-content;
+}
+
 .tox.tox-tinymce-inline,
 .tox.tox-hugerte-inline,
 .tox.tox-silver-sink,

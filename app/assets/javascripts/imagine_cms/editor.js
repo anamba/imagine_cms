@@ -33,7 +33,11 @@
       var editor = editorForElement(element);
       if (!textarea) return;
 
-      textarea.value = editor ? editor.getContent() : element.innerHTML;
+      if (editor) {
+        if (editor._imagineCmsContentChanged) textarea.value = editor.getContent();
+      } else {
+        textarea.value = element.innerHTML;
+      }
     });
   }
 
@@ -274,6 +278,131 @@
     ];
   }
 
+  function encodeCmsToken(value) {
+    return encodeURIComponent(value)
+      .replace(/_/g, "%5F")
+      .replace(/'/g, "%27");
+  }
+
+  function decodeCmsToken(value) {
+    return decodeURIComponent(value);
+  }
+
+  function cmsTokenSentinel(token) {
+    return "__IMAGINE_CMS_TOKEN_" + encodeCmsToken(token) + "__";
+  }
+
+  function cmsTokenSentinelPattern() {
+    return /__IMAGINE_CMS_TOKEN_([A-Za-z0-9%.!~*()-]+)__/g;
+  }
+
+  function cmsTokenElement(token, block) {
+    var element = document.createElement(block ? "div" : "span");
+
+    element.className = "imagine-cms-protected-token";
+    element.setAttribute("data-imagine-cms-token", encodeCmsToken(token));
+    element.setAttribute("contenteditable", "false");
+    element.textContent = token;
+    return element;
+  }
+
+  function renderCmsProtectedTokens(content) {
+    if (typeof content !== "string") return content;
+
+    var container = document.createElement("div");
+    var markedContent = content.replace(
+      /<#[\s\S]*?#>|<%[\s\S]*?%>/g,
+      cmsTokenSentinel
+    );
+
+    container.innerHTML = markedContent;
+    var walker = document.createTreeWalker(
+      container,
+      window.NodeFilter.SHOW_TEXT
+    );
+    var textNodes = [];
+    var textNode;
+
+    while ((textNode = walker.nextNode())) {
+      if (textNode.nodeValue.indexOf("__IMAGINE_CMS_TOKEN_") !== -1) {
+        textNodes.push(textNode);
+      }
+    }
+
+    textNodes.forEach(function (node) {
+      var value = node.nodeValue;
+      var pattern = cmsTokenSentinelPattern();
+      var standalone = node.parentNode === container &&
+        value.replace(pattern, "").trim() === "";
+      var fragment = document.createDocumentFragment();
+      var lastIndex = 0;
+      var match;
+
+      pattern.lastIndex = 0;
+      while ((match = pattern.exec(value))) {
+        if (match.index > lastIndex) {
+          fragment.appendChild(document.createTextNode(
+            value.slice(lastIndex, match.index)
+          ));
+        }
+        fragment.appendChild(cmsTokenElement(
+          decodeCmsToken(match[1]),
+          standalone
+        ));
+        lastIndex = pattern.lastIndex;
+      }
+      if (lastIndex < value.length) {
+        fragment.appendChild(document.createTextNode(value.slice(lastIndex)));
+      }
+
+      node.parentNode.replaceChild(fragment, node);
+    });
+
+    return container.innerHTML;
+  }
+
+  function restoreCmsProtectedTokens(content) {
+    if (typeof content !== "string") return content;
+
+    var container = document.createElement("div");
+    var markerPrefix = "IMAGINE_CMS_PROTECTED_" +
+      Math.random().toString(36).slice(2) + "_";
+    var replacements = [];
+
+    container.innerHTML = content;
+    Array.prototype.forEach.call(
+      container.querySelectorAll(".imagine-cms-protected-token[data-imagine-cms-token]"),
+      function (element, index) {
+        var token;
+
+        try {
+          token = decodeCmsToken(element.getAttribute("data-imagine-cms-token"));
+        } catch (_error) {
+          return;
+        }
+
+        var marker = markerPrefix + index;
+        replacements.push({ marker: marker, token: token });
+        element.parentNode.replaceChild(document.createComment(marker), element);
+      }
+    );
+
+    var restored = container.innerHTML;
+    replacements.forEach(function (replacement) {
+      restored = restored.replace(
+        "<!--" + replacement.marker + "-->",
+        replacement.token
+      );
+    });
+    restored = restored.replace(
+      cmsTokenSentinelPattern(),
+      function (_sentinel, encodedToken) {
+        return decodeCmsToken(encodedToken);
+      }
+    );
+    return restored;
+  }
+
   function initEditors() {
     var regions = Array.prototype.slice.call(document.querySelectorAll(".imagine-cms-rte"));
     if (regions.length === 0 || !window.hugerte) return;
@@ -304,7 +433,7 @@
       plugins: "autolink code image link lists quickbars searchreplace table",
       toolbar: buildToolbar(),
       quickbars_selection_toolbar: false,
-      quickbars_insert_toolbar: "cmsimage filelink table",
+      quickbars_insert_toolbar: false,
       extended_valid_elements: "*[*]",
       valid_children: "+body[style|script],+div[style|script]",
       convert_urls: false,
@@ -316,6 +445,12 @@
         // has been loaded through the protected parser.
         var hydrating = true;
 
+        editor.on("BeforeSetContent", function (event) {
+          event.content = renderCmsProtectedTokens(event.content);
+        });
+        editor.on("GetContent", function (event) {
+          event.content = restoreCmsProtectedTokens(event.content);
+        });
         editor.on("focus", function () {
           activeEditor = editor;
           nudgeToolbarLayout();
@@ -331,11 +466,13 @@
             editor.setContent(textarea.value);
           }
           hydrating = false;
+          editor._imagineCmsContentChanged = false;
         });
         editor.on("change input undo redo setcontent", function () {
           if (hydrating) return;
 
           setDirty(true);
+          editor._imagineCmsContentChanged = true;
           var textarea = document.getElementById(editor.getElement().dataset.textareaId);
           if (textarea) {
             textarea.value = editor.getContent();
