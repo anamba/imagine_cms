@@ -111,7 +111,12 @@
   </tr>
   <tr class="page-field">
     <td class="imagine-cms-properties-form__label">Publish Version:</td>
-    <td><%= select :pg, :published_version, [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, class: 'form', style: 'width: 100%' %></td>
+    <td>
+      <div class="imagine-cms-publish-control imagine-cms-publish-control--properties" data-imagine-publish-control>
+        <%= select :pg, :published_version, [ [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{ts_to_str pg.updated_on}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }), {}, class: 'form imagine-cms-publish-select', style: 'width: 100%', data: { imagine_published_version: true } %>
+        <span class="imagine-cms-publish-status" data-imagine-publish-status hidden>Offline — page is not publicly visible</span>
+      </div>
+    </td>
   </tr>
   <tr>
     <td class="imagine-cms-properties-form__label">Publish Date:</td>

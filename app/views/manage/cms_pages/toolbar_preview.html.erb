@@ -25,13 +25,14 @@
       </label>
 
       <%- if !UseCmsAccessLevels || user_has_permission?(:manage_cms_publishing) -%>
-        <label class="imagine-cms-toolbar__field">
+        <label class="imagine-cms-toolbar__field imagine-cms-publish-control" data-imagine-publish-control>
           <span>Publish</span>
-          <select data-imagine-published-version data-url="<%= url_for controller: '/manage/cms_pages', action: 'set_page_version', id: @pg %>">
+          <select class="imagine-cms-publish-select" data-imagine-published-version data-url="<%= url_for controller: '/manage/cms_pages', action: 'set_page_version', id: @pg %>">
             <%- [ @pg.path == '' ? nil : [ '[ None (offline) ]', -1 ], [ '[ Latest ]', 0 ] ].compact.concat(@pg.versions.reverse.map { |pg| [ "#{pg.version} - #{date_to_str(pg.updated_on)} #{time_to_str(pg.updated_on)}#{" by #{pg.updated_by_username}" unless pg.updated_by_username.blank? }", pg.version ] }).each do |label, version| %>
               <option value="<%= version %>"<%= (@pg && @pg.published_version == version.to_i) ? ' selected="selected"' : '' %>><%= label %></option>
             <%- end -%>
           </select>
+          <span class="imagine-cms-publish-status" data-imagine-publish-status hidden>Offline</span>
         </label>
         <span class="imagine-cms-toolbar__spinner" data-imagine-publish-spinner hidden><%= image_tag "interface/form_loading.gif" %></span>
       <%- elsif params[:version] && params[:version].to_i != @pg.published_version && !(@pg.published_version == 0 && params[:version].to_i == @pg.versions.count) -%>
@@ -93,6 +94,7 @@
           body: formData
         });
         publishedVersionSelect.classList.toggle("old-version", publishedVersionSelect.value !== "0" && publishedVersionSelect.selectedIndex > 1);
+        imagineCmsUpdatePublishedVersionState(publishedVersionSelect);
         if (spinner) spinner.hidden = true;
       });
     }

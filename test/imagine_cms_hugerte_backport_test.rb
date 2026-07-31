@@ -145,10 +145,21 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
 
   def test_preview_toolbar_urls_target_management_controller_explicitly
     source = read_engine_file("app/views/manage/cms_pages/toolbar_preview.html.erb")
+    styles = read_engine_file("app/assets/stylesheets/imagine_cms.css.scss")
+    core = read_engine_file("app/assets/javascripts/imagine_cms/core.js")
 
     assert_includes source, "controller: '/manage/cms_pages', action: 'edit_page'"
     assert_includes source, "controller: '/manage/cms_pages', action: 'set_page_version'"
     assert_includes source, "controller: '/manage/cms_pages', action: 'request_review'"
+    assert_includes source, "data-imagine-publish-control"
+    assert_includes source, "data-imagine-publish-status"
+    assert_includes source, "imagine-cms-publish-select"
+    assert_includes core, "function imagineCmsUpdatePublishedVersionState(select)"
+    assert_includes core, "String(select.value) === '-1'"
+    assert_includes core, "imagineCmsInitializePublishedVersionStates(target)"
+    assert_includes styles, ".imagine-cms-publish-select.imagine-cms-publish-select--offline"
+    assert_includes styles, ".imagine-cms-publish-select.imagine-cms-publish-select--offline option"
+    assert_includes styles, ".imagine-cms-publish-status"
     refute_includes source, "url_for action: 'edit_page'"
   end
 
@@ -164,6 +175,9 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, "class=\"imagine-cms-properties-form\""
     assert_includes source, "imagine-cms-dialog__button--primary"
     assert_includes source, "appendTo: '#properties_dialog'"
+    assert_includes source, "data-imagine-publish-control"
+    assert_includes source, "data-imagine-publish-status"
+    assert_includes source, "imagine-cms-publish-select"
     assert_includes styles, ".imagine-cms-properties-form"
     assert_includes styles, "color: #ffffff !important;"
   end

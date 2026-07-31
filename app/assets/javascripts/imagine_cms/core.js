@@ -162,7 +162,41 @@ function setImagineDialogContent(target, html) {
         newScript.appendChild(document.createTextNode(oldScript.textContent));
         oldScript.parentNode.replaceChild(newScript, oldScript);
     });
+    imagineCmsInitializePublishedVersionStates(target);
 }
+
+function imagineCmsUpdatePublishedVersionState(select) {
+    if (!select) return;
+
+    var offline = String(select.value) === '-1';
+    var control = select.closest('[data-imagine-publish-control]') || select.parentElement;
+    var status = control && control.querySelector('[data-imagine-publish-status]');
+
+    select.classList.toggle('imagine-cms-publish-select--offline', offline);
+    if (control) {
+        control.classList.toggle('imagine-cms-publish-control--offline', offline);
+    }
+    if (status) status.hidden = !offline;
+}
+
+function imagineCmsInitializePublishedVersionStates(root) {
+    if (!root || !root.querySelectorAll) return;
+
+    Array.prototype.forEach.call(
+        root.querySelectorAll('[data-imagine-published-version]'),
+        imagineCmsUpdatePublishedVersionState
+    );
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    imagineCmsInitializePublishedVersionStates(document);
+});
+
+document.addEventListener('change', function (event) {
+    if (event.target.matches('[data-imagine-published-version]')) {
+        imagineCmsUpdatePublishedVersionState(event.target);
+    }
+});
 
 function ajaxLoadInto(targetId, url, options) {
     options = options || {};

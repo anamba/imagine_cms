@@ -121,6 +121,56 @@ body.imagine-editor header.sticky {
   box-shadow: 0 0 0 1px rgba(204, 51, 51, 0.25);
 }
 
+.imagine-cms-publish-select.imagine-cms-publish-select--offline {
+  color: #8b1d1d !important;
+  background: #fff1f2 !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22) !important;
+  font-weight: 750 !important;
+}
+
+.imagine-cms-publish-select.imagine-cms-publish-select--offline option {
+  color: #1f2933;
+  background: #ffffff;
+  font-weight: 400;
+}
+
+.imagine-cms-publish-control--offline > span:first-child {
+  color: #991b1b;
+}
+
+.imagine-cms-publish-status {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: max-content;
+  padding: 2px 7px;
+  color: #991b1b !important;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.imagine-cms-publish-status::before {
+  width: 6px;
+  height: 6px;
+  background: #dc2626;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+  content: "";
+}
+
+.imagine-cms-publish-status[hidden] {
+  display: none !important;
+}
+
 .imagine-cms-toolbar__spinner img {
   width: 16px;
   height: 16px;
@@ -294,6 +344,11 @@ body.imagine-editor header.sticky {
 .imagine-cms-properties-form textarea.form,
 .imagine-cms-properties-form textarea {
   min-height: 54px;
+}
+
+.imagine-cms-publish-control--properties {
+  display: grid;
+  gap: 6px;
 }
 
 .imagine-cms-properties-form input[type="checkbox"],
