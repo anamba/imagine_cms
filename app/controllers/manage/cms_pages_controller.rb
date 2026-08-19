@@ -1412,11 +1412,12 @@ class Manage::CmsPagesController < Manage::ApplicationController
       end
     end
 
+    # Discover options from template source. Executing the template (the old
+    # approach) fails for new pages because text_editor calls url_for with a
+    # nil page id, so later template_option() calls never run.
     def load_template_options
-      begin
-        render_to_string inline: @pg.template.content
-      rescue StandardError => e
-        Rails.logger.debug e
+      @pg.template&.content.to_s.scan(/template_option\(\s*['"]([^'"]+)['"](?:\s*,\s*:(\w+))?/) do |name, type|
+        @template_options[name] = (type.presence || 'string').to_sym
       end
     end
 
