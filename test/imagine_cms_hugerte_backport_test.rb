@@ -112,7 +112,7 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, '"cmslink table cmsimage filelink code"'
     assert_includes source, 'tooltip: "Insert/edit link"'
     assert_includes source, '{ name: "linkClass", type: "input", label: "Class" }'
-    assert_includes source, '{ name: "linkStyle", type: "input", label: "Style" }'
+    refute_includes source, '{ name: "linkStyle", type: "input", label: "Style" }'
     assert_includes source, "editor.dom.setAttribs(anchor, attributes)"
     assert_includes source, "editor.execCommand(\"mceInsertLink\", false, attributes)"
     assert_includes source, "quickbars_selection_toolbar: false"

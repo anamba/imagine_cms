@@ -214,8 +214,7 @@
               { text: "New window", value: "_blank" }
             ]
           },
-          { name: "linkClass", type: "input", label: "Class" },
-          { name: "linkStyle", type: "input", label: "Style" }
+          { name: "linkClass", type: "input", label: "Class" }
         ]
       },
       buttons: [
@@ -227,8 +226,7 @@
         text: initialText,
         title: optionalAttribute(anchor, "title"),
         target: optionalAttribute(anchor, "target"),
-        linkClass: optionalAttribute(anchor, "class"),
-        linkStyle: optionalAttribute(anchor, "style")
+        linkClass: optionalAttribute(anchor, "class")
       },
       onSubmit: function (dialog) {
         var data = dialog.getData();
@@ -248,8 +246,7 @@
             title: data.title || null,
             target: data.target || null,
             rel: linkRelForTarget(optionalAttribute(anchor, "rel"), data.target) || null,
-            class: data.linkClass.trim() || null,
-            style: data.linkStyle.trim() || null
+            class: data.linkClass.trim() || null
           };
 
           if (anchor) {
