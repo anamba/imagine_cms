@@ -388,11 +388,38 @@ body.imagine-editor header.sticky {
   white-space: nowrap;
 }
 
-.imagine-cms-properties-form .tagit {
+#management-content .imagine-cms-properties-form ul.tagit,
+.imagine-cms-properties-form ul.tagit {
+  display: block;
+  box-sizing: border-box;
+  list-style: none;
+  width: 100%;
+  margin: 0;
+  padding: 4px 6px;
   color: #18212b;
   background: #ffffff;
   border: 1px solid #b9c3cf;
   border-radius: 5px;
+}
+
+.imagine-cms-properties-form input.tagit-hidden-field {
+  display: none !important;
+}
+
+.imagine-cms-properties-form__panel {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px;
+  background-color: #ffffff;
+  border: 1px solid #aaaaaa;
+}
+
+.imagine-cms-properties-form__panel table {
+  width: 100%;
+}
+
+#edit_page_template_options:not(:empty) {
+  margin-top: 4px;
 }
 
 .imagine-cms-properties-form .auto_complete {

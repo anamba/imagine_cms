@@ -212,7 +212,7 @@
           </td>
         </tr>
       </table>
-      <div id="custom_attributes" style="background-color: white; min-height: 40px; overflow: auto; border: 1px solid #aaaaaa">
+      <div id="custom_attributes" class="imagine-cms-properties-form__panel" style="min-height: 40px; overflow: auto;">
         <%- @page_objects.to_h.each do |key, val| -%>
           <%- key =~ /^obj-(\w+?)-(.+?)$/ -%>
           <%= render partial: 'page_attribute', locals: { name: $2 } if $1 == 'attribute' %>
