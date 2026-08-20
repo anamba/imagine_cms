@@ -5,9 +5,10 @@ module Cms # :nodoc:
     include ActionController::Caching::Actions
     include ActionController::Caching::Pages
     self.page_cache_directory = "#{Rails.root}/public"
-    
-    caches_action :rss_feed
-    
+
+    # RSS cannot use caches_action: that filter forces Content-Type from the path
+    # extension and defaults to text/html when the route has none.
+
     before_action :convert_content_path
     
     # Routes:
