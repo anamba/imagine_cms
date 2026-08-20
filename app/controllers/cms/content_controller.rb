@@ -273,14 +273,14 @@ module Cms # :nodoc:
     def rss_feed
       min_time = Time.rfc2822(request.env["HTTP_IF_MODIFIED_SINCE"]) rescue nil
       if min_time && (Time.now - min_time) < 5.minutes
-        render plain: '', status: '304 Not Modified' and return
+        head :not_modified and return
       end
       
       @@cms_page_table_exists ||= CmsPage.table_exists?
       return not_found unless @@cms_page_table_exists
       
       @pg = CmsPage.find_by_id(params[:page_id])
-      render nothing: true and return unless @pg && params[:page_list_name]
+      head :not_found and return unless @pg && params[:page_list_name]
       key = "obj-page_list-#{params[:page_list_name].gsub(/[^\w]/, '_')}"
       
       load_page_objects or return false
@@ -297,7 +297,7 @@ module Cms # :nodoc:
         
         if min_time && @most_recent_pub_date.published_date && @most_recent_pub_date.published_date <= min_time
           # use cached version
-          render plain: '', status: '304 Not Modified' and return
+          head :not_modified and return
         end
         
         @pages.each_with_index do |page, index|
@@ -305,11 +305,12 @@ module Cms # :nodoc:
         end
       end
       
-      # send feed
-      response.headers["Content-Type"] = "application/rss+xml"
+      # Request format is HTML (the route has no .xml extension). Passing content_type
+      # on render is required so Rails 8 does not overwrite application/rss+xml with text/html.
       response.headers["Last-Modified"] = (@pages.first.published_date.httpdate rescue Time.now).to_s
       
-      render template: 'cms/content/rss_feed', formats: [:xml], layout: false
+      render template: 'cms/content/rss_feed', formats: [:xml], layout: false,
+             content_type: 'application/rss+xml'
     end
     
     def preview_template
