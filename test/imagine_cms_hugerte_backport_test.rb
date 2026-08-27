@@ -174,6 +174,9 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes source, "date_field :pg, :article_date"
     assert_includes source, "date_field :pg, :published_date"
     assert_includes source, "date_field :pg, :expiration_date"
+    controller = read_engine_file("app/controllers/manage/cms_pages_controller.rb")
+    assert_includes controller, "if params[:pg][:expiration_date_year]"
+    refute_includes controller, "if params[:pg][:expires]\n      date = Time.zone.parse"
     assert_includes source, "class=\"imagine-cms-properties-form\""
     assert_includes source, "imagine-cms-dialog__button--primary"
     assert_includes source, "appendTo: '#properties_dialog'"

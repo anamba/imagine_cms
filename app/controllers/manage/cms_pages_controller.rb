@@ -80,7 +80,10 @@ class Manage::CmsPagesController < Manage::ApplicationController
     if params[:pg][:published_date_year]
       params[:pg][:published_date] = Time.zone.parse("#{params[:pg].delete(:published_date_year)}-#{params[:pg].delete(:published_date_month)}-#{params[:pg].delete(:published_date_day)}")
     end
-    if params[:pg][:expires]
+    # Native date_field posts expiration_date as YYYY-MM-DD. The old date_select
+    # split params still work; do not overwrite a submitted ISO date with a
+    # parse of missing year/month/day parts (that was wiping the saved date).
+    if params[:pg][:expiration_date_year]
       date = Time.zone.parse("#{params[:pg].delete(:expiration_date_year)}-#{params[:pg].delete(:expiration_date_month)}-#{params[:pg].delete(:expiration_date_day)}")
       params[:pg][:expiration_date] = date if params[:pg][:expires] == 'true'
     end
