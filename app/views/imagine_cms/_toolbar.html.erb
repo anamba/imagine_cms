@@ -26,11 +26,11 @@
         document.getElementById('imagine_cms-toolbar').style.display = 'block';
       }
     </script>
-  <%- elsif [ 'cms/content', 'manage/cms_pages' ].include?(controller.controller_path) && is_logged_in_user? -%>
-    <%- if is_editing_page? -%>
+  <%- elsif [ 'cms/content', 'manage/cms_pages' ].include?(controller.controller_path) -%>
+    <%- if is_editing_page? && is_logged_in_user? -%>
       <%= render template: '/manage/cms_pages/toolbar_edit' %>
-    <%- else -%>
-      <%= render template: '/manage/cms_pages/toolbar_preview' %>
+    <%- elsif @pg -%>
+      <div id="imagine-cms-toolbar-host" hidden data-toolbar-url="<%= url_for controller: '/manage/cms_pages', action: 'toolbar_preview', id: @pg, version: params[:version] %>"></div>
     <%- end -%>
   <%- end -%>
 <%- end -%>

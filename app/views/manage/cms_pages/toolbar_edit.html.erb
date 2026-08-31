@@ -23,22 +23,30 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var toolbar = document.getElementById("imagine_cms-toolbar");
-    if (!toolbar) return;
+  (function () {
+    function bindImagineEditToolbar() {
+      var toolbar = document.getElementById("imagine_cms-toolbar");
+      if (!toolbar) return;
 
-    var saveButton = toolbar.querySelector("[data-imagine-save]");
-    var cancelButton = toolbar.querySelector("[data-imagine-cancel]");
+      var saveButton = toolbar.querySelector("[data-imagine-save]");
+      var cancelButton = toolbar.querySelector("[data-imagine-cancel]");
 
-    if (saveButton) {
-      saveButton.addEventListener("click", function () {
-        ImagineCms.Editor.submitEditForm();
-      });
+      if (saveButton) {
+        saveButton.addEventListener("click", function () {
+          ImagineCms.Editor.submitEditForm();
+        });
+      }
+      if (cancelButton) {
+        cancelButton.addEventListener("click", function () {
+          ImagineCms.Editor.cancelEdit(cancelButton.dataset.imagineCancel);
+        });
+      }
     }
-    if (cancelButton) {
-      cancelButton.addEventListener("click", function () {
-        ImagineCms.Editor.cancelEdit(cancelButton.dataset.imagineCancel);
-      });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bindImagineEditToolbar);
+    } else {
+      bindImagineEditToolbar();
     }
-  });
+  })();
 </script>

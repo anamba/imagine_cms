@@ -52,63 +52,71 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var toolbar = document.getElementById("imagine_cms-toolbar");
-    if (!toolbar) return;
+  (function () {
+    function bindImaginePreviewToolbar() {
+      var toolbar = document.getElementById("imagine_cms-toolbar");
+      if (!toolbar) return;
 
-    var propertiesButton = toolbar.querySelector("[data-imagine-properties]");
-    var displayVersionSelect = toolbar.querySelector("[data-imagine-display-version]");
-    var publishedVersionSelect = toolbar.querySelector("[data-imagine-published-version]");
-    var reviewForm = toolbar.querySelector("[data-imagine-review-form]");
-    var spinner = toolbar.querySelector("[data-imagine-publish-spinner]");
-    var csrfToken = function () {
-      if (window.ImagineCms && ImagineCms.Editor && ImagineCms.Editor.csrfToken) {
-        return ImagineCms.Editor.csrfToken();
+      var propertiesButton = toolbar.querySelector("[data-imagine-properties]");
+      var displayVersionSelect = toolbar.querySelector("[data-imagine-display-version]");
+      var publishedVersionSelect = toolbar.querySelector("[data-imagine-published-version]");
+      var reviewForm = toolbar.querySelector("[data-imagine-review-form]");
+      var spinner = toolbar.querySelector("[data-imagine-publish-spinner]");
+      var csrfToken = function () {
+        if (window.ImagineCms && ImagineCms.Editor && ImagineCms.Editor.csrfToken) {
+          return ImagineCms.Editor.csrfToken();
+        }
+
+        var meta = document.querySelector("meta[name='csrf-token']");
+        return meta ? meta.getAttribute("content") : "";
+      };
+
+      if (propertiesButton) {
+        propertiesButton.addEventListener("click", function () {
+          editProperties(propertiesButton.dataset.imagineProperties, "Page Properties");
+        });
       }
-
-      var meta = document.querySelector("meta[name='csrf-token']");
-      return meta ? meta.getAttribute("content") : "";
-    };
-
-    if (propertiesButton) {
-      propertiesButton.addEventListener("click", function () {
-        editProperties(propertiesButton.dataset.imagineProperties, "Page Properties");
-      });
-    }
-    if (displayVersionSelect) {
-      displayVersionSelect.addEventListener("change", function () {
-        window.location.href = displayVersionSelect.value;
-      });
-    }
-    if (publishedVersionSelect) {
-      publishedVersionSelect.addEventListener("change", async function () {
-        if (spinner) spinner.hidden = false;
-        var formData = new FormData();
-        formData.append("authenticity_token", csrfToken());
-        formData.append("pg[published_version]", publishedVersionSelect.value);
-
-        await fetch(publishedVersionSelect.dataset.url, {
-          method: "POST",
-          credentials: "same-origin",
-          headers: { "X-CSRF-Token": csrfToken() },
-          body: formData
+      if (displayVersionSelect) {
+        displayVersionSelect.addEventListener("change", function () {
+          window.location.href = displayVersionSelect.value;
         });
-        publishedVersionSelect.classList.toggle("old-version", publishedVersionSelect.value !== "0" && publishedVersionSelect.selectedIndex > 1);
-        imagineCmsUpdatePublishedVersionState(publishedVersionSelect);
-        if (spinner) spinner.hidden = true;
-      });
-    }
-    if (reviewForm) {
-      reviewForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        var response = await fetch(reviewForm.action, {
-          method: "POST",
-          credentials: "same-origin",
-          headers: { "X-CSRF-Token": csrfToken() },
-          body: new FormData(reviewForm)
+      }
+      if (publishedVersionSelect) {
+        publishedVersionSelect.addEventListener("change", async function () {
+          if (spinner) spinner.hidden = false;
+          var formData = new FormData();
+          formData.append("authenticity_token", csrfToken());
+          formData.append("pg[published_version]", publishedVersionSelect.value);
+
+          await fetch(publishedVersionSelect.dataset.url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-CSRF-Token": csrfToken() },
+            body: formData
+          });
+          publishedVersionSelect.classList.toggle("old-version", publishedVersionSelect.value !== "0" && publishedVersionSelect.selectedIndex > 1);
+          imagineCmsUpdatePublishedVersionState(publishedVersionSelect);
+          if (spinner) spinner.hidden = true;
         });
-        if (response.ok) reviewForm.querySelector("button").textContent = "Submitted";
-      });
+      }
+      if (reviewForm) {
+        reviewForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          var response = await fetch(reviewForm.action, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-CSRF-Token": csrfToken() },
+            body: new FormData(reviewForm)
+          });
+          if (response.ok) reviewForm.querySelector("button").textContent = "Submitted";
+        });
+      }
     }
-  });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bindImaginePreviewToolbar);
+    } else {
+      bindImaginePreviewToolbar();
+    }
+  })();
 </script>

@@ -59,6 +59,13 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert legacy_editor_guard
     assert_operator controls_link, :<, legacy_editor_guard
     assert_includes source, "var load_imagine_controls = loggedIn() ||"
+    assert_includes source, "function imagineCmsLoadPreviewToolbar()"
+    assert_includes source, "imagine-cms-toolbar-host"
+
+    toolbar = read_engine_file("app/views/imagine_cms/_toolbar.html.erb")
+    assert_includes toolbar, 'id="imagine-cms-toolbar-host"'
+    assert_includes toolbar, "action: 'toolbar_preview'"
+    refute_includes toolbar, "render template: '/manage/cms_pages/toolbar_preview'"
   end
 
   def test_compat_manifest_does_not_load_scriptaculous_dependent_legacy_scripts
