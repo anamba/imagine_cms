@@ -203,7 +203,10 @@ module Cms # :nodoc:
             
             render inline: template_content
             
-            if UseCmsPageCaching && @allow_caching && perform_caching && request.format == Mime[:html]
+            # Never cache responses for logged-in CMS users: the preview toolbar
+            # (including revision history) is rendered into the HTML and would
+            # otherwise be served to anonymous visitors from public/*.html.
+            if UseCmsPageCaching && @allow_caching && !is_logged_in_user? && perform_caching && request.format == Mime[:html]
               cache_page(nil, nil, nil)
             end
             
