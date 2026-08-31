@@ -229,6 +229,15 @@ module Cms # :nodoc:
       @allow_caching = false
     end
     helper_method :disable_caching
+
+    # Page cache writes the full HTML to public/. Logged-in responses include the
+    # preview toolbar and revision history; never persist those for anonymous hits
+    # (including cache_page calls from templates).
+    def cache_page(content = nil, path = nil, gzip = Zlib::BEST_COMPRESSION)
+      return if is_logged_in_user?
+
+      super
+    end
     
     def search
       @pages = []
