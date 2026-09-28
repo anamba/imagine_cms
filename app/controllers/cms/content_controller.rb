@@ -402,8 +402,12 @@ module Cms # :nodoc:
       template_content.gsub!(/<(%.*?\%x\s?\[.*?\s*%)>/, '&lt;\1&gt;')
       template_content.gsub!(/<(%.*?\`.*?\s*%)>/, '&lt;\1&gt;')
       
+      # Page templates are HTML documents, so lay them out with the HTML layout
+      # even for non-HTML requests (e.g. feed readers sending Accept:
+      # application/rss+xml); without pinning the format, the default layout
+      # lookup finds no RSS/XML layout and raises.
       template_content = render_to_string(inline: template_content, layout: true,
-                                          locals: { page: page })
+                                          formats: [:html], locals: { page: page })
       
       template_content
     end
