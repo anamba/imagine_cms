@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails",               [ ">= 7.0.0", "< 9.0" ]
   spec.add_dependency "rails-observers",     "~> 0.1"
+  spec.add_dependency "json",                ["~> 2.0", "< 3"]
   spec.add_dependency "actionpack-action_caching", "~> 1.0"
   spec.add_dependency "actionpack-page_caching", "~> 1.1"
   spec.add_dependency "aws-sdk",             "~> 2.0"
