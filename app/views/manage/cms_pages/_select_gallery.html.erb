@@ -8,6 +8,7 @@
         <%- session[:broken_galleries].sort.each do |g| -%>
         <li><%= g.titleize %> (<%= link_to "delete",
                                           { action: 'delete_gallery', id: params[:id], gallery_id: g },
+                                          method: :post,
                                           data: { remote: true, update: 'delete_gallery_container', confirm: "This action cannot be undone. Continue?" } %>)</li>
         <%- end -%>
       </ul>

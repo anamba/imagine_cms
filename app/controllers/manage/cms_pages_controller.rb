@@ -930,18 +930,24 @@ class Manage::CmsPagesController < Manage::ApplicationController
 
 
   def receive_gallery
+    localdir = nil
     @pg = CmsPage.find_by_id(params[:id])
 
     target_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
     FileUtils.mkdir_p target_dir
 
     count = 1
-    localdir = File.join(target_dir, 'gallery_1')
-    while File.exist?(localdir) && count < 100
-      count += 1
-      localdir = File.join(target_dir, "gallery_#{count}")
+    loop do
+      candidate = File.join(target_dir, "gallery_#{count}")
+      begin
+        Dir.mkdir(candidate)
+        localdir = candidate
+        break
+      rescue Errno::EEXIST
+        count += 1
+      end
     end
-    FileUtils.mkdir_p File.join(localdir, 'temp')
+    Dir.mkdir(File.join(localdir, 'temp'))
 
     data = params[:gallery_file][:data]
     # read zip file
@@ -954,6 +960,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
       entries << zipentry
     end
     entries.sort! { |a,b| File.basename(a.name).downcase <=> File.basename(b.name).downcase }
+    raise ArgumentError, "No supported images found in ZIP" if entries.empty?
 
     Zip::File.open(data.path) do |zipfile|
       entries.each_with_index do |zipentry, index|
@@ -962,21 +969,20 @@ class Manage::CmsPagesController < Manage::ApplicationController
         localfile = File.join(localdir, 'temp', (index+1).to_s + ext.downcase)
         jpgfile = File.join(localdir, 'temp', (index+1).to_s + '.jpg')
 
-        begin
-          zipentry.extract(localfile)
+        zipentry.extract(localfile)
 
-          im = MiniMagick::Image.open(localfile)
-          im.write(jpgfile)
+        im = MiniMagick::Image.open(localfile)
+        im.write(jpgfile)
 
-          File.unlink(localfile) if localfile != jpgfile
-
-        rescue StandardError => e
-          Rails.logger.error(e)
-        end
+        File.unlink(localfile) if localfile != jpgfile
       end
     end
 
     render json: { filename: File.basename(localdir) }.to_json
+  rescue StandardError => e
+    FileUtils.rm_rf(localdir) if localdir
+    Rails.logger.error(e)
+    render json: { error: "Gallery upload failed. Please upload a ZIP containing valid images." }, status: :unprocessable_entity
   end
 
   def gallery_setup
