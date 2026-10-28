@@ -54,6 +54,7 @@
       <td>
         <%= submit_tag 'Next', id: 'upload-gallery-next-button', class: 'form_button', style: 'min-width: 70px' %>
         <button type="button" class="form_button" onclick="cancelInsertImage()">Cancel</button>
+        <p id="gallery-upload-status" role="status" aria-live="polite"></p>
       </td>
     </tr>
   </table>
@@ -88,9 +89,6 @@
     document.getElementById("next_clicked").value = "1";
   });
   finishButton.addEventListener("click", (e) => {
-    e.target.dataset.disableWith = "Uploading...";
-  });
-  galleryNextButton.addEventListener("click", (e) => {
     e.target.dataset.disableWith = "Uploading...";
   });
 
@@ -131,34 +129,46 @@
 
   uploadGalleryForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (uploadGalleryForm.dataset.uploading === "true") return;
 
-    if (galleryFileField.value == "") {
-      setTimeout(() => {
-        galleryNextButton.value = "Next";
-        galleryNextButton.dataset.disableWith = null;
-        galleryNextButton.disabled = false;
-      });
+    var status = document.getElementById("gallery-upload-status");
+    if (!galleryFileField.files.length) {
+      status.textContent = "Select a ZIP file to upload.";
       return;
     }
 
-    var file = galleryFileField.files[0];
-    var formData = new FormData(uploadGalleryForm);
+    uploadGalleryForm.dataset.uploading = "true";
+    galleryNextButton.disabled = true;
+    galleryNextButton.value = "Uploading...";
+    status.textContent = "Uploading and preparing your gallery. Please wait.";
 
-    var resp = await fetch(uploadGalleryForm.action, {
-      method: 'POST',
-      body: formData
-    });
-    var data = await resp.json();
+    try {
+      var resp = await fetch(uploadGalleryForm.action, {
+        method: "POST",
+        body: new FormData(uploadGalleryForm)
+      });
+      if (!resp.ok) throw new Error("Upload failed. Check that your ZIP contains valid images and try again.");
+      var data = await resp.json();
+      if (!data.filename) throw new Error("The upload did not return a gallery. Please try again.");
 
-    document.getElementById("dirname").value = data.filename;
-    fetch(document.getElementById("mainform_gallery").action, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "X-CSRF-Token": ImagineCms.Editor.csrfToken() },
-      body: new FormData(document.getElementById("mainform_gallery"))
-    })
-      .then((response) => response.text())
-      .then((html) => setImagineDialogContent(document.getElementById("insert_image_dialog_content"), html));
+      document.getElementById("dirname").value = data.filename;
+      var setupForm = document.getElementById("mainform_gallery");
+      var setupResponse = await fetch(setupForm.action, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRF-Token": ImagineCms.Editor.csrfToken() },
+        body: new FormData(setupForm)
+      });
+      if (!setupResponse.ok) throw new Error("Your upload was received, but gallery setup failed. Please try again.");
+      var html = await setupResponse.text();
+      setImagineDialogContent(document.getElementById("insert_image_dialog_content"), html);
+    } catch (error) {
+      status.textContent = error.message || "Gallery upload failed. Please try again.";
+    } finally {
+      uploadGalleryForm.dataset.uploading = "false";
+      galleryNextButton.disabled = false;
+      galleryNextButton.value = "Next";
+    }
   });
   })();
 </script>
