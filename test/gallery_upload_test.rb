@@ -156,6 +156,23 @@ class GalleryUploadTest < Minitest::Test
     assert_equal "select_gallery", @controller.result[:action]
   end
 
+  def test_deletes_a_completed_gallery_and_preserves_other_galleries
+    gallery = @target.join("gallery_1")
+    other_gallery = @target.join("gallery_2")
+    FileUtils.mkdir_p([gallery.join("management"), other_gallery])
+    ["1.jpg", "1-thumb.jpg", "captions.yml", "settings.yml", "management/preview.jpg"].each do |file|
+      gallery.join(file).write("gallery content")
+    end
+    other_gallery.join("1.jpg").write("other gallery")
+
+    @controller.params[:gallery_id] = "gallery_1"
+    @controller.delete_gallery
+
+    refute gallery.exist?
+    assert_equal "other gallery", other_gallery.join("1.jpg").read
+    assert_equal "select_gallery", @controller.result[:action]
+  end
+
   class GallerySelectionView
     include ActionView::Helpers::UrlHelper
 
@@ -186,9 +203,37 @@ class GalleryUploadTest < Minitest::Test
   end
 
   def test_broken_gallery_delete_link_renders_post_method
-    html = GallerySelectionView.new.html
-    assert_includes html, 'data-method="post"'
-    assert_includes html, 'data-remote="true"'
-    assert_includes html, '/delete_gallery?gallery_id=gallery_1'
+    assert_gallery_delete_link GallerySelectionView.new.html
+  end
+
+  def test_completed_gallery_delete_link_renders_post_method
+    lookup = ActionView::LookupContext.new(
+      [File.expand_path("../app/views", __dir__)], {}, ["manage/cms_pages"]
+    )
+    view = ActionView::Base.with_empty_template_cache.new(lookup, {
+      galleries: ["/gallery_1"], pg: OpenStruct.new(path: "news"), images: [],
+      gallery: OpenStruct.new(slide_duration: 0, autoplay: "true", show_thumbs: "true")
+    }, nil)
+    def view.params
+      { id: 1, gallery_id: "gallery_1" }
+    end
+    def view.session
+      { broken_galleries: [] }
+    end
+    def view.url_for(options = {})
+      "/manage/cms_pages/1/#{options[:action]}?gallery_id=#{options[:gallery_id]}"
+    end
+
+    assert_gallery_delete_link view.render(template: "manage/cms_pages/gallery_management")
+  end
+
+  def assert_gallery_delete_link(html)
+    link = Nokogiri::HTML.fragment(html).at_css('a[href*="/delete_gallery?"]')
+    refute_nil link
+    assert_equal "post", link["data-method"]
+    assert_equal "true", link["data-remote"]
+    assert_equal "delete_gallery_container", link["data-update"]
+    assert_match(/cannot be undone/, link["data-confirm"])
+    assert_includes link["href"], "gallery_id=gallery_1"
   end
 end
