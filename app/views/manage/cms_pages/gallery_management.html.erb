@@ -33,6 +33,7 @@
                 style: 'float: right; margin-right: 6px;', data: { remote: true, update: 'gallery_window' } %>
     <%= link_to image_tag("management/gallery_delete.gif") + " Delete Gallery",
                 { action: 'delete_gallery', id: @pg, gallery_id: params[:gallery_id] },
+                method: :post,
                 style: 'float: right; margin-right: 6px;', data: { remote: true, update: 'delete_gallery_container', confirm: "This gallery, including photos and captions, will be deleted and cannot be undone. Continue?" } %>
     <br clear="all" />
   </div>
