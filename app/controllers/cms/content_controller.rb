@@ -136,6 +136,13 @@ module Cms # :nodoc:
         
         if test.size == 3
           if test[0] == 'segment' && !test[1].blank? && !test[2].blank?
+            if params[:append] == '1'
+              return head(:bad_request) unless test[1].match?(/\A\d{1,10}\z/)
+              seed = params[:seed].to_s
+              return head(:bad_request) unless seed.match?(/\A\d{1,10}\z/) && seed.to_i <= 2**32 - 1
+              # Append bodies must never be cached as HTML or across preview sessions.
+              response.cache_control.replace(no_store: true)
+            end
             @page_list_segment = true
             params[:page_list_name] = db_path.pop
             params[:offset] = db_path.pop
@@ -143,7 +150,7 @@ module Cms # :nodoc:
             
             # don't cache to disk on server, but do allow browsers and proxies to cache briefly
             @allow_caching = false
-            expires_in 1.minutes, public: true if Rails.env.production?
+            expires_in 1.minutes, public: true if Rails.env.production? && params[:append] != '1'
           end
         end
         
@@ -197,7 +204,14 @@ module Cms # :nodoc:
             if @page_list_segment
               name = params[:page_list_name]
               key = "obj-page_list-#{name.gsub(/[^\w]/, '_')}"
-              render inline: render_page_list_segment(name, @page_list_pages[key]) and return true
+              pages = @page_list_pages && @page_list_pages[key]
+              return not_found unless pages
+              options = (@page_list_render_options || {})[key] || {}
+              if params[:append] == '1'
+                return head(:bad_request) unless page_list_append_mode?(key, options)
+                render json: page_list_append_response(name, pages, options) and return true
+              end
+              render inline: render_page_list_segment(name, pages, options) and return true
             end
             # end of page list segment code
             

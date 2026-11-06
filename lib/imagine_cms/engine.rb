@@ -54,7 +54,7 @@ module ImagineCms
       app.config.assets.paths << root.join('app', 'assets', 'javascripts')
 
       app.config.assets.precompile += %w( dojo/** management.css cms_dialog.css imagine_controls.css reset.css cropper/* interface/* management/* )
-      app.config.assets.precompile += ["codemirror*", "codemirror/**/*"]
+      app.config.assets.precompile += ["codemirror*", "codemirror/**/*", "imagine_cms/page_list.js"]
       # Rails.application.config.load_paths << File.dirname(__FILE__) + "/../app/helpers"
     end
 

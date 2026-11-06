@@ -219,7 +219,34 @@ module CmsApplicationHelper
     @page_objects
   end
   
+  # Explicit modes take precedence; legacy callers retain their existing flag.
+  def page_list_pagination_mode(key, options = {})
+    mode = first_non_empty(options[:pagination_mode], @page_objects["#{key}-pagination-mode"]).to_s
+    return mode if %w[none numbered load_more infinite].include?(mode)
+
+    first_non_empty(options[:use_pagination], @page_objects["#{key}-use-pagination"], 0).to_i == 1 ? 'numbered' : 'none'
+  end
+
+  def page_list_append_mode?(key, options = {})
+    %w[load_more infinite].include?(page_list_pagination_mode(key, options))
+  end
+
+  def page_list_seed(key)
+    @page_list_seeds ||= {}
+    @page_list_seeds[key] ||= begin
+      requested_key = "obj-page_list-#{params[:page_list_name].to_s.gsub(/[^\w]/, '_')}"
+      if params[:append] == '1' && requested_key == key && params[:seed].present?
+        value = params[:seed].to_s
+        raise ArgumentError, 'Invalid page-list seed' unless value.match?(/\A\d{1,10}\z/) && value.to_i <= 2**32 - 1
+        value.to_i
+      else
+        Random.new_seed % (2**32)
+      end
+    end
+  end
+
   def page_list_items(pg, key, options = {})
+    append_mode = page_list_append_mode?(key, options)
     pages = []
     single_pages = []
     instance_tags_include = []
@@ -382,8 +409,10 @@ module CmsApplicationHelper
       pages.reject! { |page| page.tags.reject { |t| t.name != tag } == [] }
     end
     
+    pages.uniq! if append_mode
+
     # set some reasonable defaults in case the sort keys are nil
-    pages.each { |pg| pg.article_date ||= Time.now; pg.position ||= 0; pg.title ||= '' }
+    pages.each { |pg| pg.article_date ||= (append_mode ? pg.published_date || Time.at(0) : Time.now); pg.position ||= 0; pg.title ||= '' }
     pri_sort_key = first_non_empty(@page_objects["#{key}-sort-first-field"], options[:primary_sort_key], 'article_date')
     pri_sort_dir = first_non_empty(@page_objects["#{key}-sort-first-direction"], options[:primary_sort_direction], 'desc')
     sec_sort_key = first_non_empty(@page_objects["#{key}-sort-second-field"], options[:secondary_sort_key], 'position')
@@ -414,6 +443,7 @@ module CmsApplicationHelper
         index += 1
       end
       
+      result = a.id <=> b.id if result == 0 && append_mode
       result
     end
     
@@ -444,10 +474,14 @@ module CmsApplicationHelper
         pages = pages.first(random_pool_size)
       end
       
-      n = pages.length
-      for i in 0...n
-        r = rand(n-1).floor
-        pages[r], pages[i] = pages[i], pages[r]
+      if append_mode
+        pages = pages.shuffle(random: Random.new(page_list_seed(key)))
+      else
+        n = pages.length
+        for i in 0...n
+          r = rand(n-1).floor
+          pages[r], pages[i] = pages[i], pages[r]
+        end
       end
     end
     

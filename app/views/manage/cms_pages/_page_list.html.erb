@@ -111,8 +111,11 @@
             <br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <label>
-              <%= check_box :page_objects, "#{key}-use-pagination" %>
-              Show multiple list segments
+              Pagination:
+              <%= select :page_objects, "#{key}-pagination-mode",
+                    [['None', 'none'], ['Page numbers', 'numbered'], ['Load more', 'load_more'], ['Infinite scroll', 'infinite']],
+                    selected: page_list_pagination_mode(key, options) %>
+              <small>“Display” is the number of items per batch.</small>
             </label>
             <br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

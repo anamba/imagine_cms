@@ -191,6 +191,34 @@ module ActionControllerExtensions
     end
     
     
+    def page_list_segment_url(name, offset, append: false, seed: nil)
+      path = @pg.path.split('/').concat(['segment', offset.to_s, name])
+      path.concat(['version', params[:version].to_s]) if params[:version].to_i > 0
+      args = { controller: '/cms/content', action: 'show', content_path: path, only_path: true }
+      args.merge!(append: '1', seed: seed) if append
+      url_for(args)
+    end
+
+    def render_page_list_items(key, subset, total, options)
+      subset.each_with_index.map do |page, index|
+        (@cms_agent_rendered_pages ||= []) << page.id
+        "<!--cms-owner:#{page.id}:start-->" +
+          substitute_placeholders(first_non_empty(@page_objects["#{key}-template"], options[:template], ''), page,
+                                  index: index + 1, count: subset.size, total: total) +
+          "<!--cms-owner:#{page.id}:end-->"
+      end.join
+    end
+
+    def page_list_append_response(name, pages, options)
+      key = "obj-page_list-#{name.gsub(/[^\w]/, '_')}"
+      offset = params[:offset].to_i
+      limit = [first_non_empty(@page_objects["#{key}-max-item-count"], options[:item_count], pages.size).to_i, 1].max
+      subset = pages[offset, limit] || []
+      next_offset = offset + subset.size
+      { html: erb_render(render_page_list_items(key, subset, pages.size, options)), count: subset.size,
+        next_url: next_offset < pages.size ? page_list_segment_url(name, next_offset, append: true, seed: page_list_seed(key)) : nil }
+    end
+
     def render_page_list_segment(name, pages, options = {}, html_options = {})
       return '' unless @pg
 
@@ -200,7 +228,12 @@ module ActionControllerExtensions
       
       key = "obj-page_list-#{name.gsub(/[^\w]/, '_')}"
       
-      offset = first_non_empty(params[:offset], 0).to_i
+      @page_list_render_options ||= {}
+      @page_list_render_options[key] = options.dup unless options.empty?
+      mode = page_list_pagination_mode(key, options)
+      append_mode = %w[load_more infinite].include?(mode)
+      targeted = params[:page_list_name].to_s == name.to_s
+      offset = params[:append] == '1' && !targeted ? 0 : first_non_empty(params[:offset], 0).to_i
       limit = first_non_empty(@page_objects["#{key}-max-item-count"], options[:item_count], pages.size).to_i
       limit = 1 if limit < 1
       page_subset = pages[offset, limit] || []
@@ -216,22 +249,18 @@ module ActionControllerExtensions
                                                            options[:empty_message],
                                                            'No pages found.'), @pg)
       else
-        page_subset.each_with_index do |page, index|
-          (@cms_agent_rendered_pages ||= []) << page.id
-          content << "<!--cms-owner:#{page.id}:start-->"
-          content << substitute_placeholders(first_non_empty(@page_objects["#{key}-template"], options[:template], ''), page,
-                                             :index => index+1, :count => page_subset.size, :total => pages.size)
-          content << "<!--cms-owner:#{page.id}:end-->"
-        end
+        content << render_page_list_items(key, page_subset, pages.size, options)
       end
       
+      content << "<!--cms-list-end:#{key}-->" if append_mode
+
       content << substitute_placeholders(first_non_empty(@page_objects["#{key}-footer"], options[:footer]), @pg,
                                          :count => page_subset.size, :total => pages.size,
                                          :rss_feed_url => feed_url)
       
       num_segments = (pages.size.to_f / limit).ceil
       Rails.logger.info "Number of page list segments: #{num_segments}"
-      if first_non_empty(options[:use_pagination], @page_objects["#{key}-use-pagination"], 0).to_i == 1 && num_segments > 1
+      if mode == 'numbered' && num_segments > 1
         content << '<div class="imagine_cms-paginator">'
         content << '<span>Page:&nbsp;</span>'
         num_segments.times do |seg|
@@ -270,6 +299,16 @@ EOT
 EOT
       end
       
+      if append_mode && offset + page_subset.size < pages.size
+        next_url = page_list_segment_url(name, offset + page_subset.size, append: true, seed: page_list_seed(key))
+        content << content_tag(:div,
+          content_tag(:button, 'Load more', type: 'button') +
+          content_tag(:span, '', role: 'status', 'aria-live' => 'polite'),
+          class: 'imagine_cms-load-more', 'data-cms-pagination' => key,
+          'data-mode' => mode, 'data-next-url' => next_url)
+        content << helpers.javascript_include_tag('imagine_cms/page_list', defer: true)
+      end
+
       if options[:wrapper_div]
         content_tag :div, erb_render(content), html_options.update(:id => key)
       else
