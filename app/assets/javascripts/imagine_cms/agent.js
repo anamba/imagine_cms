@@ -15,7 +15,7 @@
     var panel = document.createElement("section");
     panel.className = "imagine-cms-agent imagine-cms-toolbar";
     panel.setAttribute("aria-label", "Agent editing review");
-    panel.innerHTML = '<div class="imagine-cms-toolbar__inner"><span role="status" aria-live="polite"></span><div data-agent-actions></div></div>';
+    panel.innerHTML = '<div class="imagine-cms-toolbar__inner"><div data-agent-actions></div><span role="status" aria-live="polite"></span></div>';
     document.body.appendChild(panel);
     var status = panel.querySelector("[role=status]");
     var actions = panel.querySelector("[data-agent-actions]");
@@ -137,27 +137,30 @@
       });
       if (window.ImagineCms && ImagineCms.Editor) ImagineCms.Editor.setDirty(true);
     }
+    async function discardWorkingChanges() {
+      if (!window.confirm("Discard all unsaved page content changes?")) return;
+      // Discard starts a fresh working copy, not just a fresh rendered view.
+      // Keep the existing draft if fetching the current context fails.
+      var context = await request("context");
+      state.context = context;
+      state.working = {};
+      state.generation++;
+      replaceWorkingView(context.preview);
+      idle();
+    }
     function idle() {
       actions.replaceChildren();
       message(dirty() ? "Applied changes are not saved." : "Agent editing ready.");
       if (!editing && dirty()) {
         button("Save", async function () {
-          var result = await request("save", { working: readWorking(), base: state.context.base });
-          state.context.base = result.base;
+          var result = await request("save", { working: readWorking() });
           state.context.sources = result.sources;
           state.working = {};
           replaceWorkingView(result.preview);
           idle();
           message("Page saved.");
         }, true);
-        button("Discard changes", async function () {
-          if (!window.confirm("Discard all unsaved page content changes?")) return;
-          var result = await request("preview", { working: {} });
-          state.working = {};
-          state.generation++;
-          replaceWorkingView(result.preview);
-          idle();
-        });
+        button("Discard changes", discardWorkingChanges);
       }
     }
     async function propose(input) {
@@ -170,7 +173,7 @@
       var generation = state.generation;
       state.busy = true;
       var result;
-      try { result = await request("propose", Object.assign({}, input, { working: working, base: state.context.base })); }
+      try { result = await request("propose", Object.assign({}, input, { working: working })); }
       finally { state.busy = false; }
       if (generation !== state.generation || JSON.stringify(readWorking()) !== JSON.stringify(working)) {
         await request("discard", { proposal_id: result.id });
@@ -195,7 +198,6 @@
         state.pending = null;
         state.generation++;
         if (accepted.saved) {
-          state.context.base = accepted.base;
           state.context.sources = accepted.sources;
           if (!editing) replaceWorkingView(accepted.preview);
           else message("Source saved. Save or discard your page content before reloading the updated structure.");
@@ -220,21 +222,6 @@
       state.context = context;
       if (editing) state.context.sources = state.context.sources.filter(function (source) { return source.category === "staged"; });
       readWorking();
-      if (editing) {
-        window.ImagineCms.AgentEditing = { save: async function () {
-          if (state.busy || state.pending) { message("Review or discard the proposal before saving."); return; }
-          state.busy = true;
-          try {
-            var result = await request("save", { working: readWorking(), base: state.context.base });
-            state.context.base = result.base;
-            state.context.sources = result.sources;
-            state.working = {};
-            ImagineCms.Editor.setDirty(false);
-            window.location.href = "/manage/cms_pages/" + pageId + "/edit_page_content?version=" + result.version;
-          } catch (error) { message(error.message); }
-          finally { state.busy = false; }
-        } };
-      }
       await api.registerTool({ name: "cms_read_page", description: "Read the current CMS page, editable sources, page-local/shared scope and save categories. Use current working content; identical text does not imply shared ownership.",
         inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true },
         execute: async function () {

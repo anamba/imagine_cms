@@ -2,6 +2,8 @@ require 'securerandom'
 
 module Cms
   class AgentController < ContentController
+    class WorkingCopyConflict < StandardError; end
+
     skip_before_action :convert_content_path
     before_action :authorize_agent
     protect_from_forgery with: :exception
@@ -9,12 +11,12 @@ module Cms
 
     rescue_from ImagineCms::SourceCatalog::Forbidden, with: ->(e) { render json: { error: e.message }, status: :forbidden }
     rescue_from ImagineCms::ProposalBuilder::Invalid, ArgumentError, with: ->(e) { render json: { error: e.message }, status: :unprocessable_entity }
-    rescue_from ImagineCms::ContentWriter::Conflict, CmsAgentProposal::Unavailable, with: ->(e) { render json: { error: e.message }, status: :conflict }
+    rescue_from WorkingCopyConflict, CmsAgentProposal::Unavailable, with: ->(e) { render json: { error: e.message }, status: :conflict }
 
     def context
       html = render_working({})
       render json: { page_id: @pg.id, title: @pg.title, version: @pg.version,
-                     base: ImagineCms::ContentWriter.snapshot(@pg), sources: catalog_sources,
+                     sources: catalog_sources,
                      referenced_pages: referenced_pages,
                      csrf_token: form_authenticity_token, preview: html }
     end
@@ -24,9 +26,6 @@ module Cms
     end
 
     def propose
-      if ImagineCms::ContentWriter.snapshot(@pg) != params.require(:base)
-        raise ImagineCms::ContentWriter::Conflict, 'The page changed since your working copy was opened. Save or reconcile your content before requesting another change.'
-      end
       working = working_params
       render_working(working)
       result = ImagineCms::ProposalBuilder.call(page: @pg, user: @user, session_token: agent_session,
@@ -46,16 +45,13 @@ module Cms
       # Lock order is page, then proposal; all writers follow the same order.
       @pg.with_lock do
         proposal.consume! do |data|
-          if ImagineCms::ContentWriter.snapshot(@pg) != data.fetch('base')
-            raise ImagineCms::ContentWriter::Conflict, 'The page changed. Request a fresh proposal.'
-          end
           render_working(working)
           sources = catalog_sources.index_by { |s| s[:id] }
           data.fetch('changes').each do |change|
             source = sources[change['source_id']]
             raise ImagineCms::SourceCatalog::Forbidden, 'Source is no longer editable.' unless source
-            if working.fetch(source[:id], source[:content]).to_s != change['before']
-              raise ImagineCms::ContentWriter::Conflict, 'Working content changed. Request a fresh proposal.'
+            if working.key?(source[:id]) && working[source[:id]].to_s != change['before']
+              raise WorkingCopyConflict, 'Working content changed. Request a fresh proposal.'
             end
           end
           candidate = working.merge(data['changes'].to_h { |c| [c['source_id'], c['content']] })
@@ -64,7 +60,7 @@ module Cms
             validate_dirty_regions!(working)
             persist_immediate!(data['changes'])
             @pg.reload
-            result = { saved: true, base: ImagineCms::ContentWriter.snapshot(@pg),
+            result = { saved: true,
                        sources: catalog_sources, preview: render_working(working) }
           else
             result = { saved: false, working: candidate, preview: rendered, changes: data['changes'] }
@@ -76,9 +72,6 @@ module Cms
 
     def save
       @pg.with_lock do
-        if ImagineCms::ContentWriter.snapshot(@pg) != params.require(:base)
-          raise ImagineCms::ContentWriter::Conflict, 'The page changed. Reload before saving.'
-        end
         working = working_params
         render_working(working)
         allowed = catalog_sources.select { |s| s[:category] == 'staged' }.map { |s| s[:id] }
@@ -87,7 +80,7 @@ module Cms
         ImagineCms::ContentWriter.call(page: @pg, input: working, user_id: @user.id,
           username: @user.username, full_access: !UseCmsAccessLevels || user_has_permission?(:manage_cms_full_access))
       end
-      render json: { saved: true, version: @pg.version, base: ImagineCms::ContentWriter.snapshot(@pg),
+      render json: { saved: true, version: @pg.version,
                      preview: render_working({}), sources: catalog_sources }
     end
 
@@ -204,7 +197,7 @@ module Cms
         # Page-list configuration fields are represented by the list boundary.
         represented = rendered.any? { |id| id == "page:#{@pg.id}:#{key}" ||
           (id.start_with?("page:#{@pg.id}:obj-page_list-") && key.start_with?(id.split(':', 3).last + '-')) }
-        raise ImagineCms::ContentWriter::Conflict, 'Save or discard content in removed regions before changing structure.' unless represented
+        raise WorkingCopyConflict, 'Save or discard content in removed regions before changing structure.' unless represented
       end
     end
 
@@ -218,10 +211,6 @@ module Cms
           raise ImagineCms::SourceCatalog::Forbidden unless @catalog.shared_access?
           klass = change['kind'] == 'template' ? CmsTemplate : CmsSnippet
           record = klass.lock.find(change['source_id'].split(':').last)
-          # Compare the exact shared source, since page revisions do not track it.
-          if record.content.to_s != change['before']
-            raise ImagineCms::ContentWriter::Conflict, 'Shared source changed. Request a new proposal.'
-          end
           record.content = change['content'].dup
           record.save!
         end

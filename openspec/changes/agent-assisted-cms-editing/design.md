@@ -4,7 +4,7 @@
 
 See proposal.md for motivation and specs/cms-agent-editing/spec.md for behavior. The gem stores named regions as CmsPageObject records keyed by page, version, type, and name. Public rendering runs through ActionControllerExtensions#insert_object, placeholder substitution, ERB rendering, and Cms::ContentController#render_cms_page_to_string. Management rendering overrides insert_object to produce editing controls. HugeRTE runs inline with canonical source in hidden textareas and protected CMS/ERB tokens.
 
-Content saving currently lives in Manage::CmsPagesController#edit_page_content: it normalizes submitted source, creates a page revision and object records, updates the index, and invokes cache sweeping. published_version=0 follows Latest; other publishing states must retain their existing semantics. Page properties can save without incrementing the content revision, so page version alone is not a sufficient freshness token. Templates and snippets have their own versions. Public HTML may be cached; the preview toolbar is fetched from an authenticated endpoint.
+Content saving currently lives in Manage::CmsPagesController#edit_page_content: it normalizes submitted source, creates a page revision and object records, updates the index, and invokes cache sweeping. published_version=0 follows Latest; other publishing states must retain their existing semantics. Templates and snippets have their own versions. Public HTML may be cached; the preview toolbar is fetched from an authenticated endpoint.
 
 ## Goals / Non-Goals
 
@@ -34,11 +34,11 @@ Alternative: persist each accepted region immediately. Rejected because agent-as
 
 ### 3. Store bounded proposals and preview exact normalized changes
 
-Add a proposal record storing editor/session binding, page, category, canonical normalized changes, source fingerprints, affected working-source fingerprints, requested scope, warnings, expiry, and consumption state. Default pending lifetime: 30 minutes, checked on access with batched cleanup. Proposal IDs alone do not grant access. Protect mutation endpoints with existing session authentication and CSRF defenses.
+Add a proposal record storing editor/session binding, page, category, canonical normalized changes, local working-source values, requested scope, warnings, expiry, and consumption state. Default pending lifetime: 30 minutes, checked on access with batched cleanup. Proposal IDs alone do not grant access. Protect mutation endpoints with existing session authentication and CSRF defenses.
 
 Extract the relevant save-time normalization from the existing content controller into a shared operation used by preview and persistence. Refactor content revision persistence into a shared transaction used by existing Save and preview-mode Save; retain all unmodified objects in the new version. Render proposals with request-scoped source overrides through the real template/filter/placeholder/ERB path, without creating saved CMS revisions. Start with full-page rendering and extract replaceable output boundaries when reliable; use larger preview replacements for template-wide changes.
 
-Before display, ensure a returned asynchronous preview still matches the current working generation. Acceptance checks affected target fingerprints; independent region proposals can coexist even when the overall generation advances. Overlapping stale proposals require regeneration. Applying/saving consumes a proposal once. Expired proposals do not silently remove already applied working content.
+Before display, ensure a returned asynchronous preview still matches the current working generation. Acceptance checks explicitly submitted local working values; independent region proposals can coexist even when the overall generation advances. Overlapping stale proposals require regeneration. Applying/saving consumes a proposal once. Expired proposals do not silently remove already applied working content.
 
 The CMS already executes trusted editorial ERB. Guidance requires avoiding side effects and preserving existing Ruby unless needed for the request. This change does not claim regex filters or database rollback create a Ruby sandbox.
 
@@ -50,11 +50,13 @@ Proposals include requested scope so the server can compare it with actual sourc
 
 For immediate proposals, the explicit user action is Save change. Saving a property/template/snippet uses the existing corresponding permissions and persistence rules. Maintain pending content across the resulting re-render. Before saving structural changes, render with the working map and reject changes that remove or invalidate dirty regions; the editor can save/discard/revise those edits first. No ordinary content Save may accidentally persist an unaccepted immediate proposal.
 
-### 5. Use locked source snapshots for freshness
+### 5. Preserve ordinary CMS revision saving
 
-Fingerprint relevant persisted fields/content, including properties saved without revision; include template/snippet state when it affects preview validity. At Save, lock and recheck affected records in stable order, validate permissions again, and persist atomically. A content working copy retains its original base snapshot until Save; local Apply does not advance the database revision. A successful independent immediate change can refresh only the corresponding acknowledged base fields, never hide unrelated concurrent edits.
+Agent-assisted edits use the same revision model as manual edits. Another editor saving, changing properties, publishing a revision, or editing a template/snippet does not invalidate a draft or prevent proposing, applying, or saving. Each content Save creates a revision and retains previous revisions. Publishing selects which revision is visible according to existing CMS rules.
 
-Do not rely on max(version)+1 alone for concurrency. Use a page-row lock around revision creation and full snapshot checks. Reject source/working conflicts with actionable errors while preserving the editor's draft. Rendered previews may include dynamic data, so exactness means the accepted canonical source changes and rendering rules, not frozen external data forever.
+Do not generate or require page fingerprints, base tokens, or site-wide snippet snapshots. Keep authorization, proposal expiry/ownership, single-use acceptance, and atomic persistence. A short page-row transaction allocates a distinct revision; it is not an editor lock or a reason to reject another editor's draft. Shared-source saves retain their existing model history behavior.
+
+Only protect edits made in the same working copy while a proposal is being reviewed: if a submitted local target has changed since preview, require a fresh proposal for that target. Do not compare against newly persisted source as a proxy for local edits. Discarding all page-content edits fetches current context and starts a clean working copy; discarding one proposal preserves other working content.
 
 ## Risks / Trade-offs
 

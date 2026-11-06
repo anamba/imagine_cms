@@ -11,14 +11,14 @@
 
 - [x] 2.1 Extract shared content normalization and full-page revision persistence from the management action; verify ordinary editor saves retain unchanged objects, revision attribution, publishing permissions, index updates, and cache invalidation.
 - [ ] 2.2 Add request-scoped render overrides using canonical working source; verify placeholders, ERB, snippets, lists, and normalization render faithfully without creating saved CMS revisions.
-- [ ] 2.3 Add snapshot/fingerprint checks and stable row locking to content and immediate-source persistence; verify stale content/property/template/snippet changes are rejected and concurrent saves cannot overwrite newer work.
+- [x] 2.3 Preserve ordinary revision-based saving without agent-only concurrency rejection; verify two editors can each save a retained revision and publishing changes do not block drafts.
 - [x] 2.4 Document the working-source/preview/persisted-source boundaries and verify source map examples preserve CMS tokens.
 
 ## 3. Proposal lifecycle
 
-- [x] 3.1 Add proposal storage/migration, editor/session binding, source and working fingerprints, expiry, and cleanup; verify expiry, foreign access, replay rejection, and migration behavior.
+- [x] 3.1 Add proposal storage/migration, editor/session binding, local working values, expiry, and cleanup; verify expiry, foreign access, replay rejection, and migration behavior.
 - [x] 3.2 Implement proposal validation and normalized rendering, local/shared mismatch warnings, and server rejection of mixed categories; verify each path leaves persistent content unchanged before user acceptance.
-- [ ] 3.3 Implement single-use acceptance/discard endpoints with permission/CSRF/freshness rechecks; verify exact previewed source is accepted and independent proposals coexist while overlapping stale proposals fail.
+- [ ] 3.3 Implement single-use acceptance/discard endpoints with permission/CSRF/expiry checks and local working-value checks; verify exact previewed source is accepted and independent proposals coexist while overlapping stale proposals fail.
 - [x] 3.4 Document proposal endpoints and agent guidance for no side effects, source scope, deferred mixed requests, and human-controlled apply/save; verify no registered tool invokes acceptance or saving.
 
 ## 4. Edit-mode input adapter
@@ -73,7 +73,7 @@ Do not count the following as complete solely because their code is present:
 
 - 1.2–1.3: rendering ownership and authenticated discovery code exists; nested/repeated
   ownership and anonymous/cache verification still need their stated coverage.
-- 2.2–2.3 and 3.3: rendering, freshness, and acceptance code has basic regression
+- 2.2–2.3 and 3.3: rendering, revision saving, and acceptance code has basic regression
   coverage; the complete source-type/concurrency/CSRF/independent-proposal matrix remains.
 - 4.1–4.3: the edit adapter and documentation exist; HugeRTE interaction/undo and
   delayed-response scenarios need end-to-end verification.
@@ -88,3 +88,13 @@ Staging/preview is the intended environment for the remaining interaction checks
 The 2026-11-06 precommit review found and fixed checkbox/radio Apply semantics;
 targeted JavaScript regressions pass. This commit is a deployable testing checkpoint,
 not a claim that the unchecked scenarios are verified.
+
+## Concurrency clarification (2026-11-06)
+
+The user confirmed that concurrent editing is not a concern requiring special
+handling: every Save creates a revision, so neither saved edit is lost. Removed
+page/source fingerprints and base-token gates from propose, Apply, and Save.
+Publishing and unrelated edits do not invalidate drafts. Only local unsaved input,
+authorization, proposal ownership/expiry/single use, and structural preservation
+remain guarded. Earlier fingerprint-related review notes are historical and do
+not define the current requirements. Staging interaction verification remains open.

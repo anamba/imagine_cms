@@ -80,12 +80,12 @@ A proposal MUST contain only staged page-content changes or only immediately sav
 - **WHEN** a proposal combines page content with a property, template, or snippet change
 - **THEN** the server rejects it and returns guidance to handle the categories separately
 
-### Requirement: Proposal freshness and isolation
-Pending proposals SHALL be bound to their editor, page, source state, working-copy state, and expiry. Applying or saving MUST reject expired, foreign, or conflicting proposals without overwriting newer work. Independent proposals MUST NOT clobber each other; consumed proposals MUST NOT apply twice.
+### Requirement: Proposal lifecycle and local working content
+Pending proposals SHALL be bound to their editor, page, local working values, and expiry. Expired, foreign, or consumed proposals MUST NOT apply. Changes saved by other editors SHALL NOT block proposing, applying, or saving. Each content Save MUST create a revision and retain previous revisions. Applying a proposal MUST preserve unrelated local unsaved content.
 
-#### Scenario: Source changed since preview
-- **WHEN** an affected source changes before a proposal is accepted
-- **THEN** acceptance reports a conflict and requires a fresh proposal
+#### Scenario: Another editor saves while a draft is open
+- **WHEN** another editor saves content or changes publishing state while a draft is open
+- **THEN** the draft can still be proposed, applied, and saved as a separate revision, retaining earlier revisions and respecting the current publication selection
 
 #### Scenario: Working content changed since preview
 - **WHEN** the editor modifies a proposal's target before applying it

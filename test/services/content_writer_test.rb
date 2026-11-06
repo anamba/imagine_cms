@@ -40,17 +40,6 @@ class ContentWriterTest < ActiveSupport::TestCase
     assert_equal 1, @page.objects.where(obj_type: 'option', name: 'string-theme').count
   end
 
-  test 'snapshot detects properties saved without a revision' do
-    snapshot = ImagineCms::ContentWriter.snapshot(@page)
-    @page.title = 'Concurrent edit'
-    @page.save_without_revision
-    assert_raises ImagineCms::ContentWriter::Conflict do
-      ImagineCms::ContentWriter.call(page: @page, input: {}, user_id: 2,
-                                    username: 'editor', full_access: true, expected: snapshot)
-    end
-    assert_equal 'Concurrent edit', @page.reload.title
-  end
-
   test 'invalid input rolls back revision creation' do
     version = @page.version
     assert_raises ArgumentError do

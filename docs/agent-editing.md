@@ -1,117 +1,97 @@
 # Agent-assisted CMS editing
 
-Implementation is in progress under OpenSpec change `agent-assisted-cms-editing` (BB-652).
+BB-652 is implemented as a staging-testing checkpoint. The active OpenSpec change
+is `agent-assisted-cms-editing`; its remaining end-to-end checks are still open.
 
-## Site tools API
+## Interaction
 
-Checked 2026-11-03 against https://learn.chatgpt.com/docs/webmcp .
-Feature-detect `document.modelContext.registerTool` and register tools with `name`,
-`description`, `inputSchema`, optional `annotations`, and an asynchronous `execute`.
-Register on the top-level document. The current documentation also describes iframe
-and declarative-form support; the issue's original limitation is historical.
-No API key or remote MCP server is needed: tools use the editor's signed-in browser session.
-Real ChatGPT desktop discovery still needs manual verification.
+Tools run on the top-level page through `document.modelContext.registerTool`.
+`cms_read_page` reads working source; `cms_propose_change` creates an on-page
+preview for user review. No tool applies, saves, or publishes.
 
-## Source and persistence contract
+- Edit mode: Apply updates the open editor and its undo/dirty state. Save uses the
+  normal editor form submission and shared content writer to create an ordinary CMS revision.
+- Preview mode: Apply accumulates page content and page-owned page-list settings.
+  Save creates a revision containing that working content.
+- Page properties, templates, and snippets: Save change persists the proposal
+  immediately, according to existing permissions and publishing behavior.
+- A proposal cannot mix staged content with immediately saved sources. Guidance
+  recommends handling one category first and deferring the other.
 
-A source has an actual owner, a page-local/shared scope, and a staged/immediate
-save category. Similar DOM text is not evidence of shared ownership. A snippet
-remains shared even if currently referenced only once. Usage counts are not needed.
-Page-list output must resolve to its real content owner, not automatically the page
-that displays the list. Tool descriptions must recommend handling mixed requests
-one category at a time, deferring the other.
+The review bar is pinned to the viewport. Discarding a proposal restores the prior
+working view; Discard changes fetches current saved context and clears working
+content only after that fetch succeeds.
 
-Working source contains CMS placeholders (`<# title #>`) and ERB (`<%= ... %>`).
-Rendered HTML is a view of that source, never a replacement for canonical source.
-ContentNormalizer applies the same editorial transformations during preview and
-Save; it is not a Ruby/HTML sandbox. Avoid introducing side effects and retain
-existing Ruby unless the requested change needs it.
+## Revisions and other editors
 
-ContentWriter saves a complete page revision under a page-row lock, retaining
-unsubmitted regions. A persisted snapshot includes properties and objects, since
-property saves can leave the page's revision number unchanged. Save rechecks that
-snapshot and refuses stale work. Existing publishing rules remain in effect:
-Latest can publish on Save, while basic editors pin the prior published revision.
+Agent-assisted editing follows the existing CMS revision model. If two editors
+save, both saved revisions remain available. Publishing selects the visible
+revision. Do not add page/source fingerprints, base tokens, or agent-only save
+conflict detection. Another editor's save or publication change does not block a
+draft from being proposed, applied, or saved.
 
-## Integration and verification (2026-11-03)
+ContentWriter saves atomically and allocates a distinct page revision under a
+short database row lock. It retains unsubmitted regions, preserves the live
+publication selection, and follows existing basic-editor publishing rules.
+Templates and snippets retain their normal model histories.
 
-Install the engine migration through the host's usual engine migration workflow
-before enabling site tools. For this checkout, proposal storage was exercised in
-the local test database only; the development migration did not run because the
-host development environment fails at `Rack::LiveReload` startup.
+Only protect the same editor's local input while a proposal is being reviewed:
+if that editor changes a submitted target before Apply, request a fresh proposal.
+That check must not use newly saved database content as a proxy for local edits.
+Permission checks, CSRF, proposal ownership, expiry and single-use acceptance
+remain enforced. Structural changes must preserve existing unsaved regions.
 
-Registered tools are `cms_read_page` and `cms_propose_change`. They use authenticated
-`/manage/cms_pages/:id/agent/` endpoints. No tool applies or saves. The UI uses the
-separate accept/discard/save endpoints with CSRF, session and permission checks.
-Pending proposals expire after 30 minutes. Run `CmsAgentProposal.cleanup_expired!`
-from the host maintenance job to remove at most 500 expired records per call.
+## Sources and rendering
 
-In edit mode the tools target content in the existing form. Apply participates in
-HugeRTE undo and marks content dirty. Save (including Ctrl/Cmd+S) uses the checked
-working-copy endpoint when agent editing is active. In preview mode Apply accumulates
-page content/page-list configuration until Save; Save change immediately persists
-page properties, templates or snippets. Review/discard retains the original DOM
-nodes and document head. Shared source changes warn when scope intent differs.
-List item owner boundaries identify content from another page and read context
-provides permission-checked navigation to its owning page.
+Sources identify their actual owner, page-local/shared scope, and save category.
+Warn when requested scope differs from actual scope. Similar text does not prove
+sharing; a snippet remains shared even if referenced only once. Usage counts and
+a site-wide dependency graph are unnecessary.
 
-Freshness includes the page, its objects, its template, and conservative snippet
-state. Because ERB can select snippets dynamically, an unrelated snippet save can
-also invalidate a working base. This favors conflict detection over silently
-accepting a preview with changed dependencies.
+Rendered list items identify their actual page owner. Read context provides
+permission-checked navigation to that page for editing its content or properties.
 
-Verification performed:
+Canonical source retains CMS placeholders and ERB; rendered HTML is its preview,
+not editable canonical source. Preview and Save share editorial normalization.
+This is not an execution sandbox: agent guidance must avoid introducing side
+effects and preserve existing Ruby unless the requested edit requires changing it.
 
-- Rails service/controller tests exercise normalization, region retention,
-  publishing policy, proposal ownership/expiry/replay, scope warnings, category
-  rejection, working/source conflicts, immediate property persistence, rendered
-  head content, and newly added page-list configuration.
-- Existing HugeRTE backport checks pass (10 tests, 248 assertions).
-- JavaScript syntax checks and git whitespace checks pass.
-- Browser execution of the actual `readWorking` function confirms unchecked radios,
-  unchecked checkboxes, and disabled fields follow FormData submission semantics.
-- Browser execution of the actual preview/restore functions confirms head styling
-  changes appear and discard restores the original head and body node identities.
+## Setup and maintenance
 
-Full on-page CMS flow verification remains pending: the host application stylesheet
-fails with Sass `wrong number of arguments (1 for 3) for rgb` when rendering a real
-CMS page. The available preview browser does not expose `document.modelContext`;
-real ChatGPT desktop tool discovery, invocation, and complete user interaction
-scenarios have not been verified. Do not mark the OpenSpec change complete until
-these checks and remaining task-specific verification are finished.
+Install the engine's CreateCmsAgentProposals migration in the host and run it
+before testing proposal writes. Authenticated requests use
+`/manage/cms_pages/:id/agent/` endpoints. Proposal lifetime is 30 minutes;
+`CmsAgentProposal.cleanup_expired!` removes up to 500 expired records per call.
 
-Final automated run with the local path gem selected:
-`bin/rails test test imagine_cms_rb/test/services` — 37 tests, 110 assertions,
-0 failures, 0 errors, 0 skips. Temporary browser-test records and servers were
-removed/stopped, and sportshigh's original Gemfile/Gemfile.lock were restored.
+Official API reference checked 2026-11-03: https://learn.chatgpt.com/docs/webmcp .
+Feature-detect tool support and retain normal CMS behavior when unavailable.
+On 2026-11-06 the user confirmed ChatGPT browser discovery in both modes.
 
-Dijkstra independently reviewed the captured implementation and affected fixes.
-Valid findings fixed: stale-base acknowledgement through immediate saves,
-unversioned property-object duplication, omitted head previews, unchecked form
-control serialization, and rejection of newly added list fields. Final independent
-re-review reported no remaining actionable findings within the affected scope.
-No commit, push, sync, archive, PR, or deployment was performed.
-The final page-list feed URL consolidation, pagination URL, and list-owner marker
-changes also received a separate independent Dijkstra recheck with no findings.
+## Verification
+
+Rails regressions cover revision preservation, publishing behavior, normalization,
+region retention, permissions, proposal lifecycle, scope/category validation,
+rendered previews, and page-list configuration. JavaScript regressions execute the
+actual editor adapter and discard operation against representative controls/state.
+They cover radio/checkbox Apply and preserving drafts when discard refresh fails.
+
+The page/source fingerprint implementation and related false-conflict patches
+were removed after the user clarified revision semantics on 2026-11-06. Older
+requests may include unused base parameters; they are not required or checked.
+No draft needs a fresh fingerprint to Save.
+
+Full ChatGPT Apply/Save/Discard, HugeRTE undo, shared-source, and mode-switch
+scenarios remain to be verified locally or on staging. These remaining checks do
+not prevent a checkpoint commit or preview deployment. The OpenSpec change remains
+open until they are verified.
 
 
-## User verification update (2026-11-06)
-
-The user confirmed actual ChatGPT browser tool discovery in both preview and edit
-mode. This supersedes the earlier discovery limitation, but does not establish the
-full Apply/Save/Discard, undo, accumulation, or conflict scenarios. The host
-LiveReload remnants were removed separately and development boot was verified.
-
-Precommit automated checks were rerun with the user's current local path gem:
-37 Rails tests / 110 assertions and 10 HugeRTE checks / 248 assertions passed.
-The user authorized a CMS-side checkpoint commit. Pending verification remains
-tracked in the active OpenSpec tasks; do not treat the checkpoint as completion.
-
-Precommit Dijkstra review on 2026-11-06 identified one additional edit-mode defect:
-checkbox/radio Apply updated the first control's value instead of checked state.
-The adapter now updates checked state across matching choices while preserving
-option values and Rails hidden defaults. The actual adapter passes targeted Node
-regressions for checked-to-unchecked, unchecked-to-checked, radio selection changes,
-and ordinary string fields. The affected fix was re-reviewed against form-submission
-semantics. Staging is the intended next environment for the remaining interaction
-checks; those checks do not prevent a checkpoint commit or preview deployment.
+Latest automated checks after removing concurrency gates: combined host/CMS Rails
+suite 37 tests, 115 assertions, no failures/errors/skips; HugeRTE checks 10 tests,
+248 assertions, all passing; JavaScript adapter/discard regressions, syntax checks,
+whitespace checks, and strict OpenSpec validation pass. One regression sends an
+older browser's base token and verifies Save succeeds while retaining both editors'
+revisions. Source/property/template edits continue to follow ordinary CMS behavior.
+Independent Dijkstra review of token removal, ordinary form Save, revision retention,
+and publication behavior found no actionable issues. Reviewer also ran the
+JavaScript regressions and whitespace check successfully.

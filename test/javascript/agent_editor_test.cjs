@@ -57,3 +57,43 @@ test('Apply continues to replace ordinary string fields', () => {
   apply(controls, 'new');
   assert.equal(submitted(controls), 'new');
 });
+
+const discardStart = source.indexOf('    async function discardWorkingChanges()');
+const discardEnd = source.indexOf('    function idle()', discardStart);
+assert.ok(discardStart >= 0 && discardEnd > discardStart);
+function discardHarness(request, confirmed = true) {
+  const original = { sources: [{ id: 'obj-text-main', content: 'Original' }] };
+  const state = { context: original, working: { 'obj-text-main': 'Unsaved draft' }, generation: 2 };
+  const rendered = [];
+  const context = { state, window: { confirm: () => confirmed }, request,
+    replaceWorkingView: html => rendered.push(html), idle() {} };
+  vm.createContext(context);
+  vm.runInContext(source.slice(discardStart, discardEnd), context);
+  return { state, original, rendered, discard: context.discardWorkingChanges };
+}
+test('Discard changes refreshes saved sources before the next proposal', async () => {
+  const fresh = { sources: [{ id: 'obj-text-main', content: 'Current saved content' }], preview: '<p>Current saved content</p>' };
+  const harness = discardHarness(async operation => {
+    assert.equal(operation, 'context');
+    return fresh;
+  });
+  await harness.discard();
+  assert.equal(harness.state.context, fresh);
+  assert.equal(Object.keys(harness.state.working).length, 0);
+  assert.equal(harness.state.generation, 3);
+  assert.deepEqual(harness.rendered, [fresh.preview]);
+});
+test('failed discard refresh retains the draft and its original context', async () => {
+  const harness = discardHarness(async () => { throw new Error('Offline'); });
+  await assert.rejects(harness.discard(), /Offline/);
+  assert.equal(harness.state.context, harness.original);
+  assert.equal(harness.state.working['obj-text-main'], 'Unsaved draft');
+  assert.equal(harness.state.generation, 2);
+  assert.equal(harness.rendered.length, 0);
+});
+test('canceling Discard changes leaves the draft alone', async () => {
+  const harness = discardHarness(async () => { assert.fail('must not fetch'); }, false);
+  await harness.discard();
+  assert.equal(harness.state.context, harness.original);
+  assert.equal(harness.state.working['obj-text-main'], 'Unsaved draft');
+});

@@ -11,7 +11,7 @@ Editors should be able to describe a change while viewing the real CMS page and 
 - In edit mode, Apply changes the working content without saving; existing Save remains the persistence boundary.
 - In preview mode, page content (including page-owned page-list configuration) accumulates in a working copy until the user selects Save. Page properties, templates, and snippets save individually when the user accepts their proposal.
 - Reject proposals mixing staged page content with immediately saved sources. Tool guidance tells the agent to process one category first and defer the other.
-- Render proposals through existing CMS rendering and content normalization, preserve unrelated unsaved edits, check stale source/working-copy state, and expire pending proposals.
+- Render proposals through existing CMS rendering and content normalization, preserve unrelated unsaved edits, preserve the existing revision-based saving behavior, protect local unsaved edits during Apply, and expire pending proposals.
 - Keep applying and saving under explicit user control; tools can read and propose but cannot apply, save, or publish.
 - Support editable regions, page lists, templates, and snippets according to existing permissions. Avoid introducing Ruby side effects through agent guidance; no separate execution sandbox project.
 

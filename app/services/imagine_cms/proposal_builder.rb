@@ -41,7 +41,7 @@ module ImagineCms
         end
       end
       payload = { 'category' => categories.first, 'changes' => resolved, 'warnings' => warnings,
-                  'requested_scope' => requested_scope, 'base' => ContentWriter.snapshot(page) }
+                  'requested_scope' => requested_scope }
       preview = render.call(resolved)
       proposal = CmsAgentProposal.create!(cms_page: page, user_id: user.id,
         session_digest: CmsAgentProposal.session_digest(session_token),
