@@ -97,3 +97,32 @@ test('canceling Discard changes leaves the draft alone', async () => {
   assert.equal(harness.state.context, harness.original);
   assert.equal(harness.state.working['obj-text-main'], 'Unsaved draft');
 });
+
+const saveStart = source.indexOf('    async function saveWorkingChanges()');
+const saveEnd = source.indexOf('    function idle()', saveStart);
+assert.ok(saveStart >= 0 && saveEnd > saveStart);
+function saveHarness(requestUrl) {
+  const state = { working: { 'obj-text-main': '<p>Applied</p>' } };
+  const navigation = [];
+  const context = { pageId: '42', state, readWorking: () => ({ ...state.working }), requestUrl,
+    window: { location: { assign: url => navigation.push(url) } } };
+  vm.createContext(context);
+  vm.runInContext(source.slice(saveStart, saveEnd), context);
+  return { state, navigation, save: context.saveWorkingChanges };
+}
+test('preview Save uses the regular content action and navigates to its saved revision', async () => {
+  const harness = saveHarness(async (url, input) => {
+    assert.equal(url, '/manage/cms_pages/42/edit_page_content');
+    assert.equal(input.page_objects['obj-text-main'], '<p>Applied</p>');
+    return { saved: true, version: 9, redirect_to: '/news/story/version/9' };
+  });
+  await harness.save();
+  assert.equal(Object.keys(harness.state.working).length, 0);
+  assert.deepEqual(harness.navigation, ['/news/story/version/9']);
+});
+test('failed Save preserves the working content and does not navigate', async () => {
+  const harness = saveHarness(async () => { throw new Error('Save failed'); });
+  await assert.rejects(harness.save(), /Save failed/);
+  assert.equal(harness.state.working['obj-text-main'], '<p>Applied</p>');
+  assert.equal(harness.navigation.length, 0);
+});

@@ -53,9 +53,10 @@ class AgentControllerTest < ActionController::TestCase
     assert_response :success
     working = JSON.parse(response.body)['working']
     assert_equal version, @page.reload.version
-    post :save, params: { id: @page.id, working: working }
+    save_content(working)
     assert_response :success
     assert_equal version + 1, @page.reload.version
+    assert_equal "/#{@page.path}#{@page.path.empty? ? '' : '/'}version/#{@page.version}", JSON.parse(response.body).fetch('redirect_to')
     assert_equal '<p>Other</p>', @page.objects.find_by(cms_page_version: @page.version, name: 'other').content
   end
 
@@ -86,7 +87,7 @@ class AgentControllerTest < ActionController::TestCase
     @page.updated_on = 1.minute.from_now
     @page.save_without_revision!
 
-    post :save, params: { id: @page.id, working: working }
+    save_content(working)
     assert_response :success
     assert_equal published_version, @page.reload.published_version
     assert_equal '<p>Applied draft</p>', @page.objects.find_by(cms_page_version: @page.version, name: 'main').content
@@ -97,7 +98,7 @@ class AgentControllerTest < ActionController::TestCase
     ImagineCms::ContentWriter.call(page: @page, input: { 'obj-text-main' => 'First editor saved this' },
       user_id: @user.id, username: @user.username, full_access: true)
     first_version = @page.reload.version
-    post :save, params: { id: @page.id, base: 'ignored-older-client-token', working: { 'obj-text-main' => 'Second editor saved this' } }
+    save_content({ 'obj-text-main' => 'Second editor saved this' })
     assert_response :success
     assert_equal original_version + 2, @page.reload.version
     assert_equal 'First editor saved this', @page.objects.find_by(cms_page_version: first_version, name: 'main').content
@@ -125,11 +126,11 @@ class AgentControllerTest < ActionController::TestCase
 
   test 'new configuration fields belong to an authorized rendered page list' do
     @page.template.update!(content: '<main><%= page_list("news") %></main>')
-    post :save, params: { id: @page.id, working: {
+    save_content({
       'obj-page_list-news-sources-tag-count' => '2',
       'obj-page_list-news-sources-tag0' => 'First',
       'obj-page_list-news-sources-tag1' => 'Second'
-    } }
+    })
     assert_response :success
     assert_equal 'Second', @page.objects.find_by(cms_page_version: @page.reload.version,
       name: 'news-sources-tag1', obj_type: 'page_list').content
@@ -145,5 +146,27 @@ class AgentControllerTest < ActionController::TestCase
     assert_equal 'New title', @page.reload.title
     assert_equal '<p>Old</p>', @page.objects.find_by(cms_page_version: @page.version, name: 'main').content
     assert_includes JSON.parse(response.body)['preview'], 'Unsaved'
+  end
+
+  test 'ordinary HTML Save redirects to the revision just like preview Save' do
+    save_content({ 'obj-text-main' => '<p>Saved normally</p>' }, format: :html)
+    @page.reload
+    assert_redirected_to "/#{@page.path}#{@page.path.empty? ? '' : '/'}version/#{@page.version}"
+  end
+
+  test 'JSON Save retains section restrictions and does not create a revision when denied' do
+    @user.cms_allowed_sections = '/not-allowed'
+    @user.save!
+    assert_no_difference 'CmsPageVersion.count' do
+      save_content({ 'obj-text-main' => 'Not permitted' })
+      assert_response :forbidden
+    end
+  end
+
+  private
+
+  def save_content(content, format: :json)
+    @controller = Manage::CmsPagesController.new
+    post :edit_page_content, params: { id: @page.id, page_objects: content }, format: format
   end
 end

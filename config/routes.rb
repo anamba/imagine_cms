@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   
   namespace :manage do
     get 'cms_pages/:id/agent/context' => '/cms/agent#context'
-    %w[preview propose accept discard save].each do |operation|
+    %w[preview propose accept discard].each do |operation|
       post "cms_pages/:id/agent/#{operation}" => "/cms/agent##{operation}"
     end
     get 'cms' => 'cms#index'

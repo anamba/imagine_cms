@@ -56,7 +56,7 @@ Applying page-content proposals SHALL modify working content without saving in e
 
 #### Scenario: Save accumulated content
 - **WHEN** the editor selects Save on a valid working copy
-- **THEN** the CMS saves a new page revision containing the applied edits and unchanged regions, honoring existing publishing rights and publishing policy
+- **THEN** the CMS saves a new page revision containing the applied edits and unchanged regions, honoring existing publishing rights and publishing policy, then navigates to that saved revision
 
 #### Scenario: Leave with unsaved content
 - **WHEN** the editor attempts to leave with applied unsaved content

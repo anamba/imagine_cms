@@ -40,7 +40,10 @@
       return state.context ? state.context.csrf_token : (meta ? meta.content : "");
     }
     async function request(operation, data) {
-      var response = await fetch(endpoint + operation, {
+      return requestUrl(endpoint + operation, data);
+    }
+    async function requestUrl(url, data) {
+      var response = await fetch(url, {
         method: data === undefined ? "GET" : "POST", credentials: "same-origin",
         headers: { "Accept": "application/json", "Content-Type": "application/json", "X-CSRF-Token": csrf() },
         body: data === undefined ? undefined : JSON.stringify(data)
@@ -148,18 +151,16 @@
       replaceWorkingView(context.preview);
       idle();
     }
+    async function saveWorkingChanges() {
+      var result = await requestUrl("/manage/cms_pages/" + pageId + "/edit_page_content", { page_objects: readWorking() });
+      state.working = {};
+      window.location.assign(result.redirect_to);
+    }
     function idle() {
       actions.replaceChildren();
       message(dirty() ? "Applied changes are not saved." : "Agent editing ready.");
       if (!editing && dirty()) {
-        button("Save", async function () {
-          var result = await request("save", { working: readWorking() });
-          state.context.sources = result.sources;
-          state.working = {};
-          replaceWorkingView(result.preview);
-          idle();
-          message("Page saved.");
-        }, true);
+        button("Save", saveWorkingChanges, true);
         button("Discard changes", discardWorkingChanges);
       }
     }

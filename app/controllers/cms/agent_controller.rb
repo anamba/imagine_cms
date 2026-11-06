@@ -70,20 +70,6 @@ module Cms
       render json: result
     end
 
-    def save
-      @pg.with_lock do
-        working = working_params
-        render_working(working)
-        allowed = catalog_sources.select { |s| s[:category] == 'staged' }.map { |s| s[:id] }
-        raise ImagineCms::SourceCatalog::Forbidden, 'Unknown content source.' unless (working.keys - allowed).empty?
-
-        ImagineCms::ContentWriter.call(page: @pg, input: working, user_id: @user.id,
-          username: @user.username, full_access: !UseCmsAccessLevels || user_has_permission?(:manage_cms_full_access))
-      end
-      render json: { saved: true, version: @pg.version,
-                     preview: render_working({}), sources: catalog_sources }
-    end
-
     private
 
     def authorize_agent

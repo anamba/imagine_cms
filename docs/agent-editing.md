@@ -1,7 +1,7 @@
 # Agent-assisted CMS editing
 
-BB-652 is implemented as a staging-testing checkpoint. The active OpenSpec change
-is `agent-assisted-cms-editing`; its remaining end-to-end checks are still open.
+BB-652 implementation is complete. OpenSpec change `agent-assisted-cms-editing`
+is synced and archived; remaining manual checks are QA follow-up.
 
 ## Interaction
 
@@ -12,7 +12,7 @@ preview for user review. No tool applies, saves, or publishes.
 - Edit mode: Apply updates the open editor and its undo/dirty state. Save uses the
   normal editor form submission and shared content writer to create an ordinary CMS revision.
 - Preview mode: Apply accumulates page content and page-owned page-list settings.
-  Save creates a revision containing that working content.
+  Save submits that working content to the same edit_page_content action and navigates to the saved revision, matching regular editing.
 - Page properties, templates, and snippets: Save change persists the proposal
   immediately, according to existing permissions and publishing behavior.
 - A proposal cannot mix staged content with immediately saved sources. Guidance
@@ -80,10 +80,10 @@ were removed after the user clarified revision semantics on 2026-11-06. Older
 requests may include unused base parameters; they are not required or checked.
 No draft needs a fresh fingerprint to Save.
 
-Full ChatGPT Apply/Save/Discard, HugeRTE undo, shared-source, and mode-switch
-scenarios remain to be verified locally or on staging. These remaining checks do
-not prevent a checkpoint commit or preview deployment. The OpenSpec change remains
-open until they are verified.
+Additional ChatGPT Apply/Save/Discard, HugeRTE undo, shared-source, and mode-switch
+scenarios can be exercised during local/staging QA. The user confirmed that these
+are follow-up QA, not implementation-completion gates; issues found there are
+follow-up bugs. Implementation and previously reported local issues are complete.
 
 
 Latest automated checks after removing concurrency gates: combined host/CMS Rails
@@ -95,3 +95,22 @@ revisions. Source/property/template edits continue to follow ordinary CMS behavi
 Independent Dijkstra review of token removal, ordinary form Save, revision retention,
 and publication behavior found no actionable issues. Reviewer also ran the
 JavaScript regressions and whitespace check successfully.
+
+
+## Save navigation and finalization
+
+Preview content Save now posts page_objects to the ordinary management
+edit_page_content action. HTML clients receive its normal redirect; JSON clients
+receive the same revision URL, which the browser navigates to after successful
+Save. Failed saves retain working content and do not navigate. The agent-specific
+Save action/route and its post-save rerender were removed. Section permissions,
+revision history, publishing selection, normalization, indexing and cache sweeping
+remain in the existing save path.
+
+
+Final save-path validation: combined Rails suite 39 tests / 122 assertions, zero
+failures/errors/skips; HugeRTE checks 10 tests / 248 assertions; JavaScript
+regressions and syntax, whitespace, and strict OpenSpec validation pass. Independent
+Dijkstra review of unified Save/navigation, permissions, revision retention and
+publishing found no actionable issues. Unrun manual QA is recorded in the archived
+tasks as follow-up, per the user's completion policy.

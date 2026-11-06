@@ -250,7 +250,11 @@ class Manage::CmsPagesController < Manage::ApplicationController
         full_access: !UseCmsAccessLevels || user_has_permission?(:manage_cms_full_access)
       )
 
-      redirect_to "/#{@pg.path}#{@pg.path == '' ? '' : '/'}version/#{@pg.version}"
+      revision_url = "/#{@pg.path}#{@pg.path == '' ? '' : '/'}version/#{@pg.version}"
+      respond_to do |format|
+        format.html { redirect_to revision_url }
+        format.json { render json: { saved: true, version: @pg.version, redirect_to: revision_url } }
+      end
     end
   end
 
@@ -1248,6 +1252,7 @@ class Manage::CmsPagesController < Manage::ApplicationController
         unless allowed
           respond_to do |wants|
             wants.js    { render plain: 'Sorry, you don\'t have permission to edit this page.' }
+            wants.json  { render json: { error: "You don't have permission to edit this page." }, status: :forbidden }
             wants.html  { redirect_to "/#{@pg.path}#{@pg.path == '' ? '' : '/'}version/#{@pg.version}" }
           end
           return false
