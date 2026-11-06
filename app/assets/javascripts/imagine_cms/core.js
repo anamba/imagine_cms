@@ -319,6 +319,38 @@ document.addEventListener('click', function (event) {
     });
 });
 
+// Non-remote method links navigate using a form so redirects stay full-page.
+document.addEventListener('click', function (event) {
+    var link = event.target.closest('a[data-method]:not([data-remote])');
+    if (!link || event.defaultPrevented) return;
+
+    event.preventDefault();
+    if (link.dataset.confirm && !window.confirm(link.dataset.confirm)) return;
+
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = link.href;
+    form.style.display = 'none';
+
+    function hiddenField(name, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    hiddenField('_method', link.dataset.method);
+    var csrfParam = document.querySelector('meta[name="csrf-param"]');
+    var csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (csrfParam && csrfToken && new URL(link.href).origin === window.location.origin) {
+      hiddenField(csrfParam.content, csrfToken.content);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+});
+
 document.addEventListener('submit', function (event) {
     if (!event.target.matches('form[data-remote]')) return;
     event.preventDefault();

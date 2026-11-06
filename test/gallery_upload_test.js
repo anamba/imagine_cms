@@ -111,18 +111,20 @@ async function run() {
   // the actual delegated click handler here with those data attributes.
   const core = fs.readFileSync(path.join(root, 'app/assets/javascripts/imagine_cms/core.js'), 'utf8');
   const click = core.slice(core.indexOf("document.addEventListener('click', function (event) {"), core.indexOf("document.addEventListener('submit', function (event) {"));
-  let handler, sent;
+  const handlers = [];
+  let sent;
   vm.runInNewContext(click, {
-    document: { addEventListener: (type, callback) => { handler = callback; } },
+    document: { addEventListener: (type, callback) => { handlers.push(callback); } },
     imagineCmsRemoteRequest: (url, options) => { sent = options; }
   });
-  handler({
+  const event = {
     target: { closest: selector => selector === 'a[data-remote]' ? {
       href: '/manage/cms_pages/1/delete_gallery?gallery_id=gallery_1',
       dataset: { method: 'post', remote: 'true', update: 'delete_gallery_container' }
     } : null },
     preventDefault() {}
-  });
+  };
+  handlers.forEach(handler => handler(event));
   assert.strictEqual(sent.method, 'post');
   console.log('Gallery upload and delete JavaScript regression checks passed');
 }
