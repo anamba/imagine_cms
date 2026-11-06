@@ -1,4 +1,4 @@
-<div id="imagine_cms-toolbar" class="imagine-cms-toolbar imagine-cms-toolbar--preview">
+<div id="imagine_cms-toolbar" data-imagine-agent-page="<%= @pg.id %>" class="imagine-cms-toolbar imagine-cms-toolbar--preview">
   <div class="imagine-cms-toolbar__inner">
     <% if @pg -%>
       <a class="imagine-cms-toolbar__button imagine-cms-toolbar__button--primary" href="<%= url_for controller: '/manage/cms_pages', action: 'edit_page_content', id: @pg, version: params[:version] %>">

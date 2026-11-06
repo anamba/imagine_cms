@@ -520,7 +520,12 @@
     unloadHandler = warnAboutUnsavedChanges;
     window.addEventListener("beforeunload", unloadHandler);
 
-    form.addEventListener("submit", function () {
+    form.addEventListener("submit", function (event) {
+      if (ImagineCms.AgentEditing && ImagineCms.AgentEditing.save) {
+        event.preventDefault();
+        ImagineCms.AgentEditing.save();
+        return;
+      }
       syncEditors();
       setDirty(false);
       window.removeEventListener("beforeunload", unloadHandler);
@@ -529,10 +534,7 @@
     document.addEventListener("keydown", function (event) {
       if ((event.metaKey || event.ctrlKey) && event.key === "s") {
         event.preventDefault();
-        syncEditors();
-        setDirty(false);
-        window.removeEventListener("beforeunload", unloadHandler);
-        form.submit();
+        submitEditForm();
       }
     });
   }
@@ -546,6 +548,10 @@
   }
 
   function submitEditForm() {
+    if (ImagineCms.AgentEditing && ImagineCms.AgentEditing.save) {
+      ImagineCms.AgentEditing.save();
+      return;
+    }
     var form = document.getElementById("page_content_form");
     if (!form) return;
 

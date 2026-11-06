@@ -151,7 +151,8 @@ module ActionControllerExtensions
       when :snippet
         @snippet = CmsSnippet.find_by_name(name)
         if @snippet
-          erb_render(substitute_placeholders(@snippet.content, @pg))
+          source = (@cms_agent_snippet_overrides || {}).fetch(@snippet.id.to_s, @snippet.content)
+          erb_render(substitute_placeholders(source.dup, @pg))
         else
           'Could not find snippet "' + name + '" in the database.'
         end
@@ -204,26 +205,29 @@ module ActionControllerExtensions
       limit = 1 if limit < 1
       page_subset = pages[offset, limit] || []
       
+      feed_url = @pg.id ? url_for(controller: '/cms/content', action: 'rss_feed',
+                                 page_id: @pg.id, page_list_name: name) : nil
       content = ''
       content << substitute_placeholders(first_non_empty(@page_objects["#{key}-header"], options[:header]), @pg,
                                          :count => page_subset.size, :total => pages.size,
-                                         :rss_feed_url => (@pg && @pg.id ? url_for(:action => 'rss_feed', :page_id => @pg.id,
-                                                                         :page_list_name => name) : nil))
+                                         :rss_feed_url => feed_url)
       if page_subset.empty?
         content << substitute_placeholders(first_non_empty(@page_objects["#{key}-empty_message"],
                                                            options[:empty_message],
                                                            'No pages found.'), @pg)
       else
         page_subset.each_with_index do |page, index|
+          (@cms_agent_rendered_pages ||= []) << page.id
+          content << "<!--cms-owner:#{page.id}:start-->"
           content << substitute_placeholders(first_non_empty(@page_objects["#{key}-template"], options[:template], ''), page,
                                              :index => index+1, :count => page_subset.size, :total => pages.size)
+          content << "<!--cms-owner:#{page.id}:end-->"
         end
       end
       
       content << substitute_placeholders(first_non_empty(@page_objects["#{key}-footer"], options[:footer]), @pg,
                                          :count => page_subset.size, :total => pages.size,
-                                         :rss_feed_url => (@pg && @pg.id ? url_for(:action => 'rss_feed', :page_id => @pg.id,
-                                                                         :page_list_name => name) : nil))
+                                         :rss_feed_url => feed_url)
       
       num_segments = (pages.size.to_f / limit).ceil
       Rails.logger.info "Number of page list segments: #{num_segments}"
@@ -252,7 +256,7 @@ EOT
     jQuery('##{key}-segment-#{seg}').click(function () {
       jQuery('##{key}').css({ cursor: 'wait', opacity: '0.5' });
       jQuery('html,body').animate({ scrollTop: jQuery('##{key}').position().top }, 200);
-      jQuery.get('#{url_for(:content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', function (data) {
+      jQuery.get('#{url_for(:controller => '/cms/content', :action => 'show', :content_path => @pg.path.split('/').concat([ 'segment', start.to_s, name ]), :only_path => true)}', function (data) {
         jQuery('##{key}').html(data);
         jQuery('##{key}').css({ cursor: 'default', opacity: '1' });
       });

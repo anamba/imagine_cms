@@ -96,5 +96,11 @@ module ImagineCms
     end
 
     config.to_prepare { ImagineCms::Engine.activate }
+
+    config.to_prepare do
+      [Cms::ContentController, Manage::CmsPagesController].each do |controller|
+        controller.prepend ImagineCms::RenderTrace unless controller.ancestors.include?(ImagineCms::RenderTrace)
+      end
+    end
   end
 end

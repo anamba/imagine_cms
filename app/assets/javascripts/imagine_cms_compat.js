@@ -16,3 +16,4 @@
 //= require imagine_cms/core
 //= require hugerte
 //= require imagine_cms/editor
+//= require imagine_cms/agent

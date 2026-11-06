@@ -6,6 +6,10 @@ Rails.application.routes.draw do
   match 'manage/cms/preview_template'           => 'cms/content#preview_template', :via => [ :post ]
   
   namespace :manage do
+    get 'cms_pages/:id/agent/context' => '/cms/agent#context'
+    %w[preview propose accept discard save].each do |operation|
+      post "cms_pages/:id/agent/#{operation}" => "/cms/agent##{operation}"
+    end
     get 'cms' => 'cms#index'
 
     resources :cms_pages do
