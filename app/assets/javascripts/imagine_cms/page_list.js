@@ -19,6 +19,8 @@
     var button = control.querySelector('button'), status = control.querySelector('[role="status"]');
     var pending = false, failed = false, next = control.dataset.nextUrl, observer;
     control.cmsPageList = true;
+    control.dataset.state = 'idle';
+    control.dataset.autoLoad = String(control.dataset.mode === 'infinite' && 'IntersectionObserver' in window);
     cleanups.push(function () {
       if (control.isConnected && marker.isConnected) return true;
       if (observer) observer.disconnect();
@@ -36,6 +38,7 @@
       button.disabled = true;
       button.textContent = 'Loading…';
       status.textContent = 'Loading…';
+      control.dataset.state = 'loading';
       control.setAttribute('aria-busy', 'true');
       fetch(next, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
         .then(function (response) {
@@ -57,6 +60,7 @@
           marker.parentNode.insertBefore(fragment, marker);
           next = data.next_url;
           failed = false;
+          control.dataset.state = next ? 'idle' : 'complete';
           button.hidden = !next;
           button.textContent = 'Load more';
           status.textContent = next ? data.count + ' more items loaded.' : 'All items loaded.';
@@ -70,6 +74,7 @@
           marker.parentNode.dispatchEvent(new CustomEvent('imagine-cms:append', { bubbles: true, detail: { key: control.dataset.cmsPagination, count: data.count } }));
         }).catch(function () {
           failed = true;
+          control.dataset.state = 'error';
           button.textContent = 'Retry';
           status.textContent = 'Could not load more items.';
         }).finally(function () {

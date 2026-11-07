@@ -24,6 +24,8 @@ const script = fs.readFileSync(require('node:path').join(__dirname, '../../app/a
  await page.goto('https://cms.test/');
  let html=shapes.map(([key,head])=>`<section id="${key}">${head}<!--cms-list-end:${key}-->${key==='list'?'</ul>':key==='table'?'</table>':key==='body'?'</tbody></table>':''}<p class="footer">Footer</p><div data-cms-pagination="${key}" data-mode="load_more" data-next-url="/segment?key=${key}&seed=42"><button>Load more</button><span role="status"></span></div></section>`).join('');
  await page.setContent(html); await page.addScriptTag({content:script});
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-state'), 'idle');
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-auto-load'), 'false');
  for (const [key,, ,tag] of shapes) {
   await page.locator(`#${key} button`).click();
   await page.waitForFunction(key=>document.querySelector(`#${key} [role=status]`).textContent==='All items loaded.',key);
@@ -36,12 +38,14 @@ const script = fs.readFileSync(require('node:path').join(__dirname, '../../app/a
  fail=true; hold=true;
  await page.locator('#list button').click();
  await page.waitForFunction(()=>document.querySelector('#list button').disabled);
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-state'), 'loading');
  const before=calls;
  await page.locator('#list button').evaluate(b=>b.click());
  assert.equal(calls,before);
  release(); hold=false;
  await page.waitForFunction(()=>document.querySelector('#list button').textContent==='Retry');
  assert.equal(await page.locator('#list li').count(),1);
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-state'), 'error');
  fail=false;
  await page.locator('#list button').click();
  await page.waitForFunction(()=>document.querySelector('#list [role=status]').textContent==='All items loaded.');
@@ -52,10 +56,13 @@ const script = fs.readFileSync(require('node:path').join(__dirname, '../../app/a
  await page.evaluate(()=>{document.body.tabIndex=-1;document.body.focus();window.ImagineCmsPageLists.init();});
  await page.waitForFunction(()=>Array.from(document.querySelectorAll('[role=status]')).every(s=>s.textContent==='All items loaded.'));
  assert.equal(await page.evaluate(()=>document.activeElement.tagName),'BODY');
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-state'), 'complete');
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-auto-load'), 'true');
  // Browsers without observation retain a functional manual button.
  await page.setContent(html.replaceAll('data-mode="load_more"','data-mode="infinite"'));
  await page.evaluate(()=>{delete window.IntersectionObserver;window.ImagineCmsPageLists.init();});
  assert.equal(await page.locator('#list li').count(),1);
+ assert.equal(await page.locator('#list [data-cms-pagination]').getAttribute('data-auto-load'), 'false');
  await page.locator('#list button').click();
  await page.waitForFunction(()=>document.querySelector('#list [role=status]').textContent==='All items loaded.');
  assert.equal(await page.locator('#list li').count(),2);
