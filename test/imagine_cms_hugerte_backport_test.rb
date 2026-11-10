@@ -8,9 +8,9 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     ENGINE_ROOT.join(path).read
   end
 
-  def test_hugerte_editor_is_the_default_path
+  def test_hugerte_editor_is_the_only_path
     config = read_engine_file("lib/imagine_cms.rb")
-    assert_includes config, "mattr_accessor :use_legacy_dojo_editor, default: false"
+    refute_includes config, "use_legacy_dojo_editor"
 
     controller = read_engine_file("app/controllers/manage/cms_pages_controller.rb")
     assert_includes controller, "imagine-cms-rte"
@@ -53,12 +53,9 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
   def test_authenticated_cms_controls_are_loaded_without_the_legacy_editor
     source = read_engine_file("app/views/imagine_cms/_header.html.erb")
     controls_link = source.index('document.writeln(\'<link href="/assets/imagine_controls.css"')
-    legacy_editor_guard = source.index("<%- if ImagineCms.use_legacy_dojo_editor -%>")
 
     assert controls_link
-    assert legacy_editor_guard
-    assert_operator controls_link, :<, legacy_editor_guard
-    assert_includes source, "var load_imagine_controls = loggedIn() ||"
+    assert_includes source, "var load_imagine_controls = loggedIn();"
     assert_includes source, "function imagineCmsLoadPreviewToolbar()"
     assert_includes source, "imagine-cms-toolbar-host"
 

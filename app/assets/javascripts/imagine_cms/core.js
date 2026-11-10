@@ -357,19 +357,8 @@ document.addEventListener('submit', function (event) {
     imagineCmsRemoteFormSubmit(event.target);
 });
 
-function showDojoDialog(id, titleText) {
+function showImagineCmsDialog(id, titleText) {
     var dlg = document.getElementById(id);
-    if (!dlg && window.dojo && dojo.widget) {
-        dlg = dojo.widget.byId(id);
-        if (!dlg) dlg = dojo.widget.createWidget(id);
-        if (!dlg) return false;
-        dlg.closeWindow = function () { hideDojoDialog(id); };
-        dlg.show();
-        if (dialogStack.length > 0) dojo.widget.byId(dialogStack[dialogStack.length-1]).hide();
-        dialogStack.push(id);
-        return true;
-    }
-
     if (!dlg) return false;
     if (typeof(titleText) != 'undefined') {
         var title = dlg.querySelector('[data-imagine-dialog-title]');
@@ -385,23 +374,15 @@ function showDojoDialog(id, titleText) {
     dialogStack.push(id);
 }
 
-function hideDojoDialog(id) {
+function hideImagineCmsDialog(id) {
     dialogStack.pop();
 
-    if (window.dojo && dojo.widget && dojo.widget.byId(id)) {
-        dojo.widget.byId(id).hide();
-    } else {
-        var dlg = document.getElementById(id);
-        if (dlg) dlg.hidden = true;
-    }
+    var dlg = document.getElementById(id);
+    if (dlg) dlg.hidden = true;
 
     if (dialogStack.length > 0) {
-        if (window.dojo && dojo.widget && dojo.widget.byId(dialogStack[dialogStack.length-1])) {
-            dojo.widget.byId(dialogStack[dialogStack.length-1]).show();
-        } else {
-            var previous = document.getElementById(dialogStack[dialogStack.length-1]);
-            if (previous) previous.hidden = false;
-        }
+        var previous = document.getElementById(dialogStack[dialogStack.length-1]);
+        if (previous) previous.hidden = false;
     } else {
         document.documentElement.classList.remove('imagine-cms-dialog-open');
     }
@@ -446,45 +427,27 @@ function editProperties(url, titleText) {
                 });
         });
     });
-    showDojoDialog('properties_dialog', titleText);
+    showImagineCmsDialog('properties_dialog', titleText);
 }
 
 function cancelEditProperties() {
-    hideDojoDialog('properties_dialog');
+    hideImagineCmsDialog('properties_dialog');
 }
 
 function insertImage(url) {
-    if (window.dojo && dojo.widget) {
-        var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
-        imageNode = dojo.withGlobal(curInst.window, "getSelectedElement", dojo.html.selection);
-        if (!imageNode) {
-            imageNode = dojo.withGlobal(curInst.window, "getAncestorElement", dojo.html.selection, ['img']);
-        }
-        if (imageNode) {
-            dojo.require("dojo.widget.Editor2Plugin.InsertImageDialog");
-            w = dojo.widget.createWidget("Editor2InsertImageDialog");
-            w.show();
-            return true;
-        }
-    }
-
     ajaxLoadInto('insert_image_dialog_content', url);
-    showDojoDialog('insert_image_dialog');
+    showImagineCmsDialog('insert_image_dialog');
     try { if (cropper) cropper.remove(); } catch (e) {}
 }
 
 function cancelInsertImage() {
-    hideDojoDialog('insert_image_dialog');
+    hideImagineCmsDialog('insert_image_dialog');
     try { if (cropper) cropper.remove(); } catch (e) {}
 }
 
 function insertFile(url) {
     var html = '';
-    if (window.dojo && dojo.widget) {
-        var curInst = dojo.widget.Editor2Manager.getCurrentInstance();
-        curInst.saveSelection(); //save selection (none-activeX IE)
-        html = dojo.withGlobal(curInst.window, "getSelectedText", dojo.html.selection);
-    } else if (window.ImagineCms && ImagineCms.Editor) {
+    if (window.ImagineCms && ImagineCms.Editor) {
         html = ImagineCms.Editor.getSelectedText();
     }
 
@@ -494,20 +457,20 @@ function insertFile(url) {
     }
 
     ajaxLoadInto('insert_file_dialog_content', url);
-    showDojoDialog('insert_file_dialog');
+    showImagineCmsDialog('insert_file_dialog');
 }
 
 function cancelInsertFile() {
-    hideDojoDialog('insert_file_dialog');
+    hideImagineCmsDialog('insert_file_dialog');
 }
 
 function selectThumbnail(url) {
     ajaxLoadInto('select_thumbnail_dialog_content', url);
-    showDojoDialog('select_thumbnail_dialog');
+    showImagineCmsDialog('select_thumbnail_dialog');
 }
 
 function cancelSelectThumbnail() {
-    hideDojoDialog('select_thumbnail_dialog');
+    hideImagineCmsDialog('select_thumbnail_dialog');
 }
 
 if (!window.gallerySize) window.gallerySize = {};
@@ -590,11 +553,11 @@ function showPageBrowser(field_id) {
 
     ajaxLoadInto('page_browser', '/manage/cms_pages/select_page?path=' + encodeURIComponent(path));
     document.getElementById('page_browser_selection').value = path;
-    showDojoDialog('page_browser_dialog');
+    showImagineCmsDialog('page_browser_dialog');
 }
 
 function closePageBrowser() {
-    hideDojoDialog('page_browser_dialog');
+    hideImagineCmsDialog('page_browser_dialog');
     document.getElementById(pageBrowserFieldID).value = document.getElementById('page_browser_selection').value;
 }
 

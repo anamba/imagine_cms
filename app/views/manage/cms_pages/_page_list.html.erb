@@ -1,13 +1,13 @@
 <%- options ||= {} -%>
 <div id="page_list_container_<%= key %>" class="page_list_dialog" style="border: 1px solid gray; padding: 8px; background-color: #dddddd; width: 170px; text-align: center;">
   Page List: <%= name %><br/>
-  <button class="form_button" onclick="showDojoDialog('page_list_<%= key %>'); return false;">Configure</button>
+  <button class="form_button" onclick="showImagineCmsDialog('page_list_<%= key %>'); return false;">Configure</button>
 </div>
 <div id="page_list_<%= key %>" class="imagine-cms-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="page_list_<%= key %>_title">
   <div class="imagine-cms-dialog__panel" style="width: min(620px, 100%); max-height: calc(100vh - 72px);">
     <div class="imagine-cms-dialog__header">
       <h2 id="page_list_<%= key %>_title" data-imagine-dialog-title>Page List: <%= name %></h2>
-      <button type="button" class="imagine-cms-dialog__close" onclick="hideDojoDialog('page_list_<%= key %>');" aria-label="Close">×</button>
+      <button type="button" class="imagine-cms-dialog__close" onclick="hideImagineCmsDialog('page_list_<%= key %>');" aria-label="Close">×</button>
     </div>
     <div class="imagine-cms-dialog__content" style="max-height: calc(100vh - 132px); overflow: auto;">
   <div class="ccs-page-list-form">
@@ -250,7 +250,7 @@
     
     <br>
     
-    <center><button class="form_button" onclick="hideDojoDialog('page_list_<%= key %>'); return false;">Close</button></center>
+    <center><button class="form_button" onclick="hideImagineCmsDialog('page_list_<%= key %>'); return false;">Close</button></center>
   </div>
     </div>
   </div>
