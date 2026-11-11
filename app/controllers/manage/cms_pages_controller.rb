@@ -338,39 +338,29 @@ class Manage::CmsPagesController < Manage::ApplicationController
       text_field(:page_objects, key, options)
     when :text
       @page_objects[key] = options[:content] if @page_objects[key].blank?
-      focusOnLoad = !defined?(@cms_text_editor_placed)
-      @cms_text_editor_placed = true
       content = ''.html_safe
-      editor_options = if ImagineCms.use_legacy_dojo_editor
-                         { dojoType: 'Editor2', toolbarGroup: 'main', isToolbarGroupLeader: 'false',
-                           focusOnLoad: focusOnLoad.to_s, style: 'border: 2px dashed gray; padding: 5px',
-                           minHeight: '100px' }
-                       else
-                         {
-                           id: "page_objects_#{key}",
-                           class: 'imagine-cms-rte-source',
-                           hidden: true,
-                           data: {
-                             upload_image_url: url_for(action: 'upload_image', id: @pg.id),
-                             upload_file_url: url_for(action: 'upload_file', id: @pg.id)
-                           }
-                         }
-                       end
+      editor_options = {
+        id: "page_objects_#{key}",
+        class: 'imagine-cms-rte-source',
+        hidden: true,
+        data: {
+          upload_image_url: url_for(action: 'upload_image', id: @pg.id),
+          upload_file_url: url_for(action: 'upload_file', id: @pg.id)
+        }
+      }
       content << text_area_tag("page_objects[#{key}]", @page_objects[key],
                                editor_options.deep_merge(html_options.except(:class, :data)))
-      unless ImagineCms.use_legacy_dojo_editor
-        editor_id = "page_objects_#{key}_editor"
-        editor_classes = [html_options[:class], 'imagine-cms-rte'].compact.join(' ')
-        content << content_tag(:div, @page_objects[key].to_s.html_safe,
-                               id: editor_id,
-                               class: editor_classes,
-                               contenteditable: 'true',
-                               data: {
-                                 textarea_id: "page_objects_#{key}",
-                                 upload_image_url: url_for(action: 'upload_image', id: @pg.id),
-                                 upload_file_url: url_for(action: 'upload_file', id: @pg.id)
-                               })
-      end
+      editor_id = "page_objects_#{key}_editor"
+      editor_classes = [html_options[:class], 'imagine-cms-rte'].compact.join(' ')
+      content << content_tag(:div, @page_objects[key].to_s.html_safe,
+                             id: editor_id,
+                             class: editor_classes,
+                             contenteditable: 'true',
+                             data: {
+                               textarea_id: "page_objects_#{key}",
+                               upload_image_url: url_for(action: 'upload_image', id: @pg.id),
+                               upload_file_url: url_for(action: 'upload_file', id: @pg.id)
+                             })
       content << content_tag(:div, '', id: "page_object_config_#{key}")
       script_tag = <<-EOT
         <script type="text/javascript">

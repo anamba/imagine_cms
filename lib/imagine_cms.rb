@@ -4,7 +4,6 @@ module ImagineCms
   # Our host application root path
   # We set this when the engine is initialized
   mattr_accessor :app_root
-  mattr_accessor :use_legacy_dojo_editor, default: false
   mattr_accessor :toolbar_sticky_offset, default: 52
   mattr_accessor :toolbar_sticky_offset_mobile, default: nil
   

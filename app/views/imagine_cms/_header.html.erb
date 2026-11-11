@@ -1,5 +1,3 @@
-<%#= javascript_tag 'var djConfig = { isDebug: true };' %>
-
 <script>
     function readCookie(name) {
         var ca = document.cookie.split(';');
@@ -15,7 +13,7 @@
         return readCookie('user_auth_status') == 'authenticated';
     }
 
-    var load_imagine_controls = loggedIn() || <%= ImagineCms.use_legacy_dojo_editor && @load_dojo ? 'true' : 'false' %>;
+    var load_imagine_controls = loggedIn();
 
     if (load_imagine_controls) {
         document.writeln('<link href="/assets/imagine_controls.css" media="screen" rel="stylesheet" type="text/css" />')
@@ -67,24 +65,6 @@
         imagineCmsLoadPreviewToolbar();
     }
 </script>
-<%- if ImagineCms.use_legacy_dojo_editor -%>
-  <script defer type="text/javascript">
-      var load_dojo = false;
-      if (<%= @load_dojo || 'false' %>) {
-        load_dojo = true;
-      }
-
-      if (loggedIn() || load_dojo) {
-          document.writeln('<scr' + 'ipt src="/assets/dojo/dojo.js" type="text/javascript"></scr' + 'ipt>');
-      }
-  </script>
-  <script defer type="text/javascript">
-      if (loggedIn()) {
-          dojo.require("dojo.widget.Editor2");
-          dojo.require("dojo.widget.Editor2Plugin.TableOperation");
-      }
-  </script>
-<%- end -%>
 
 <%= stylesheet_link_tag "cms_dialog", media: "screen" %>
 
