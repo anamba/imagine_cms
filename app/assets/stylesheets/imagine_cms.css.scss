@@ -44,6 +44,15 @@ body.imagine-editor header.sticky {
   text-transform: none;
 }
 
+.imagine-cms-toolbar--edit {
+  position: sticky;
+  top: 0;
+}
+
+html:has(body > .imagine-cms-toolbar--edit) {
+  scroll-padding-top: 52px;
+}
+
 .imagine-cms-toolbar__inner {
   display: flex;
   align-items: center;
