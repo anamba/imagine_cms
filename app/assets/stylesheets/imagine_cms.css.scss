@@ -44,13 +44,15 @@ body.imagine-editor header.sticky {
   text-transform: none;
 }
 
-.imagine-cms-toolbar--edit {
+.imagine-cms-toolbar--edit,
+.imagine-cms-toolbar--preview {
   position: sticky;
   top: 0;
+  padding-block: 8px;
 }
 
-html:has(body > .imagine-cms-toolbar--edit) {
-  scroll-padding-top: 52px;
+html:has(body > :is(.imagine-cms-toolbar--edit, .imagine-cms-toolbar--preview)) {
+  scroll-padding-top: 64px;
 }
 
 .imagine-cms-toolbar__inner {

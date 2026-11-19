@@ -417,6 +417,11 @@
       stickyOffset = config.toolbarStickyOffsetMobile;
     }
 
+    var pageToolbar = document.querySelector(".imagine-cms-toolbar--edit");
+    if (pageToolbar) {
+      stickyOffset = Math.max(stickyOffset, pageToolbar.offsetHeight);
+    }
+
     hugerte.init({
       selector: ".imagine-cms-rte",
       inline: true,
