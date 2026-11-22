@@ -163,8 +163,8 @@ class ImagineCmsHugeRteBackportTest < Minitest::Test
     assert_includes core, "function imagineCmsUpdatePublishedVersionState(select)"
     assert_includes core, "String(select.value) === '-1'"
     assert_includes core, "imagineCmsInitializePublishedVersionStates(target)"
-    assert_includes styles, ".imagine-cms-publish-select.imagine-cms-publish-select--offline"
-    assert_includes styles, ".imagine-cms-publish-select.imagine-cms-publish-select--offline option"
+    assert_includes styles, '.imagine-cms-publish-select:is(.imagine-cms-publish-select--offline, :has(option[value="-1"]:checked))'
+    assert_includes styles, '.imagine-cms-publish-select option[value="-1"]'
     assert_includes styles, ".imagine-cms-publish-status"
     refute_includes source, "url_for action: 'edit_page'"
   end

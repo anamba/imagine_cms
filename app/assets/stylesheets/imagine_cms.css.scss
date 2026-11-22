@@ -145,7 +145,7 @@ html:has(body > :is(.imagine-cms-toolbar--edit, .imagine-cms-toolbar--preview)) 
   box-shadow: 0 0 0 1px rgba(204, 51, 51, 0.25);
 }
 
-.imagine-cms-publish-select.imagine-cms-publish-select--offline {
+.imagine-cms-publish-select:is(.imagine-cms-publish-select--offline, :has(option[value="-1"]:checked)) {
   color: #8b1d1d !important;
   background: #fff1f2 !important;
   border-color: #dc2626 !important;
@@ -153,10 +153,14 @@ html:has(body > :is(.imagine-cms-toolbar--edit, .imagine-cms-toolbar--preview)) 
   font-weight: 750 !important;
 }
 
-.imagine-cms-publish-select.imagine-cms-publish-select--offline option {
+.imagine-cms-publish-select option {
   color: #1f2933;
   background: #ffffff;
   font-weight: 400;
+}
+
+.imagine-cms-publish-select option[value="-1"] {
+  color: #8b1d1d;
 }
 
 .imagine-cms-publish-control--offline > span:first-child {
