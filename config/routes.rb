@@ -80,7 +80,6 @@ Rails.application.routes.draw do
         get :receive_gallery
         get :complete_gallery
         get :gallery_setup
-        get :add_to_gallery
         post :receive_gallery
         post :complete_gallery
         post :gallery_setup

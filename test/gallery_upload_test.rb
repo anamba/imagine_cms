@@ -8,7 +8,10 @@ require "ostruct"
 require "json"
 require "bigdecimal"
 require "zip"
+gem "mini_magick", "< 5"
 require "mini_magick"
+require "rmagick"
+require "yaml"
 require "action_view"
 require "erb"
 
@@ -17,12 +20,32 @@ require "erb"
 module GalleryUploadHarness
   Rails = OpenStruct.new(logger: Logger.new(File::NULL))
   CmsPage = Object.new
-  def CmsPage.find_by_id(_id)
+  def CmsPage.find(_id)
     OpenStruct.new(path: "news")
   end
 
+  def CmsPage.find_by_id(id)
+    find(id)
+  end
+
+  GalleryMaxWidth = 586
+  GalleryMaxHeight = 440
+  GalleryThumbWidth = 50
+  GalleryThumbHeight = 50
+  module ImagineCms
+    Engine = OpenStruct.new(root: File.expand_path("..", __dir__))
+  end
+
   class Controller
-    attr_accessor :params
+    def request
+      OpenStruct.new(xhr?: xhr)
+    end
+
+    def session
+      @session ||= {}
+    end
+
+    attr_accessor :params, :xhr
     attr_reader :result
 
     def render(**options)
@@ -38,11 +61,16 @@ module GalleryUploadHarness
     end
   end
   source = File.read(File.expand_path("../app/controllers/manage/cms_pages_controller.rb", __dir__))
-  ["receive_gallery", "delete_gallery"].each do |name|
+  ["receive_gallery", "delete_gallery", "add_to_gallery"].each do |name|
     method_source = source[/^  def #{name}\n.*?^  end$/m]
     raise "Cannot locate #{name}" unless method_source
     module_eval("class Controller\n#{method_source}\nend", __FILE__, __LINE__)
   end
+  %w[create_captions_file append_gallery_images stage_gallery_image create_preview_image].each do |name|
+    method_source = source[/^    def #{name}\b.*?^    end$/m]
+    Controller.class_eval(method_source, __FILE__, __LINE__)
+  end
+  TOPLEVEL_BINDING.eval(source[/^module MiniMagick\n.*\z/m], __FILE__, __LINE__)
 end
 
 class GalleryUploadTest < Minitest::Test
@@ -52,6 +80,7 @@ class GalleryUploadTest < Minitest::Test
     @target = @root.join("public/assets/content/news")
     @controller = GalleryUploadHarness::Controller.new
     @controller.params = { id: 1 }
+    @controller.xhr = true
   end
 
   def teardown
@@ -76,6 +105,75 @@ class GalleryUploadTest < Minitest::Test
       command << image.to_s
     end
     File.binread(image)
+  end
+
+  def append_to_gallery(filename, bytes)
+    gallery = @target.join("gallery_1")
+    FileUtils.mkdir_p(gallery.join("management"))
+    gallery.join("1.jpg").write("existing photo")
+    gallery.join("1-thumb.jpg").write("existing thumbnail")
+    gallery.join("captions.yml").write("---\n- 0\n- Existing caption\n")
+    @controller.params[:gallery_id] = "gallery_1"
+    @root.join(filename).binwrite(bytes)
+    File.open(@root.join(filename), "rb") do |file|
+      file.define_singleton_method(:original_filename) { filename }
+      @controller.params[:gallery_file] = { data: file }
+      @controller.add_to_gallery
+    end
+    gallery
+  end
+
+  def test_appends_one_image_and_refreshes_existing_gallery
+    gallery = append_to_gallery("photo.PNG", image_data)
+    assert_equal({ partial: "gallery_index", formats: [:html] }, @controller.result)
+    assert_equal "existing photo", gallery.join("1.jpg").read
+    assert_equal [0, "Existing caption"], YAML.load_file(gallery.join("captions.yml"))
+    assert_equal "JPEG", MiniMagick::Image.open(gallery.join("2.jpg").to_s).type
+    assert gallery.join("2-thumb.jpg").file?
+    assert gallery.join("management/2.jpg").file?
+  end
+
+  def test_regular_upload_redirects_back_to_existing_gallery
+    @controller.xhr = false
+    append_to_gallery("photo.png", image_data)
+
+    assert_equal "gallery_management", @controller.result[:action]
+    assert_equal "gallery_1", @controller.result[:gallery_id]
+    assert_equal :see_other, @controller.result[:status]
+  end
+
+  def test_appends_zip_photos_after_highest_existing_id
+    archive = @root.join("archive.zip")
+    photo = image_data
+    Zip::File.open(archive, create: true) do |zip|
+      zip.get_output_stream("nested/a.png") { |stream| stream.write(photo) }
+      zip.get_output_stream("nested/._a.png") { |stream| stream.write("ignored") }
+      zip.get_output_stream("nested/b.PNG") { |stream| stream.write(photo) }
+    end
+    gallery = @target.join("gallery_1")
+    FileUtils.mkdir_p(gallery)
+    gallery.join("4.jpg").write("existing photo without thumbnail")
+    append_to_gallery("photos.zip", archive.binread)
+
+    assert_equal({ partial: "gallery_index", formats: [:html] }, @controller.result)
+    assert_equal "existing photo without thumbnail", gallery.join("4.jpg").read
+    assert_equal [1, 4, 5, 6], @controller.instance_variable_get(:@images)
+    %w[5.jpg 5-thumb.jpg management/5.jpg 6.jpg 6-thumb.jpg management/6.jpg].each do |file|
+      assert gallery.join(file).file?, "expected #{file}"
+    end
+  end
+
+  def test_append_rejects_invalid_zip_image_without_publishing_previous_entries
+    archive = @root.join("archive.zip")
+    photo = image_data
+    Zip::File.open(archive, create: true) do |zip|
+      zip.get_output_stream("a.png") { |stream| stream.write(photo) }
+      zip.get_output_stream("b.jpg") { |stream| stream.write("invalid image") }
+    end
+    gallery = append_to_gallery("photos.zip", archive.binread)
+
+    assert_equal :unprocessable_entity, @controller.result[:status]
+    assert_equal %w[1-thumb.jpg 1.jpg captions.yml management], gallery.children.map { |path| path.basename.to_s }.sort
   end
 
   def assert_rejected(result)
@@ -206,7 +304,7 @@ class GalleryUploadTest < Minitest::Test
     assert_gallery_delete_link GallerySelectionView.new.html
   end
 
-  def test_completed_gallery_delete_link_renders_post_method
+  def gallery_management_html
     lookup = ActionView::LookupContext.new(
       [File.expand_path("../app/views", __dir__)], {}, ["manage/cms_pages"]
     )
@@ -224,7 +322,23 @@ class GalleryUploadTest < Minitest::Test
       "/manage/cms_pages/1/#{options[:action]}?gallery_id=#{options[:gallery_id]}"
     end
 
-    assert_gallery_delete_link view.render(template: "manage/cms_pages/gallery_management")
+    view.render(template: "manage/cms_pages/gallery_management")
+  end
+
+  def test_completed_gallery_delete_link_renders_post_method
+    assert_gallery_delete_link gallery_management_html
+  end
+
+  def test_existing_gallery_upload_posts_multipart_and_updates_the_gallery_index
+    form = Nokogiri::HTML.fragment(gallery_management_html).at_css(
+      'form[action="/manage/cms_pages/1/add_to_gallery?gallery_id=gallery_1"]'
+    )
+    refute_nil form
+    assert_equal "post", form["method"]
+    assert_equal "multipart/form-data", form["enctype"]
+    assert_equal "true", form["data-remote"]
+    assert_equal "gallery_window", form["data-update"]
+    assert form.at_css('input[type=file][name="gallery_file[data]"][required]')
   end
 
   def assert_gallery_delete_link(html)

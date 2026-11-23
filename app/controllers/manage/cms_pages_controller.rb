@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'tmpdir'
 
 class Manage::CmsPagesController < Manage::ApplicationController
   include ActionController::Caching::Pages
@@ -9,7 +10,6 @@ class Manage::CmsPagesController < Manage::ApplicationController
 
   upload_status_for :receive_image
   upload_status_for :receive_gallery
-  upload_status_for :add_to_gallery
 
   cache_sweeper :cms_content_sweeper
 
@@ -1070,92 +1070,27 @@ class Manage::CmsPagesController < Manage::ApplicationController
   end
 
   def add_to_gallery
-    @pg = CmsPage.find_by_id(params[:id])
-    galleries_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path)
-    @galleries = Dir.entries(galleries_dir).sort
-    @gallery_dir = File.join(galleries_dir, params[:gallery_id])
-    images = Dir.glob("#{@gallery_dir}/*-thumb.{jpg,jpeg,png,gif}")
+    @pg = CmsPage.find(params[:id])
+    gallery_id = params[:gallery_id].to_s
+    gallery_dir = File.join(Rails.root, 'public', 'assets', 'content', @pg.path, gallery_id)
+    return head :not_found unless gallery_id.match?(/\Agallery_\d+\z/) && File.directory?(gallery_dir)
 
-    temp_location = File.join(@gallery_dir ,'temp')
-    FileUtils.rm_rf(temp_location)
-    Dir.mkdir(temp_location)
-
-    data = params[:gallery_file][:data]
-    data_dest = File.join(temp_location, data.original_filename)
-    File.open(data_dest, 'wb') { |f| f.write(data.read) }
-
-    last_id = images.size
-    ext = File.extname(data_dest).downcase
-
-    if ext != '.zip'
-      localfile = File.join(@gallery_dir, (last_id + 1).to_s + ext)
-      thumbfile = File.join(@gallery_dir, (last_id + 1).to_s + '-thumb' + ext)
-
-      File.open(localfile, "w") { |f| f.write(File.open(data_dest).read) }
-
-      # create blank captions.yml if it doesn't already exist
-      create_captions_file(@pg.id)
-
-      localfile = resize_image(localfile)
-
-      small = MiniMagick::Image.open(localfile)
-      small.crop_resized(GalleryThumbWidth, GalleryThumbHeight)
-      small.write(thumbfile)
-
-      File.chmod(0644, localfile, thumbfile)
-
-      create_preview_images(force: true)
-
-    elsif ext == '.zip'
-      begin
-        Zip::File.foreach(data.path) do |zipentry|
-          next if ![ '.jpg', '.jpeg', '.png', '.gif' ].include?(File.extname(zipentry.name).downcase) || zipentry.size < 1000
-          upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
-          localfile = File.join(temp_location, ((last_id+1).to_s + File.extname(zipentry.name)).downcase)
-
-          begin
-            zipentry.extract(localfile)
-            last_id += 1
-          rescue StandardError => e
-            Rails.logger.error(e)
-          end
-        end
-      rescue StandardError => e
-        Rails.logger.debug params.inspect
-        Rails.logger.error(e)
-        finish_upload_status "''" and return
-      end
-
-      @images = Dir.glob("#{temp_location}/*.{jpg,jpeg,png,gif}")
-
-      @images.each do |img|
-        localfile = File.join(@gallery_dir, File.basename(img, File.extname(img))) + '.jpg'
-        tempfile = File.join(temp_location, File.basename(img, File.extname(img))) + File.extname(img)
-        thumbfile = File.join(@gallery_dir, File.basename(img, File.extname(img))) + '-thumb.jpg'
-
-        small = MiniMagick::Image.open(tempfile)
-        small.crop_resized(GalleryThumbWidth, GalleryThumbHeight)
-        small.write(thumbfile)
-
-        FileUtils.cp(tempfile, localfile)
-        resize_image(localfile)
-
-        File.chmod(0644, localfile, thumbfile)
-      end
-
-      # smaller images for gallery index
-      management_dir = File.join(@gallery_dir, 'management')
-
-      preview_images = []
-      Dir.glob("#{@gallery_dir}/*.{jpg,jpeg,png,gif}").each { |img| preview_images << img unless File.basename(img).include?('thumb') }
-
-      preview_images.each { |img| create_preview_image(img, management_dir, true) }
+    begin
+      append_gallery_images(params.dig(:gallery_file, :data), gallery_dir)
+    rescue ArgumentError, IOError, SystemCallError, Zip::Error, MiniMagick::Error, MiniMagick::Invalid, Magick::ImageMagickError => e
+      Rails.logger.error(e)
+      return render plain: 'Could not add images. Choose a valid image or ZIP of images.', status: :unprocessable_entity
     end
 
-    File.delete(data_dest)
-
-    upload_progress.message = "File received successfully."
-    finish_upload_status "'#{File.basename(data_dest)}'" and return
+    if request.xhr?
+      @images = Dir.glob("#{gallery_dir}/*.{jpg,jpeg,png,gif}").filter_map do |image|
+        name = File.basename(image, '.*')
+        name.to_i if name.match?(/\A\d+\z/)
+      end.sort
+      render partial: 'gallery_index', formats: [:html]
+    else
+      redirect_to action: 'gallery_management', id: @pg, gallery_id: gallery_id, status: :see_other
+    end
   end
 
   def delete_photo
@@ -1370,15 +1305,66 @@ class Manage::CmsPagesController < Manage::ApplicationController
       File.open(settings_location, 'w') { |f| YAML.dump(settings_hash, f) }
     end
 
-    def resize_image(localfile)
-      im = MiniMagick::Image.open(localfile)
+    def append_gallery_images(upload, gallery_dir)
+      raise ArgumentError, 'Missing upload' unless upload.respond_to?(:original_filename)
 
-      if im[:width] > GalleryMaxWidth || im[:height] > GalleryMaxHeight
-        im.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}")
-        im.write(localfile)
+      File.open(gallery_dir) do |directory|
+        raise IOError, 'Could not lock gallery' unless directory.flock(File::LOCK_EX)
+        last_id = Dir.glob("#{gallery_dir}/*.{jpg,jpeg,png,gif}").map { |file| File.basename(file).to_i }.max || 0
+        Dir.mktmpdir('.append-', gallery_dir) do |staging|
+          FileUtils.mkdir_p(File.join(staging, 'management'))
+          if File.extname(upload.original_filename).downcase == '.zip'
+            next_id = last_id + 1
+            Zip::File.open(upload.path) do |archive|
+              archive.each do |entry|
+                next if entry.directory? || File.basename(entry.name).start_with?('._')
+                next unless %w[.jpg .jpeg .png .gif].include?(File.extname(entry.name).downcase)
+
+                entry.get_input_stream { |stream| stage_gallery_image(stream, staging, next_id) }
+                next_id += 1
+              end
+            end
+            raise ArgumentError, 'No images in ZIP' if next_id == last_id + 1
+          else
+            File.open(upload.path, 'rb') { |stream| stage_gallery_image(stream, staging, last_id + 1) }
+          end
+
+          FileUtils.mkdir_p(File.join(gallery_dir, 'management'))
+          published = []
+          begin
+            files = Dir.glob(['management/*.jpg', '*-thumb.jpg', '*.jpg'], base: staging, sort: false).uniq
+            files.each do |file|
+              destination = File.join(gallery_dir, file)
+              File.link(File.join(staging, file), destination)
+              published << destination
+            end
+            create_captions_file(@pg.id)
+          rescue StandardError
+            FileUtils.rm_f(published)
+            raise
+          end
+        end
       end
+    end
 
-      localfile
+    def stage_gallery_image(stream, staging, id)
+      image = MiniMagick::Image.read(stream)
+      raise ArgumentError, 'Unsupported image format' unless %w[JPEG PNG GIF].include?(image.type)
+
+      image.format('jpg')
+      photo = File.join(staging, "#{id}.jpg")
+      thumb = File.join(staging, "#{id}-thumb.jpg")
+      thumbnail = MiniMagick::Image.open(image.path)
+      thumbnail.crop_resized(GalleryThumbWidth, GalleryThumbHeight)
+      thumbnail.write(thumb)
+
+      image.resize("#{GalleryMaxWidth}x#{GalleryMaxHeight}>")
+      image.write(photo)
+      create_preview_image(photo, File.join(staging, 'management', "#{id}.jpg"))
+      File.chmod(0644, photo, thumb)
+    ensure
+      image&.destroy!
+      thumbnail&.destroy!
     end
 
     def create_preview_image(src_file, dest, force = false, overlay = 'gallery_small_overlay.png', thumb_size = 90)

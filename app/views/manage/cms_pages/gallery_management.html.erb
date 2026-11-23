@@ -75,21 +75,26 @@
   </fieldset>
   
   <fieldset style="margin-bottom: 10px;">
-    <legend>Add Images</legend>
+    <legend id="add-gallery-images">Add Images</legend>
     
-    <%= form_tag({ :action => 'add_to_gallery', :id => @pg, :gallery_id => params[:gallery_id] }, multipart: true) do %>
+    <%= form_tag({ action: 'add_to_gallery', id: @pg, gallery_id: params[:gallery_id] },
+                 multipart: true, aria: { labelledby: 'add-gallery-images' },
+                 data: { remote: true, update: 'gallery_window',
+                         loading: "document.getElementById('upload_status_div').textContent = 'Uploading images…';",
+                         success: "document.getElementById('upload_status_div').textContent = 'Images added.'; document.getElementById('append_gallery_file').value = '';",
+                         failure: "document.getElementById('upload_status_div').textContent = 'Could not add images. Check the gallery before retrying.';" }) do %>
     <table>
       <tr>
-        <td width="100">Zip or Image File:</td>
+        <td width="100"><label for="append_gallery_file">ZIP or image file</label></td>
         <td>
-          <%= file_field 'gallery_file', 'data', :class => 'form', :style => 'margin-bottom: 0; width: 150px' %><br/>
+          <%= file_field 'gallery_file', 'data', id: 'append_gallery_file', required: true, class: 'form', style: 'margin-bottom: 0; width: 150px' %><br/>
         </td>
       </tr>
       <tr>
         <td></td>
         <td>
-          <div id="upload_status_div" class="error"></div>
-          <%= submit_tag 'Next', class: 'form_button', style: 'width: 70px;', data: { disable_with: 'Uploading...' } %>
+          <div id="upload_status_div" role="status"></div>
+          <%= submit_tag 'Add Images', class: 'form_button', data: { disable_with: 'Uploading...' } %>
         </td>
       </tr>
     </table>
