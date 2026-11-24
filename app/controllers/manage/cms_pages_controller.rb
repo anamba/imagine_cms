@@ -825,11 +825,10 @@ class Manage::CmsPagesController < Manage::ApplicationController
 
       entries << zipentry
     end
-    entries.sort! { |a,b| File.basename(a.name).downcase <=> File.basename(b.name).downcase }
     raise ArgumentError, "No supported images found in ZIP" if entries.empty?
 
     Zip::File.open(data.path) do |zipfile|
-      entries.each_with_index do |zipentry, index|
+      sorted_gallery_entries(entries).each_with_index do |zipentry, index|
         upload_progress.message = "Extracting #{File.basename(zipentry.name)}"
         ext = File.extname(zipentry.name)
         localfile = File.join(localdir, 'temp', (index+1).to_s + ext.downcase)
@@ -1305,6 +1304,10 @@ class Manage::CmsPagesController < Manage::ApplicationController
       File.open(settings_location, 'w') { |f| YAML.dump(settings_hash, f) }
     end
 
+    def sorted_gallery_entries(entries)
+      entries.sort_by { |entry| File.basename(entry.name).downcase }
+    end
+
     def append_gallery_images(upload, gallery_dir)
       raise ArgumentError, 'Missing upload' unless upload.respond_to?(:original_filename)
 
@@ -1314,17 +1317,17 @@ class Manage::CmsPagesController < Manage::ApplicationController
         Dir.mktmpdir('.append-', gallery_dir) do |staging|
           FileUtils.mkdir_p(File.join(staging, 'management'))
           if File.extname(upload.original_filename).downcase == '.zip'
-            next_id = last_id + 1
             Zip::File.open(upload.path) do |archive|
-              archive.each do |entry|
-                next if entry.directory? || File.basename(entry.name).start_with?('._')
-                next unless %w[.jpg .jpeg .png .gif].include?(File.extname(entry.name).downcase)
+              entries = archive.select do |entry|
+                !entry.directory? && !File.basename(entry.name).start_with?('._') &&
+                  %w[.jpg .jpeg .png .gif].include?(File.extname(entry.name).downcase)
+              end
+              raise ArgumentError, 'No images in ZIP' if entries.empty?
 
-                entry.get_input_stream { |stream| stage_gallery_image(stream, staging, next_id) }
-                next_id += 1
+              sorted_gallery_entries(entries).each_with_index do |entry, index|
+                entry.get_input_stream { |stream| stage_gallery_image(stream, staging, last_id + index + 1) }
               end
             end
-            raise ArgumentError, 'No images in ZIP' if next_id == last_id + 1
           else
             File.open(upload.path, 'rb') { |stream| stage_gallery_image(stream, staging, last_id + 1) }
           end

@@ -66,7 +66,7 @@ module GalleryUploadHarness
     raise "Cannot locate #{name}" unless method_source
     module_eval("class Controller\n#{method_source}\nend", __FILE__, __LINE__)
   end
-  %w[create_captions_file append_gallery_images stage_gallery_image create_preview_image].each do |name|
+  %w[create_captions_file sorted_gallery_entries append_gallery_images stage_gallery_image create_preview_image].each do |name|
     method_source = source[/^    def #{name}\b.*?^    end$/m]
     Controller.class_eval(method_source, __FILE__, __LINE__)
   end
@@ -97,10 +97,10 @@ class GalleryUploadTest < Minitest::Test
     @controller.result
   end
 
-  def image_data
+  def image_data(size = "80x80")
     image = @root.join("source.png")
     MiniMagick::Tool::Convert.new do |command|
-      command.size("80x80")
+      command.size(size)
       command << "plasma:fractal"
       command << image.to_s
     end
@@ -142,13 +142,14 @@ class GalleryUploadTest < Minitest::Test
     assert_equal :see_other, @controller.result[:status]
   end
 
-  def test_appends_zip_photos_after_highest_existing_id
+  def test_appends_zip_photos_by_filename_after_highest_existing_id
     archive = @root.join("archive.zip")
-    photo = image_data
+    first_photo = image_data("80x80")
+    second_photo = image_data("100x80")
     Zip::File.open(archive, create: true) do |zip|
-      zip.get_output_stream("nested/a.png") { |stream| stream.write(photo) }
-      zip.get_output_stream("nested/._a.png") { |stream| stream.write("ignored") }
-      zip.get_output_stream("nested/b.PNG") { |stream| stream.write(photo) }
+      zip.get_output_stream("a_folder/B.png") { |stream| stream.write(second_photo) }
+      zip.get_output_stream("a_folder/._a.png") { |stream| stream.write("ignored") }
+      zip.get_output_stream("z_folder/a.PNG") { |stream| stream.write(first_photo) }
     end
     gallery = @target.join("gallery_1")
     FileUtils.mkdir_p(gallery)
@@ -158,6 +159,8 @@ class GalleryUploadTest < Minitest::Test
     assert_equal({ partial: "gallery_index", formats: [:html] }, @controller.result)
     assert_equal "existing photo without thumbnail", gallery.join("4.jpg").read
     assert_equal [1, 4, 5, 6], @controller.instance_variable_get(:@images)
+    assert_equal 80, MiniMagick::Image.open(gallery.join("5.jpg").to_s).width
+    assert_equal 100, MiniMagick::Image.open(gallery.join("6.jpg").to_s).width
     %w[5.jpg 5-thumb.jpg management/5.jpg 6.jpg 6-thumb.jpg management/6.jpg].each do |file|
       assert gallery.join(file).file?, "expected #{file}"
     end
